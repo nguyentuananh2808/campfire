@@ -1,0 +1,11 @@
+@use '../auth-shared';
+h2 {
+  font-size: 1.15rem;
+  margin: 0 0 var(--space-4);
+}
+.password-hint {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin: calc(var(--space-3) * -1) 0 0;
+}

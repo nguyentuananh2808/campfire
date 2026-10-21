@@ -1,0 +1,88 @@
+$flame-50: #fff8e8;
+$flame-100: #ffedc7;
+$flame-200: #ffdda1;
+$flame-400: #f6a51d;
+$flame-500: #ed7425;
+$flame-600: #d94b23;
+$flame-700: #a92f16;
+$ember-800: #582417;
+$ember-900: #35170f;
+$ember-950: #170d09;
+
+@mixin light-theme {
+  --background: #fffaf2;
+  --background-deep: #f8ecdc;
+  --surface: #fffdf9;
+  --surface-raised: #ffffff;
+  --surface-muted: #fff6e8;
+  --surface-glass: rgba(255, 253, 249, 0.88);
+  --input-surface: #ffffff;
+  --ink: #{$ember-900};
+  --ink-soft: #5e3e32;
+  --muted: #806054;
+  --primary: #{$flame-600};
+  --primary-strong: #{$flame-700};
+  --primary-soft: #{$flame-200};
+  --accent: #{$flame-400};
+  --accent-soft: #fff0c7;
+  --accent-ink: #7b350f;
+  --border: #ead2bb;
+  --border-strong: #d9b898;
+  --danger: #a9362a;
+  --danger-soft: #fff0ec;
+  --success: #237a4b;
+  --success-soft: #eaf7ef;
+  --info: #365f91;
+  --info-soft: #edf5ff;
+  --focus: #f09a20;
+  --shadow-color: rgba(91, 39, 18, 0.12);
+  --shadow-strong: rgba(91, 39, 18, 0.18);
+  --on-primary: #ffffff;
+  color-scheme: light;
+}
+
+@mixin dark-theme {
+  --background: #{$ember-950};
+  --background-deep: #0f0806;
+  --surface: #25130e;
+  --surface-raised: #311912;
+  --surface-muted: #2c1811;
+  --surface-glass: rgba(37, 19, 14, 0.9);
+  --input-surface: #1d100c;
+  --ink: #fff0cf;
+  --ink-soft: #efd1b7;
+  --muted: #d1aa8e;
+  --primary: #ff7633;
+  --primary-strong: #ffad4d;
+  --primary-soft: #522015;
+  --accent: #ffc14d;
+  --accent-soft: #3d2710;
+  --accent-ink: #ffd784;
+  --border: #5b3022;
+  --border-strong: #75402c;
+  --danger: #ff9785;
+  --danger-soft: #481d19;
+  --success: #7ed7a6;
+  --success-soft: #163c29;
+  --info: #9dc7ff;
+  --info-soft: #172c48;
+  --focus: #ffc14d;
+  --shadow-color: rgba(0, 0, 0, 0.38);
+  --shadow-strong: rgba(0, 0, 0, 0.56);
+  --on-primary: #2b1509;
+  color-scheme: dark;
+}
+
+:root {
+  @include light-theme;
+}
+
+:root[data-theme='dark'] {
+  @include dark-theme;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    @include dark-theme;
+  }
+}

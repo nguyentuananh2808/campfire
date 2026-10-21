@@ -1,0 +1,62 @@
+<section class="auth-shell">
+  <div class="auth-card">
+    <p class="eyebrow">Nhóm bạn bắt đầu ở đây</p>
+    <h1>Tạo tài khoản</h1>
+    <p class="intro">
+      Campfire đang ở giai đoạn riêng tư. Chưa có xác minh email hoặc khôi phục mật khẩu tự động.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label
+        >Tên hiển thị
+        <input
+          type="text"
+          formControlName="displayName"
+          autocomplete="name"
+          [attr.aria-invalid]="
+            form.controls.displayName.invalid && form.controls.displayName.touched
+          "
+        />
+      </label>
+      @if (form.controls.displayName.invalid && form.controls.displayName.touched) {
+        <p class="field-error">Tên hiển thị cần từ 2 đến 50 ký tự.</p>
+      }
+
+      <label
+        >Email
+        <input
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          inputmode="email"
+          [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+        />
+      </label>
+      @if (form.controls.email.invalid && form.controls.email.touched) {
+        <p class="field-error">Nhập một email hợp lệ.</p>
+      }
+
+      <label
+        >Mật khẩu
+        <input
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+          [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+        />
+      </label>
+      <p class="password-hint">Ít nhất 12 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <p class="field-error">Mật khẩu chưa đạt độ dài tối thiểu.</p>
+      }
+
+      @if (serverError()) {
+        <p class="form-error" role="alert">{{ serverError() }}</p>
+      }
+      <button type="submit" [disabled]="pending()">
+        {{ pending() ? 'Đang tạo…' : 'Tạo tài khoản' }}
+      </button>
+    </form>
+    <p class="switch">Đã có tài khoản? <a routerLink="/login">Đăng nhập</a></p>
+  </div>
+</section>

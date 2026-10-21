@@ -1,0 +1,145 @@
+@use '../shared-page';
+
+.hero {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+button {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  border: 0;
+  border-radius: 14px;
+  color: var(--on-primary);
+  font: inherit;
+  font-weight: 750;
+  min-height: 48px;
+  padding: 0 var(--space-5);
+}
+
+button.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.create-card,
+.error-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.create-card label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 750;
+  margin-bottom: var(--space-2);
+}
+
+.create-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+input {
+  background: var(--input-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--ink);
+  flex: 1;
+  font: inherit;
+  min-height: 48px;
+  min-width: 0;
+  padding: 0 var(--space-4);
+}
+
+.field-error,
+.error-card p {
+  color: var(--danger);
+}
+
+.status {
+  color: var(--muted);
+  padding: var(--space-8) 0;
+  text-align: center;
+}
+
+.group-list {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group-list a {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--ink);
+  display: flex;
+  gap: var(--space-4);
+  min-height: 80px;
+  padding: var(--space-4);
+  text-decoration: none;
+  box-shadow: 0 5px 18px color-mix(in srgb, var(--shadow-color) 60%, transparent);
+}
+
+.group-mark {
+  align-items: center;
+  background: var(--primary-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, transparent);
+  border-radius: 16px;
+  color: var(--primary-strong);
+  display: flex;
+  font-size: 1.3rem;
+  font-weight: 850;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+@media (hover: hover) {
+  .group-list a:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+}
+
+.group-copy {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.group-copy strong,
+.group-copy small {
+  overflow-wrap: anywhere;
+}
+
+.group-copy small {
+  color: var(--muted);
+}
+
+@media (max-width: 520px) {
+  .hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .create-row {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,127 @@
+<a class="back-link" routerLink="/groups">← Tất cả nhóm</a>
+
+@if (loading()) {
+  <p class="status" role="status">Đang tải nhóm…</p>
+} @else if (error() && !group()) {
+  <section class="panel error-card" role="alert">
+    <p>{{ error() }}</p>
+    <a routerLink="/groups">Quay lại danh sách</a>
+  </section>
+} @else if (group(); as currentGroup) {
+  <header class="hero">
+    <p class="eyebrow">{{ isOwner() ? 'Bạn là chủ nhóm' : 'Bạn là thành viên' }}</p>
+    <h1>{{ currentGroup.name }}</h1>
+    <p>{{ currentGroup.memberCount }} người trong vòng tròn này.</p>
+  </header>
+
+  @if (error()) {
+    <p class="message error-card" role="alert">{{ error() }}</p>
+  }
+  @if (notice()) {
+    <p class="message success" role="status">{{ notice() }}</p>
+  }
+
+  @if (isOwner()) {
+    <section class="panel">
+      <h2>Thông tin nhóm</h2>
+      <form class="inline-form" [formGroup]="renameForm" (ngSubmit)="rename()">
+        <label for="rename-group">Tên nhóm</label>
+        <div>
+          <input id="rename-group" formControlName="name" maxlength="80" />
+          <button type="submit" [disabled]="pendingAction() !== null">Lưu tên</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Mời bạn vào nhóm</h2>
+      <p class="muted">Link sẽ hết hạn và raw token chỉ hiển thị ngay sau khi tạo.</p>
+      <form class="inline-form" [formGroup]="inviteForm" (ngSubmit)="createInvitation()">
+        <label for="invite-hours">Hiệu lực</label>
+        <div>
+          <select id="invite-hours" formControlName="expiresInHours">
+            <option [ngValue]="1">1 giờ</option>
+            <option [ngValue]="24">24 giờ</option>
+            <option [ngValue]="72">3 ngày</option>
+            <option [ngValue]="168">7 ngày</option>
+          </select>
+          <button type="submit" [disabled]="pendingAction() !== null">Tạo link</button>
+        </div>
+      </form>
+      @if (invitationLink(); as link) {
+        <div class="raw-link">
+          <label for="new-invite-link">Link mới</label>
+          <input id="new-invite-link" readonly [value]="link" />
+          <button type="button" class="secondary" (click)="copyInvitation()">Sao chép</button>
+        </div>
+      }
+      @if (invitations().length > 0) {
+        <ul class="compact-list">
+          @for (invitation of invitations(); track invitation.id) {
+            <li>
+              <span>
+                Hết hạn {{ formatDate(invitation.expiresAtUtc) }}
+                @if (invitation.revokedAtUtc) {
+                  · Đã thu hồi
+                }
+              </span>
+              @if (!invitation.revokedAtUtc) {
+                <button
+                  type="button"
+                  class="danger-link"
+                  [disabled]="pendingAction() !== null"
+                  (click)="revoke(invitation.id)"
+                >
+                  Thu hồi
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  <section class="panel">
+    <h2>Thành viên</h2>
+    <ul class="member-list">
+      @for (member of members(); track member.userId) {
+        <li>
+          <span class="member-avatar" aria-hidden="true">{{
+            member.displayName.slice(0, 1).toUpperCase()
+          }}</span>
+          <span class="member-copy">
+            <strong
+              >{{ member.displayName }}
+              @if (isMe(member)) {
+                <small>(Bạn)</small>
+              }
+            </strong>
+            <small>{{ member.role === 'Owner' ? 'Chủ nhóm' : 'Thành viên' }}</small>
+          </span>
+          @if (isOwner() && member.role === 'Member') {
+            <span class="member-actions">
+              <button type="button" class="secondary" (click)="transfer(member)">
+                Chuyển quyền
+              </button>
+              <button type="button" class="danger-link" (click)="remove(member)">Xóa</button>
+            </span>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+
+  @if (!isOwner()) {
+    <section class="danger-zone">
+      <p>Bạn có thể rời nhóm. Dữ liệu nhóm sẽ không còn hiển thị với bạn.</p>
+      <button type="button" class="danger" [disabled]="pendingAction() !== null" (click)="leave()">
+        Rời nhóm
+      </button>
+    </section>
+  } @else {
+    <p class="owner-note">
+      Chủ nhóm phải chuyển quyền cho một thành viên khác trước khi có thể rời nhóm.
+    </p>
+  }
+}

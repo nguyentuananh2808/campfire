@@ -1,0 +1,13 @@
+{
+  "/api": {
+    "target": "http://192.168.5.185:92",
+    "secure": false,
+    "changeOrigin": false
+  },
+  "/hubs": {
+    "target": "http://192.168.5.185:92",
+    "secure": false,
+    "changeOrigin": false,
+    "ws": true
+  }
+}

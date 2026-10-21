@@ -1,0 +1,240 @@
+<section class="stranger-shell">
+  @if (!initialized()) {
+    <div class="loading-state" aria-live="polite">
+      <span class="loading-flame" aria-hidden="true">🔥</span>
+      <strong>Đang nhóm lửa…</strong>
+    </div>
+  } @else if (!session()) {
+    <div class="hero welcome-hero">
+      <span class="eyebrow"><span aria-hidden="true">✦</span> TRÒ CHUYỆN NGẪU NHIÊN</span>
+      <h1>Một người lạ.<br /><span>Một câu chuyện mới.</span></h1>
+      <p>
+        Ghép đôi riêng tư với một người đang online. Không hồ sơ công khai, không lộ email hay nhóm
+        bạn.
+      </p>
+      <div class="trust-row" aria-label="Quyền riêng tư và an toàn">
+        <span>✓ Không cần tài khoản</span><span>✓ Rời đi bất cứ lúc nào</span>
+      </div>
+    </div>
+    <form class="card entry-card" (ngSubmit)="enter()" [attr.aria-busy]="busy()">
+      <div class="field-heading">
+        <label for="nickname">Bạn muốn được gọi là gì?</label><small>2–24 ký tự</small>
+      </div>
+      <input
+        class="nickname-input"
+        id="nickname"
+        name="nickname"
+        [(ngModel)]="nickname"
+        minlength="2"
+        maxlength="24"
+        autocomplete="nickname"
+        enterkeyhint="done"
+        placeholder="Ví dụ: Đốm Lửa"
+      />
+      <p class="field-help">Chỉ người được ghép cùng mới nhìn thấy tên này.</p>
+
+      <fieldset class="choice-field">
+        <legend>Giới tính của bạn</legend>
+        <div class="choice-grid three" role="radiogroup" aria-label="Giới tính của bạn">
+          <label
+            ><input type="radio" name="gender" [(ngModel)]="gender" value="Male" /><span
+              ><b aria-hidden="true">♂</b>Nam</span
+            ></label
+          >
+          <label
+            ><input type="radio" name="gender" [(ngModel)]="gender" value="Female" /><span
+              ><b aria-hidden="true">♀</b>Nữ</span
+            ></label
+          >
+          <label
+            ><input type="radio" name="gender" [(ngModel)]="gender" value="Other" /><span
+              ><b aria-hidden="true">✦</b>Khác</span
+            ></label
+          >
+        </div>
+      </fieldset>
+
+      <fieldset class="choice-field">
+        <legend>Bạn muốn gặp ai?</legend>
+        <div class="choice-grid preference-grid" role="radiogroup" aria-label="Giới tính muốn gặp">
+          <label
+            ><input
+              type="radio"
+              name="genderPreference"
+              [(ngModel)]="genderPreference"
+              value="Any"
+            /><span>Bất kỳ</span></label
+          >
+          <label
+            ><input
+              type="radio"
+              name="genderPreference"
+              [(ngModel)]="genderPreference"
+              value="Male"
+            /><span>Nam</span></label
+          >
+          <label
+            ><input
+              type="radio"
+              name="genderPreference"
+              [(ngModel)]="genderPreference"
+              value="Female"
+            /><span>Nữ</span></label
+          >
+          <label
+            ><input
+              type="radio"
+              name="genderPreference"
+              [(ngModel)]="genderPreference"
+              value="Other"
+            /><span>Khác</span></label
+          >
+        </div>
+        <small class="choice-help">Chỉ ghép khi lựa chọn của cả hai người cùng phù hợp.</small>
+      </fieldset>
+
+      <label class="check consent"
+        ><input type="checkbox" name="adult" [(ngModel)]="adult" /><span
+          ><strong>Tôi đủ 18 tuổi</strong
+          ><small
+            >Tôi đồng ý giữ cuộc trò chuyện văn minh và không chia sẻ thông tin nhạy cảm.</small
+          ></span
+        ></label
+      >
+      <button
+        class="primary entry-action"
+        [disabled]="busy() || !adult || !gender || nickname.trim().length < 2"
+      >
+        @if (busy()) {
+          <span class="spinner" aria-hidden="true"></span> Đang vào…
+        } @else {
+          Bắt đầu trò chuyện <span aria-hidden="true">→</span>
+        }
+      </button>
+      <div class="account-link">
+        <span>Đã là thành viên?</span><a routerLink="/login">Đăng nhập Campfire</a>
+      </div>
+    </form>
+  } @else if (!conversation()) {
+    <div class="hero compact waiting-hero">
+      <div class="guest-pill"><span aria-hidden="true">●</span> {{ session()!.nickname }}</div>
+      <span class="eyebrow">GẶP GỠ NGẪU NHIÊN</span>
+      <h1>Tìm một người<br /><span>đang bên kia ngọn lửa.</span></h1>
+      <p>
+        Đang ưu tiên ghép bạn với {{ preferenceLabel(session()!.genderPreference) }} có lựa chọn phù
+        hợp. Đừng chia sẻ thông tin nhạy cảm.
+      </p>
+    </div>
+    <div class="card center match-card" [attr.aria-busy]="busy()">
+      @if (waiting()) {
+        <div class="search-orbit" aria-hidden="true"><span>🔥</span></div>
+        <h2>Đang tìm người phù hợp…</h2>
+        <p>Giữ màn hình này mở. Chúng tôi sẽ ghép bạn ngay khi có người đang chờ.</p>
+        <div class="searching"><i></i><span>Đang tìm kiếm</span></div>
+        <button class="secondary wide" (click)="cancel()" [disabled]="busy()">Dừng tìm</button>
+      } @else {
+        <div class="match-illustration" aria-hidden="true">
+          <span>☕</span><i></i><span>🔥</span><i></i><span>☺</span>
+        </div>
+        <h2>Sẵn sàng trò chuyện?</h2>
+        <p>Việc ghép đôi là ngẫu nhiên. Bạn luôn có thể bỏ qua nếu không thấy thoải mái.</p>
+        <button class="primary big wide" (click)="find()" [disabled]="busy()">
+          @if (busy()) {
+            <span class="spinner" aria-hidden="true"></span> Đang tìm…
+          } @else {
+            Tìm người trò chuyện <span aria-hidden="true">→</span>
+          }
+        </button>
+      }
+      <button class="link-button" (click)="leave()">Kết thúc phiên khách</button>
+    </div>
+  } @else {
+    <header class="chat-head">
+      <div class="partner-avatar" aria-hidden="true">
+        {{ conversation()!.partnerNickname.charAt(0).toUpperCase() }}
+      </div>
+      <div class="partner-copy">
+        <strong>{{ conversation()!.partnerNickname }}</strong>
+        <small
+          ><span class="online"></span
+          >{{ realtimeConnected() ? 'Đang kết nối trực tiếp' : 'Đang đồng bộ tin nhắn' }}</small
+        >
+      </div>
+      <button
+        class="icon-button"
+        type="button"
+        (click)="safetyOpen.set(!safetyOpen())"
+        [attr.aria-expanded]="safetyOpen()"
+        aria-label="Mở tùy chọn an toàn"
+      >
+        •••
+      </button>
+    </header>
+    @if (safetyOpen()) {
+      <div class="safety-panel" role="region" aria-label="Tùy chọn cuộc trò chuyện">
+        <button (click)="end()">
+          <span aria-hidden="true">↪</span
+          ><span
+            ><strong>Bỏ qua người này</strong
+            ><small>Kết thúc và tìm cuộc trò chuyện khác</small></span
+          >
+        </button>
+        <button (click)="end(true)">
+          <span aria-hidden="true">⊘</span
+          ><span><strong>Chặn người này</strong><small>Hai bạn sẽ không được ghép lại</small></span>
+        </button>
+        <button class="danger" (click)="report()">
+          <span aria-hidden="true">⚑</span
+          ><span
+            ><strong>Báo cáo và chặn</strong><small>Gửi báo cáo cho đội ngũ an toàn</small></span
+          >
+        </button>
+      </div>
+    }
+    <aside class="privacy-note">
+      <span aria-hidden="true">🛡</span
+      ><span>Giữ riêng số điện thoại, địa chỉ và tài khoản mạng xã hội.</span>
+    </aside>
+    <div class="messages" aria-live="polite">
+      @if (messages().length === 0) {
+        <div class="empty">
+          <span aria-hidden="true">👋</span><strong>Bạn đã được ghép đôi!</strong>
+          <p>Hãy bắt đầu bằng một lời chào tử tế.</p>
+        </div>
+      }
+      @for (m of messages(); track m.id) {
+        <article class="bubble" [class.mine]="m.isMine">
+          <span>{{ m.content }}</span>
+          @if (m.state === 'pending') {
+            <small>Đang gửi…</small>
+          } @else if (m.state === 'sent' && m.isMine) {
+            <small>Đã gửi</small>
+          }
+          @if (m.state === 'failed') {
+            <button (click)="retry(m)">Gửi lại</button>
+          }
+        </article>
+      }
+    </div>
+    <form class="composer" (ngSubmit)="send()">
+      <div class="message-field">
+        <textarea
+          id="stranger-message"
+          name="message"
+          [(ngModel)]="message"
+          maxlength="1000"
+          rows="2"
+          placeholder="Viết tin nhắn…"
+          aria-label="Nội dung tin nhắn"
+        ></textarea
+        ><small>{{ message.length }}/1000</small>
+      </div>
+      <button class="send-button" aria-label="Gửi tin nhắn" [disabled]="!message.trim()">
+        <span aria-hidden="true">➤</span>
+      </button>
+    </form>
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+</section>

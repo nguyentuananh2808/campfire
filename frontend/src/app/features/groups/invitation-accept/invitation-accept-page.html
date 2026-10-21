@@ -1,0 +1,26 @@
+<section class="invite-shell">
+  <div class="invite-card">
+    <span class="invite-mark" aria-hidden="true">✦</span>
+    <p class="eyebrow">Lời mời riêng</p>
+    @if (loading()) {
+      <h1>Đang kiểm tra lời mời…</h1>
+      <p role="status">Chưa có thay đổi thành viên nào được thực hiện.</p>
+    } @else if (error()) {
+      <h1>Không thể mở lời mời</h1>
+      <p class="error" role="alert">{{ error() }}</p>
+      <a class="secondary-action" routerLink="/groups">Về danh sách nhóm</a>
+    } @else if (preview(); as invitation) {
+      <h1>{{ invitation.groupName }}</h1>
+      @if (invitation.alreadyMember) {
+        <p>Bạn đã là thành viên của nhóm này. Không có membership trùng nào được tạo.</p>
+        <button type="button" (click)="join()">Mở nhóm</button>
+      } @else {
+        <p>Chỉ khi bạn bấm xác nhận bên dưới, tài khoản mới được thêm vào nhóm.</p>
+        <button type="button" [disabled]="joining()" (click)="join()">
+          {{ joining() ? 'Đang tham gia…' : 'Xác nhận tham gia' }}
+        </button>
+        <a class="secondary-action" routerLink="/groups">Để sau</a>
+      }
+    }
+  </div>
+</section>

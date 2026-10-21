@@ -1,0 +1,67 @@
+<section class="hero">
+  <div>
+    <p class="eyebrow">Không gian riêng</p>
+    <h1>Nhóm của bạn</h1>
+    <p>Mỗi nhóm là một góc nhỏ dành riêng cho những người thân thiết.</p>
+  </div>
+  <button type="button" (click)="showCreate.set(!showCreate())">
+    {{ showCreate() ? 'Đóng' : 'Tạo nhóm' }}
+  </button>
+</section>
+
+@if (showCreate()) {
+  <form class="create-card" [formGroup]="form" (ngSubmit)="create()">
+    <label for="group-name">Tên nhóm</label>
+    <div class="create-row">
+      <input
+        id="group-name"
+        formControlName="name"
+        maxlength="80"
+        autocomplete="off"
+        [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched"
+      />
+      <button type="submit" [disabled]="pending()">
+        {{ pending() ? 'Đang tạo…' : 'Tạo nhóm' }}
+      </button>
+    </div>
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+      <p class="field-error">Tên nhóm cần từ 2 đến 80 ký tự.</p>
+    }
+  </form>
+}
+
+@if (error()) {
+  <div class="error-card" role="alert">
+    <p>{{ error() }}</p>
+    <button type="button" class="secondary" (click)="load()">Thử lại</button>
+  </div>
+} @else if (loading()) {
+  <p class="status" role="status">Đang nhóm những người bạn lại…</p>
+} @else if (groups().length === 0) {
+  <section class="empty">
+    <div class="empty-icon" aria-hidden="true">◎</div>
+    <h2>Chưa tham gia nhóm</h2>
+    <p>Tạo nhóm mới hoặc mở một lời mời từ bạn bè.</p>
+    <button type="button" (click)="showCreate.set(true)">Tạo nhóm đầu tiên</button>
+  </section>
+} @else {
+  <ul class="group-list" aria-label="Danh sách nhóm">
+    @for (group of groups(); track group.id) {
+      <li>
+        <a [routerLink]="['/groups', group.id]">
+          <span class="group-mark" aria-hidden="true">{{
+            group.name.slice(0, 1).toUpperCase()
+          }}</span>
+          <span class="group-copy">
+            <strong>{{ group.name }}</strong>
+            <small
+              >{{ group.memberCount }} thành viên ·
+              {{ group.role === 'Owner' ? 'Chủ nhóm' : 'Thành viên' }}</small
+            >
+          </span>
+          <span aria-hidden="true">›</span>
+        </a>
+      </li>
+    }
+  </ul>
+}

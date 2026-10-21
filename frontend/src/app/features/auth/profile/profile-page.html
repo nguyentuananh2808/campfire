@@ -1,0 +1,43 @@
+<section class="auth-shell">
+  <div class="auth-card profile-card">
+    <p class="eyebrow">Tài khoản</p>
+    <h1>{{ user()?.displayName }}</h1>
+    <p class="intro">{{ user()?.email }}</p>
+
+    <h2>Đổi mật khẩu</h2>
+    <form [formGroup]="form" (ngSubmit)="changePassword()" novalidate>
+      <label
+        >Mật khẩu hiện tại
+        <input
+          type="password"
+          formControlName="currentPassword"
+          autocomplete="current-password"
+          [attr.aria-invalid]="
+            form.controls.currentPassword.invalid && form.controls.currentPassword.touched
+          "
+        />
+      </label>
+      <label
+        >Mật khẩu mới
+        <input
+          type="password"
+          formControlName="newPassword"
+          autocomplete="new-password"
+          [attr.aria-invalid]="
+            form.controls.newPassword.invalid && form.controls.newPassword.touched
+          "
+        />
+      </label>
+      <p class="password-hint">Ít nhất 12 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
+      @if (message()) {
+        <p [class]="isError() ? 'form-error' : 'success'" role="status">{{ message() }}</p>
+      }
+      <button type="submit" [disabled]="pending()">
+        {{ pending() ? 'Đang đổi…' : 'Đổi mật khẩu' }}
+      </button>
+      <button class="secondary" type="button" [disabled]="logoutPending()" (click)="logout()">
+        {{ logoutPending() ? 'Đang đăng xuất…' : 'Đăng xuất' }}
+      </button>
+    </form>
+  </div>
+</section>

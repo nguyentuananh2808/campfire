@@ -1,0 +1,26 @@
+section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  margin: 8vh auto 0;
+  max-width: 620px;
+  padding: 12vh 0;
+  text-align: center;
+}
+.code {
+  color: var(--primary);
+  font-size: 4rem;
+  font-weight: 850;
+  margin: 0;
+}
+h1 {
+  margin: 0 0 12px;
+}
+p {
+  color: var(--muted);
+}
+a {
+  color: var(--primary-strong);
+  font-weight: 750;
+}

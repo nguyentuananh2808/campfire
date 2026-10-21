@@ -1,0 +1,157 @@
+<section class="chat-shell">
+  <header class="chat-header">
+    <div>
+      <p class="eyebrow">Lửa trại chung</p>
+      <h1>Trò chuyện</h1>
+    </div>
+    @if (groups().length > 0) {
+      <label
+        >Nhóm
+        <select [value]="selectedGroup()?.id" (change)="selectGroup($any($event.target).value)">
+          @for (group of groups(); track group.id) {
+            <option [value]="group.id">{{ group.name }}</option>
+          }
+        </select>
+      </label>
+    }
+  </header>
+
+  @if (error()) {
+    <div class="banner error" role="alert">{{ error() }}</div>
+  }
+  @if (connectionState() === 'reconnecting') {
+    <div class="banner" role="status">Đang nối lại và đồng bộ tin còn thiếu…</div>
+  }
+  @if (connectionState() === 'disconnected' && !loading() && selectedGroup()) {
+    <div class="banner" role="status">
+      Realtime đang gián đoạn. Tin đã lưu vẫn được tải từ máy chủ khi kết nối lại.
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="empty" aria-live="polite">Đang nhóm lửa…</div>
+  } @else if (groups().length === 0) {
+    <div class="empty">
+      <div class="empty-icon">✦</div>
+      <h2>Bạn chưa có nhóm</h2>
+      <p>Tạo hoặc tham gia một nhóm trước khi trò chuyện.</p>
+      <a routerLink="/groups">Đến trang nhóm</a>
+    </div>
+  } @else {
+    <section class="conversation" aria-label="Tin nhắn của nhóm">
+      @if (olderCursor()) {
+        <button class="load-more" type="button" (click)="loadOlder()" [disabled]="loadingOlder()">
+          {{ loadingOlder() ? 'Đang tải…' : 'Tải tin cũ hơn' }}
+        </button>
+      }
+      @if (messages().length === 0) {
+        <div class="empty compact">
+          <div class="empty-icon">🔥</div>
+          <h2>Chưa có tin nhắn</h2>
+          <p>Chào cả nhóm một câu để mở đầu cuộc vui.</p>
+        </div>
+      } @else {
+        <ol class="message-list">
+          @for (message of messages(); track message.id) {
+            <li class="message" [class.mine]="message.senderUserId === auth.user()?.id">
+              <div class="message-meta">
+                <strong>{{ message.senderDisplayName }}</strong>
+                <time [dateTime]="message.sentAtUtc">{{
+                  message.sentAtUtc | date: 'shortTime'
+                }}</time>
+              </div>
+              @if (message.kind === 'Sticker') {
+                @if (stickerFor(message.content); as sticker) {
+                  <div class="sticker" [attr.data-tone]="sticker.tone">
+                    <span aria-hidden="true">{{ sticker.emoji }}</span>
+                    <span class="visually-hidden">Sticker {{ sticker.label }}</span>
+                  </div>
+                } @else {
+                  <p class="unknown-sticker">Sticker không còn khả dụng.</p>
+                }
+              } @else {
+                <p>{{ message.content }}</p>
+              }
+              @if (message.deliveryState !== 'sent') {
+                <div class="delivery" [class.failed]="message.deliveryState === 'failed'">
+                  {{ message.deliveryState === 'pending' ? 'Đang gửi…' : 'Gửi thất bại' }}
+                  @if (message.deliveryState === 'failed') {
+                    <button type="button" (click)="retry(message)">Thử lại</button>
+                  }
+                </div>
+              }
+            </li>
+          }
+        </ol>
+      }
+    </section>
+    <form class="composer" [formGroup]="form" (ngSubmit)="send()">
+      <div class="composer-tools" aria-label="Công cụ tin nhắn">
+        <button
+          class="tool-button"
+          type="button"
+          [class.active]="openPicker() === 'emoji'"
+          [attr.aria-expanded]="openPicker() === 'emoji'"
+          aria-controls="emoji-picker"
+          (click)="togglePicker('emoji')"
+        >
+          <span aria-hidden="true">☺</span> Emoji
+        </button>
+        <button
+          class="tool-button"
+          type="button"
+          [class.active]="openPicker() === 'sticker'"
+          [attr.aria-expanded]="openPicker() === 'sticker'"
+          aria-controls="sticker-picker"
+          (click)="togglePicker('sticker')"
+        >
+          <span aria-hidden="true">▣</span> Sticker
+        </button>
+      </div>
+      @if (openPicker() === 'emoji') {
+        <div class="picker emoji-picker" id="emoji-picker" aria-label="Chọn emoji">
+          @for (emoji of emojis; track emoji) {
+            <button
+              type="button"
+              [attr.aria-label]="'Chèn emoji ' + emoji"
+              (click)="insertEmoji(emoji)"
+            >
+              {{ emoji }}
+            </button>
+          }
+        </div>
+      }
+      @if (openPicker() === 'sticker') {
+        <div class="picker sticker-picker" id="sticker-picker" aria-label="Chọn sticker">
+          @for (sticker of stickers; track sticker.code) {
+            <button
+              type="button"
+              [attr.data-tone]="sticker.tone"
+              [attr.aria-label]="'Gửi sticker ' + sticker.label"
+              (click)="sendSticker(sticker.code)"
+            >
+              <span aria-hidden="true">{{ sticker.emoji }}</span
+              ><small>{{ sticker.label }}</small>
+            </button>
+          }
+        </div>
+      }
+      <label for="message">Tin nhắn</label>
+      <textarea
+        #messageInput
+        id="message"
+        formControlName="content"
+        maxlength="2000"
+        rows="2"
+        placeholder="Nhắn điều gì đó cho cả nhóm…"
+      ></textarea>
+      <div class="composer-footer">
+        <small>{{ form.controls.content.value.length }}/2000</small>
+        <button type="submit" [disabled]="form.invalid">Gửi</button>
+      </div>
+      @if (form.controls.content.touched && form.controls.content.invalid) {
+        <small class="field-error">Tin nhắn phải có chữ và không quá 2.000 ký tự.</small>
+      }
+    </form>
+  }
+</section>

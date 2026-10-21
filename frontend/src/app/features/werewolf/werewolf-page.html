@@ -1,0 +1,302 @@
+<section class="werewolf-shell">
+  <header class="hero">
+    <p class="eyebrow">Campfire Games</p>
+    <h1>Ma Sói bên lửa trại</h1>
+    <p>Quản trò tự động, vai trò bí mật và voice được server cấp quyền theo từng giai đoạn.</p>
+  </header>
+
+  @if (error()) {
+    <div class="notice error" role="alert">
+      <span>{{ error() }}</span
+      ><button type="button" (click)="retry()">Thử lại</button>
+    </div>
+  }
+  @if (loading()) {
+    <div class="state" aria-live="polite">Đang nhóm lửa…</div>
+  }
+
+  @if (!room() && !loading()) {
+    <div class="entry-grid">
+      <form class="panel" [formGroup]="createForm" (ngSubmit)="create()">
+        <h2>Tạo phòng</h2>
+        <label>Tên phòng<input formControlName="name" maxlength="80" /></label>
+        <div class="two">
+          <label
+            >Quyền vào<select formControlName="visibility">
+              <option value="Public">Công khai</option>
+              <option value="Private">Riêng tư</option>
+            </select></label
+          ><label
+            >Tối thiểu<input
+              type="number"
+              formControlName="minimumPlayers"
+              min="6"
+              max="20" /></label
+          ><label
+            >Tối đa<input type="number" formControlName="maximumPlayers" min="6" max="20"
+          /></label>
+        </div>
+        <label class="check"
+          ><input type="checkbox" formControlName="deadVoiceEnabled" /> Bật kênh riêng cho người đã
+          chết</label
+        >
+        <button class="primary" [disabled]="pending() || createForm.invalid">Tạo phòng</button>
+      </form>
+      <form class="panel" [formGroup]="joinForm" (ngSubmit)="join()">
+        <h2>Vào bằng mã</h2>
+        <label
+          >Mã 8 ký tự<input class="code" formControlName="code" maxlength="8" autocomplete="off"
+        /></label>
+        <label class="check"
+          ><input type="checkbox" formControlName="spectator" /> Vào với tư cách khán giả</label
+        >
+        <button class="secondary" [disabled]="pending() || joinForm.invalid">Vào phòng</button>
+      </form>
+    </div>
+    <section class="rooms">
+      <h2>Phòng công khai đang chờ</h2>
+      @if (rooms().length === 0) {
+        <div class="state">Chưa có phòng công khai. Hãy tạo một phòng mới.</div>
+      }
+      @for (item of rooms(); track item.id) {
+        <button class="room-card" type="button" (click)="open(item.id)">
+          <span
+            ><strong>{{ item.name }}</strong
+            ><small>Mã {{ item.code }}</small></span
+          ><span>{{ item.playerCount }}/{{ item.maximumPlayers }}</span>
+        </button>
+      }
+    </section>
+  }
+
+  @if (room(); as active) {
+    <section class="game-head panel">
+      <div>
+        <p class="eyebrow">
+          Mã phòng {{ active.code }}
+          <button class="copy-link" type="button" (click)="copyInvite()">Sao chép link mời</button>
+        </p>
+        <h2>{{ active.name }}</h2>
+        <p>{{ phaseLabel(active.phase) }} · Vòng {{ active.round || 0 }}</p>
+      </div>
+      <div class="timer" [class.urgent]="secondsLeft() <= 10 && active.status === 'InProgress'">
+        <strong>{{ secondsLeft() }}</strong
+        ><span>giây</span>
+      </div>
+    </section>
+    <div class="connection-row">
+      <span [attr.data-state]="realtimeState()">Realtime: {{ realtimeState() }}</span
+      ><span
+        >Voice: {{ voice.state() }}
+        @if (voice.channel()) {
+          · {{ voice.channel() }}
+        }
+      </span>
+    </div>
+
+    <div class="game-grid">
+      <section class="panel players">
+        <div class="section-title">
+          <h2>Người chơi</h2>
+          <span>{{ active.players.length }}/{{ active.maximumPlayers }}</span>
+        </div>
+        <div class="player-grid">
+          @for (player of active.players; track player.userId) {
+            <button
+              type="button"
+              class="player"
+              [class.dead]="!player.isAlive"
+              [class.speaking]="voice.speakingIds().has(player.userId)"
+              [class.selected]="targetUserId() === player.userId"
+              (click)="selectTarget(player.userId)"
+              [disabled]="player.kind === 'Spectator'"
+            >
+              <span class="avatar">{{ player.displayName.slice(0, 1).toUpperCase() }}</span
+              ><strong>{{ player.displayName }}</strong>
+              <small>
+                @if (player.isHost) {
+                  👑
+                }
+                @if (player.kind === 'Spectator') {
+                  Khán giả
+                } @else if (player.isReady) {
+                  Sẵn sàng
+                } @else {
+                  Chưa sẵn sàng
+                }
+                · {{ player.isConnected ? 'Online' : 'Mất kết nối' }}</small
+              >
+            </button>
+            @if (voice.state() === 'connected' && player.userId !== auth.user()?.id) {
+              <label class="volume"
+                >Âm lượng {{ player.displayName
+                }}<input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="100"
+                  (input)="setVolume(player.userId, $event)"
+              /></label>
+            }
+            @if (active.canManage && !player.isHost) {
+              <div class="moderation">
+                <button
+                  type="button"
+                  (click)="moderate(player.userId, player.isHostMuted ? 'unmute' : 'mute')"
+                >
+                  {{ player.isHostMuted ? 'Bỏ mute' : 'Mute' }}
+                </button>
+                @if (active.status === 'Lobby') {
+                  <button type="button" (click)="moderate(player.userId, 'kick')">Mời ra</button>
+                }
+              </div>
+            }
+          }
+        </div>
+      </section>
+
+      <aside class="side-stack">
+        @if (active.myRole; as role) {
+          <section class="role-card" [attr.data-faction]="role.faction">
+            <p>Vai trò bí mật của bạn</p>
+            <h2>
+              <span aria-hidden="true">{{ role.icon }}</span> {{ role.name }}
+            </h2>
+            <p>{{ role.description }}</p>
+            <strong>{{ role.ability }}</strong>
+            <small>Điều kiện thắng: {{ role.winCondition }}</small>
+            @if (role.werewolfTeammateIds.length) {
+              <small>Đồng đội Sói: {{ role.werewolfTeammateIds.length }} người</small>
+            }
+            @if (role.investigationResult) {
+              <div class="reveal">{{ role.investigationResult }}</div>
+            }
+          </section>
+        }
+        <section class="panel controls">
+          <h2>Điều khiển</h2>
+          @if (active.status === 'Lobby' && currentPlayer()?.kind === 'Player') {
+            <button type="button" class="primary" (click)="setReady()">
+              {{ currentPlayer()?.isReady ? 'Hủy sẵn sàng' : 'Tôi sẵn sàng' }}
+            </button>
+            @if (active.canManage) {
+              <button
+                type="button"
+                class="secondary"
+                [disabled]="!active.canStart"
+                (click)="start()"
+              >
+                Bắt đầu trận
+              </button>
+            }
+          }
+          @if (active.canAct) {
+            <p>Chọn một người trên bàn rồi xác nhận kỹ năng.</p>
+            <button
+              type="button"
+              class="primary"
+              (click)="submitAction()"
+              [disabled]="!targetUserId()"
+            >
+              Dùng kỹ năng
+            </button>
+            @if (active.phase === 'NightWitch') {
+              <button
+                type="button"
+                (click)="submitAction('WitchHeal')"
+                [disabled]="!targetUserId() || !active.myRole?.hasHealPotion"
+              >
+                Dùng bình cứu</button
+              ><button type="button" (click)="submitAction('WitchPass')">Bỏ qua</button>
+            }
+          }
+          @if (active.canVote) {
+            <p>
+              Đã gửi {{ active.votesSubmitted }}/{{ active.eligibleVoters }} phiếu. Lựa chọn được
+              giữ kín đến khi kết thúc.
+            </p>
+            <button type="button" class="primary" (click)="vote()" [disabled]="!targetUserId()">
+              Xác nhận phiếu</button
+            ><button type="button" (click)="vote(true)">Bỏ phiếu trắng</button>
+          }
+          <button type="button" class="voice" (click)="connectVoice()">
+            Kết nối voice theo pha</button
+          ><button
+            type="button"
+            (click)="voice.toggleMicrophone()"
+            [disabled]="voice.state() !== 'connected' || !voice.canPublish()"
+          >
+            {{
+              !voice.canPublish()
+                ? 'Server đang khóa microphone'
+                : voice.muted()
+                  ? 'Bật microphone'
+                  : 'Tắt microphone'
+            }}
+          </button>
+          @if (microphones().length) {
+            <label
+              >Microphone<select (change)="selectMicrophone($event)">
+                @for (device of microphones(); track device.deviceId) {
+                  <option [value]="device.deviceId">{{ device.label || 'Microphone' }}</option>
+                }
+              </select></label
+            >
+          }
+          @if (speakers().length) {
+            <label
+              >Loa<select (change)="selectSpeaker($event)">
+                @for (device of speakers(); track device.deviceId) {
+                  <option [value]="device.deviceId">{{ device.label || 'Loa' }}</option>
+                }
+              </select></label
+            >
+          }
+          <p class="rule">
+            Ban đêm voice chung bị khóa. Chỉ Sói còn sống nhận token kênh Sói; người chết không thể
+            tự mở lại kênh người sống.
+          </p>
+          <button type="button" class="danger-link" (click)="leave()">Rời phòng</button>
+        </section>
+      </aside>
+    </div>
+
+    @if (active.canManage && active.status === 'Lobby') {
+      <form class="panel settings" [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+        <h2>Cài đặt phòng</h2>
+        <label>Tên<input formControlName="name" maxlength="80" /></label>
+        <div class="two">
+          <label
+            >Quyền vào<select formControlName="visibility">
+              <option value="Public">Công khai</option>
+              <option value="Private">Riêng tư</option>
+            </select></label
+          ><label
+            >Tối thiểu<input
+              type="number"
+              formControlName="minimumPlayers"
+              min="6"
+              max="20" /></label
+          ><label
+            >Tối đa<input type="number" formControlName="maximumPlayers" min="6" max="20"
+          /></label>
+        </div>
+        <label class="check"
+          ><input type="checkbox" formControlName="deadVoiceEnabled" /> Voice riêng người đã
+          chết</label
+        ><button type="submit" class="secondary">Lưu cài đặt</button>
+      </form>
+    }
+    <section class="panel log">
+      <h2>Thông báo quản trò</h2>
+      @for (event of active.events; track event.id) {
+        <article>
+          <span>{{ event.occurredAtUtc | date: 'HH:mm:ss' }}</span>
+          <p>{{ event.message }}</p>
+        </article>
+      } @empty {
+        <div class="state">Trận chưa bắt đầu.</div>
+      }
+    </section>
+  }
+</section>

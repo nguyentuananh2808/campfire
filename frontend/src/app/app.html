@@ -1,0 +1,65 @@
+<a class="skip-link" href="#main-content">Đi tới nội dung chính</a>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" routerLink="/" aria-label="Campfire — trang chủ">
+      <img class="brand-mark" src="/campfire-logo.jpeg" alt="" aria-hidden="true" />
+      <span class="brand-copy"><strong>Campfire</strong><small>Bên nhau quanh lửa</small></span>
+    </a>
+    <div class="topbar-actions">
+      <app-theme-toggle />
+      @if (auth.status() === 'authenticated') {
+        <a class="profile-link" routerLink="/profile" aria-label="Mở hồ sơ của bạn">
+          <span class="profile-copy"
+            ><small>Tài khoản</small><strong>{{ auth.user()?.displayName }}</strong></span
+          >
+          <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+        </a>
+      } @else {
+        <a class="sign-in-link" routerLink="/login"
+          ><span>Đăng nhập</span><span aria-hidden="true">→</span></a
+        >
+      }
+    </div>
+  </div>
+</header>
+
+<main class="content" id="main-content">
+  <router-outlet />
+</main>
+
+@if (auth.status() === 'authenticated') {
+  <nav class="bottom-nav" aria-label="Điều hướng chính">
+    <span class="nav-heading">Không gian của bạn</span>
+    <a routerLink="/chat" routerLinkActive="active" ariaCurrentWhenActive="page"
+      ><span class="nav-icon" aria-hidden="true"
+        ><svg viewBox="0 0 24 24">
+          <path d="M7 17.5 3.5 20v-5.2A8 8 0 1 1 7 17.5Z" />
+          <path d="M8 9.5h8M8 13h5" /></svg></span
+      ><span>Trò chuyện</span></a
+    >
+    <a routerLink="/events" routerLinkActive="active" ariaCurrentWhenActive="page"
+      ><span class="nav-icon" aria-hidden="true"
+        ><svg viewBox="0 0 24 24">
+          <path d="M5 4.5h14a2 2 0 0 1 2 2v13H3v-13a2 2 0 0 1 2-2Z" />
+          <path d="M3 9h18M8 2.5v4M16 2.5v4M7.5 13h2M14.5 13h2M7.5 16.5h2" /></svg></span
+      ><span>Kèo</span></a
+    >
+    <a routerLink="/werewolf" routerLinkActive="active" ariaCurrentWhenActive="page"
+      ><span class="nav-icon" aria-hidden="true"
+        ><svg viewBox="0 0 24 24">
+          <path
+            d="M12 3.5c1.1 2.4 3.2 3.9 6.5 4.5-1.2 7-3.4 10.5-6.5 12.5C8.9 18.5 6.7 15 5.5 8 8.8 7.4 10.9 5.9 12 3.5Z"
+          />
+          <path d="m9 12 1.5 1M15 12l-1.5 1M10 16h4" /></svg></span
+      ><span>Ma Sói</span></a
+    >
+    <a routerLink="/groups" routerLinkActive="active" ariaCurrentWhenActive="page"
+      ><span class="nav-icon" aria-hidden="true"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="9" cy="8" r="3" />
+          <circle cx="17" cy="9" r="2.5" />
+          <path d="M3.5 19c.4-4 2.3-6 5.5-6s5.1 2 5.5 6M14 14c3.8-.8 5.8.9 6.5 4" /></svg></span
+      ><span>Nhóm</span></a
+    >
+  </nav>
+}

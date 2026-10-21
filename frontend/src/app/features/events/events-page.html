@@ -1,0 +1,240 @@
+<section class="events-shell">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Hẹn nhau thôi</p>
+      <h1>Kèo của nhóm</h1>
+      <p>Tạo một cuộc hẹn rõ ràng, để không ai phải hỏi lại “mấy giờ?”.</p>
+    </div>
+    @if (groups().length > 0) {
+      <label
+        >Nhóm
+        <select [value]="selectedGroup()?.id" (change)="selectGroup($any($event.target).value)">
+          @for (group of groups(); track group.id) {
+            <option [value]="group.id">{{ group.name }}</option>
+          }
+        </select>
+      </label>
+    }
+  </header>
+
+  @if (error()) {
+    <div class="banner error" role="alert">
+      {{ error() }}
+      @if (conflict()) {
+        <button type="button" class="link-button" (click)="reloadSelected()">Tải lại kèo</button>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="empty" aria-live="polite">Đang gom kèo…</div>
+  } @else if (groups().length === 0) {
+    <div class="empty">
+      <div class="empty-icon">◇</div>
+      <h2>Bạn chưa có nhóm</h2>
+      <p>Hãy tạo hoặc tham gia nhóm trước khi lên kèo.</p>
+      <a routerLink="/groups">Đến trang nhóm</a>
+    </div>
+  } @else {
+    <div class="toolbar">
+      <button type="button" (click)="showCreate.set(!showCreate())">
+        {{ showCreate() ? 'Đóng biểu mẫu' : 'Tạo kèo mới' }}
+      </button>
+    </div>
+
+    @if (showCreate()) {
+      <form class="event-form" [formGroup]="createForm" (ngSubmit)="create()">
+        <h2>Tạo kèo</h2>
+        <label>Tiêu đề<input formControlName="title" maxlength="120" /></label>
+        <label
+          >Mô tả<textarea formControlName="description" maxlength="2000" rows="3"></textarea>
+        </label>
+        <div class="form-grid">
+          <label
+            >Thời gian<input
+              type="datetime-local"
+              formControlName="startsAtLocal"
+              [min]="minimumDateTime"
+          /></label>
+          <label>Địa điểm<input formControlName="location" maxlength="200" /></label>
+        </div>
+        <button type="submit" [disabled]="createForm.invalid || pending()">
+          {{ pending() ? 'Đang tạo…' : 'Tạo kèo' }}
+        </button>
+      </form>
+    }
+
+    <div class="content-grid">
+      <section aria-labelledby="event-list-title">
+        <h2 id="event-list-title">Danh sách kèo</h2>
+        @if (events().length === 0) {
+          <div class="empty compact">
+            <div class="empty-icon">◇</div>
+            <h3>Chưa có kèo nào</h3>
+            <p>Tạo kèo đầu tiên cho nhóm.</p>
+          </div>
+        } @else {
+          <ul class="event-list">
+            @for (event of events(); track event.id) {
+              <li>
+                <button
+                  type="button"
+                  class="event-card"
+                  [class.active]="selectedEvent()?.id === event.id"
+                  (click)="openEvent(event.id)"
+                >
+                  <span class="status" [attr.data-status]="event.status">{{ event.status }}</span>
+                  <strong>{{ event.title }}</strong>
+                  <span>{{ event.startsAtUtc | date: 'medium' }}</span
+                  ><span>📍 {{ event.location }}</span>
+                  <small
+                    >{{ event.goingCount }} đi · {{ event.notGoingCount }} không đi
+                    @if (event.myResponse) {
+                      · Bạn: {{ event.myResponse === 'Going' ? 'Đi' : 'Không đi' }}
+                    }
+                  </small>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="detail" aria-live="polite">
+        @if (detailLoading()) {
+          <div class="empty compact">Đang tải chi tiết…</div>
+        } @else if (selectedEvent(); as event) {
+          <div class="detail-heading">
+            <div>
+              <span class="status" [attr.data-status]="event.status">{{ event.status }}</span>
+              <h2>{{ event.title }}</h2>
+            </div>
+            @if (event.canManage && event.status !== 'Cancelled') {
+              <button type="button" class="secondary" (click)="beginEdit()">Sửa</button>
+            }
+          </div>
+          <p class="description">{{ event.description || 'Không có mô tả.' }}</p>
+          <dl>
+            <div>
+              <dt>Thời gian</dt>
+              <dd>{{ event.startsAtUtc | date: 'full' }}</dd>
+            </div>
+            <div>
+              <dt>Địa điểm</dt>
+              <dd>{{ event.location }}</dd>
+            </div>
+            <div>
+              <dt>Người tạo</dt>
+              <dd>{{ event.creatorDisplayName }}</dd>
+            </div>
+          </dl>
+
+          @if (showEdit()) {
+            <form class="event-form nested" [formGroup]="editForm" (ngSubmit)="saveEdit()">
+              <h3>Chỉnh sửa kèo</h3>
+              <label>Tiêu đề<input formControlName="title" maxlength="120" /></label>
+              <label
+                >Mô tả<textarea formControlName="description" maxlength="2000" rows="3"></textarea>
+              </label>
+              <label
+                >Thời gian<input
+                  type="datetime-local"
+                  formControlName="startsAtLocal"
+                  [min]="minimumDateTime"
+              /></label>
+              <label>Địa điểm<input formControlName="location" maxlength="200" /></label>
+              <div class="actions">
+                <button type="submit" [disabled]="editForm.invalid || pending()">Lưu</button>
+                <button type="button" class="secondary" (click)="showEdit.set(false)">
+                  Hủy sửa
+                </button>
+              </div>
+            </form>
+          }
+
+          <section class="rsvp" aria-labelledby="rsvp-title">
+            <h3 id="rsvp-title">Bạn có tham gia?</h3>
+            @if (event.status === 'Open') {
+              <div class="actions">
+                <button
+                  type="button"
+                  [class.selected]="event.myResponse === 'Going'"
+                  (click)="setRsvp('Going')"
+                  [disabled]="pending()"
+                >
+                  Tôi đi
+                </button>
+                <button
+                  type="button"
+                  class="secondary"
+                  [class.selected]="event.myResponse === 'NotGoing'"
+                  (click)="setRsvp('NotGoing')"
+                  [disabled]="pending()"
+                >
+                  Không đi
+                </button>
+              </div>
+            } @else {
+              <p class="rule">
+                Kèo đã {{ event.status === 'Confirmed' ? 'chốt' : 'hủy' }}. RSVP đang bị khóa.
+              </p>
+            }
+          </section>
+
+          @if (event.canManage && event.status !== 'Cancelled') {
+            <div class="manage-actions">
+              @if (event.status === 'Open') {
+                <button type="button" (click)="changeStatus('Confirmed')" [disabled]="pending()">
+                  Chốt kèo
+                </button>
+              }
+              <button
+                type="button"
+                class="danger"
+                (click)="changeStatus('Cancelled')"
+                [disabled]="pending()"
+              >
+                Hủy kèo
+              </button>
+            </div>
+          }
+
+          <div class="attendance">
+            <section>
+              <h3>Đã trả lời</h3>
+              @if (event.participants.length === 0) {
+                <p>Chưa ai trả lời.</p>
+              }
+              <ul>
+                @for (person of event.participants; track person.userId) {
+                  <li>
+                    <span
+                      >{{ person.displayName }}
+                      @if (!person.isCurrentMember) {
+                        <em>Đã rời nhóm</em>
+                      }
+                    </span>
+                    <strong>{{ person.response === 'Going' ? 'Đi' : 'Không đi' }}</strong>
+                  </li>
+                }
+              </ul>
+            </section>
+            <section>
+              <h3>Chưa trả lời</h3>
+              @if (event.unansweredMembers.length === 0) {
+                <p>Không còn ai đang chờ.</p>
+              }
+              <ul>
+                @for (person of event.unansweredMembers; track person.userId) {
+                  <li>{{ person.displayName }}</li>
+                }
+              </ul>
+            </section>
+          </div>
+        } @else {
+          <div class="empty compact"><p>Chọn một kèo để xem chi tiết và RSVP.</p></div>
+        }
+      </section>
+    </div>
+  }
+</section>
