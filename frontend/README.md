@@ -1,5 +1,14 @@
 # Campfire Web
 
+## Production container
+
+The repository-root `Dockerfile` builds this Angular application and serves it
+through Nginx on port `8080`. Nginx keeps API, antiforgery cookies and SignalR
+same-origin by proxying `/api` and `/hubs` to the backend service named `api`.
+The AWS EC2 deployment manifest lives in the separate `campfire-Api` repository
+under `infra/aws` and expects both repositories to be sibling directories named
+`web` and `api`.
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.2.
 
 ## Development server
