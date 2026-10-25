@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -13,16 +22,21 @@ import {
   GenderPreference,
   StrangerConversation,
   StrangerMessage,
+  StrangerReaction,
 } from '../../core/stranger-chat/stranger-chat.models';
+import { ChatSticker } from '../../core/chat/chat-sticker';
+import { CHAT_STICKERS } from '../../core/chat/chat-stickers';
 
 @Component({
   selector: 'app-stranger-chat-page',
-  imports: [FormsModule, RouterLink],
+  imports: [DatePipe, FormsModule, RouterLink],
   templateUrl: './stranger-chat-page.html',
   styleUrl: './stranger-chat-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StrangerChatPage {
+  @ViewChild('messageInput') private messageInput?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('messageEnd') private messageEnd?: ElementRef<HTMLElement>;
   private readonly api = inject(StrangerChatService);
   private readonly realtime = inject(StrangerChatRealtimeService);
   private readonly destroyRef = inject(DestroyRef);
@@ -35,6 +49,17 @@ export class StrangerChatPage {
   readonly safetyOpen = signal(false);
   readonly realtimeConnected = signal(false);
   readonly error = signal('');
+  readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
+  readonly replyingTo = signal<StrangerMessage | null>(null);
+  readonly stickers = CHAT_STICKERS;
+  readonly emojis = ['😀', '😂', '🥰', '😎', '🥳', '😭', '😡', '👍', '❤️', '🔥', '🎉', '✨'];
+  readonly reactions: ReadonlyArray<{ code: StrangerReaction; emoji: string; label: string }> = [
+    { code: 'Like', emoji: '👍', label: 'Thích' },
+    { code: 'Love', emoji: '❤️', label: 'Yêu thích' },
+    { code: 'Laugh', emoji: '😂', label: 'Haha' },
+    { code: 'Wow', emoji: '😮', label: 'Bất ngờ' },
+    { code: 'Sad', emoji: '😢', label: 'Buồn' },
+  ];
   nickname = '';
   gender: GuestGender | '' = '';
   genderPreference: GenderPreference = 'Any';
@@ -97,44 +122,117 @@ export class StrangerChatPage {
     const text = this.message.trim(),
       c = this.conversation();
     if (!text || !c) return;
+    this.queueMessage('Text', text);
+    this.message = '';
+    this.openPicker.set(null);
+  }
+  sendSticker(code: string) {
+    if (!this.stickers.some((sticker) => sticker.code === code)) return;
+    this.queueMessage('Sticker', code);
+    this.openPicker.set(null);
+  }
+  private queueMessage(kind: 'Text' | 'Sticker', content: string) {
+    const c = this.conversation();
+    if (!c) return;
     const clientMessageId = createClientUuid();
+    const replyTarget = this.replyingTo();
     const pending: StrangerMessage = {
       id: clientMessageId,
       conversationId: c.id,
       clientMessageId,
-      content: text,
+      kind,
+      content,
       sentAtUtc: new Date().toISOString(),
       isMine: true,
+      replyTo: replyTarget
+        ? {
+            messageId: replyTarget.id,
+            isMine: replyTarget.isMine,
+            kind: replyTarget.kind,
+            content: replyTarget.content.slice(0, 160),
+          }
+        : null,
+      reactions: [],
+      myReaction: null,
       state: 'pending',
     };
     this.messages.update((x) => [...x, pending]);
-    this.message = '';
-    this.api.send(c.id, clientMessageId, text).subscribe({
-      next: (m) =>
-        this.messages.update((x) =>
-          x.map((y) => (y.clientMessageId === clientMessageId ? { ...m, state: 'sent' } : y)),
-        ),
-      error: () =>
-        this.messages.update((x) =>
-          x.map((y) => (y.clientMessageId === clientMessageId ? { ...y, state: 'failed' } : y)),
-        ),
-    });
+    this.replyingTo.set(null);
+    this.scrollToLatest();
+    this.api
+      .send(c.id, clientMessageId, kind, content, pending.replyTo?.messageId ?? null)
+      .subscribe({
+        next: (m) =>
+          this.messages.update((x) =>
+            x.map((y) => (y.clientMessageId === clientMessageId ? { ...m, state: 'sent' } : y)),
+          ),
+        error: () =>
+          this.messages.update((x) =>
+            x.map((y) => (y.clientMessageId === clientMessageId ? { ...y, state: 'failed' } : y)),
+          ),
+      });
   }
   retry(m: StrangerMessage) {
     const c = this.conversation();
     if (!c) return;
     m.state = 'pending';
     this.messages.update((x) => [...x]);
-    this.api.send(c.id, m.clientMessageId, m.content).subscribe({
-      next: (s) =>
-        this.messages.update((x) =>
-          x.map((y) => (y.clientMessageId === m.clientMessageId ? { ...s, state: 'sent' } : y)),
-        ),
-      error: () => {
-        m.state = 'failed';
-        this.messages.update((x) => [...x]);
-      },
+    this.api
+      .send(c.id, m.clientMessageId, m.kind, m.content, m.replyTo?.messageId ?? null)
+      .subscribe({
+        next: (s) =>
+          this.messages.update((x) =>
+            x.map((y) => (y.clientMessageId === m.clientMessageId ? { ...s, state: 'sent' } : y)),
+          ),
+        error: () => {
+          m.state = 'failed';
+          this.messages.update((x) => [...x]);
+        },
+      });
+  }
+  reply(message: StrangerMessage) {
+    if (message.state !== 'sent') return;
+    this.replyingTo.set(message);
+    queueMicrotask(() => this.messageInput?.nativeElement.focus());
+  }
+  cancelReply() {
+    this.replyingTo.set(null);
+  }
+  togglePicker(picker: 'emoji' | 'sticker') {
+    this.openPicker.update((current) => (current === picker ? null : picker));
+  }
+  insertEmoji(emoji: string) {
+    const input = this.messageInput?.nativeElement;
+    const start = input?.selectionStart ?? this.message.length;
+    const end = input?.selectionEnd ?? this.message.length;
+    const next = `${this.message.slice(0, start)}${emoji}${this.message.slice(end)}`;
+    if (next.length > 1000) return;
+    this.message = next;
+    queueMicrotask(() => {
+      input?.focus();
+      input?.setSelectionRange(start + emoji.length, start + emoji.length);
     });
+  }
+  stickerFor(code: string): ChatSticker | undefined {
+    return this.stickers.find((sticker) => sticker.code === code);
+  }
+  react(message: StrangerMessage, reaction: StrangerReaction) {
+    const conversation = this.conversation();
+    if (!conversation || message.state !== 'sent') return;
+    const next = message.myReaction === reaction ? null : reaction;
+    this.api.setReaction(conversation.id, message.id, next).subscribe({
+      next: (saved) => this.replaceMessage({ ...saved, state: 'sent' }),
+      error: (error) => this.fail(error),
+    });
+  }
+  reactionEmoji(reaction: StrangerReaction): string {
+    return this.reactions.find((item) => item.code === reaction)?.emoji ?? '•';
+  }
+  onComposerEnter(event: Event) {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.shiftKey || keyboardEvent.isComposing) return;
+    keyboardEvent.preventDefault();
+    this.send();
   }
   end(block = false) {
     const c = this.conversation();
@@ -192,6 +290,9 @@ export class StrangerChatPage {
     if (!c) return;
     this.api.messages(c.id).subscribe({
       next: (p) => {
+        const previousLastId = this.messages()
+          .filter((item) => item.state === 'sent')
+          .at(-1)?.id;
         const pending = this.messages().filter(
           (x) => x.state === 'pending' || x.state === 'failed',
         );
@@ -200,9 +301,23 @@ export class StrangerChatPage {
           ...p.items.map((x) => ({ ...x, state: 'sent' as const })),
           ...pending.filter((x) => !ids.has(x.clientMessageId)),
         ]);
+        const latestId = p.items.at(-1)?.id;
+        if (latestId && latestId !== previousLastId) this.scrollToLatest();
       },
       error: () => {},
     });
+  }
+
+  private replaceMessage(message: StrangerMessage): void {
+    this.messages.update((items) =>
+      items.map((item) =>
+        item.id === message.id || item.clientMessageId === message.clientMessageId ? message : item,
+      ),
+    );
+  }
+
+  private scrollToLatest(): void {
+    requestAnimationFrame(() => this.messageEnd?.nativeElement.scrollIntoView({ block: 'end' }));
   }
 
   private connectRealtime(): void {

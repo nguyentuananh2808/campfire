@@ -9,6 +9,7 @@ import {
   StrangerConversation,
   StrangerMessage,
   StrangerMessagePage,
+  StrangerReaction,
 } from './stranger-chat.models';
 
 @Injectable({ providedIn: 'root' })
@@ -51,12 +52,32 @@ export class StrangerChatService {
       params: new HttpParams().set('limit', 100),
     });
   }
-  send(id: string, clientMessageId: string, content: string): Observable<StrangerMessage> {
+  send(
+    id: string,
+    clientMessageId: string,
+    kind: 'Text' | 'Sticker',
+    content: string,
+    replyToMessageId: string | null,
+  ): Observable<StrangerMessage> {
     return this.mutate(() =>
       this.http.post<StrangerMessage>(`/api/v1/stranger/conversations/${id}/messages`, {
         clientMessageId,
+        kind,
         content,
+        replyToMessageId,
       }),
+    );
+  }
+  setReaction(
+    conversationId: string,
+    messageId: string,
+    reaction: StrangerReaction | null,
+  ): Observable<StrangerMessage> {
+    return this.mutate(() =>
+      this.http.put<StrangerMessage>(
+        `/api/v1/stranger/conversations/${conversationId}/messages/${messageId}/reaction`,
+        { reaction },
+      ),
     );
   }
   end(id: string, block = false): Observable<boolean> {

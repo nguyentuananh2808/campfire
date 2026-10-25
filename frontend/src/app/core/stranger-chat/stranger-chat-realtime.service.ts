@@ -12,6 +12,7 @@ export class StrangerChatRealtimeService {
       .withAutomaticReconnect()
       .build();
     this.connection.on('MessageCreated', onChanged);
+    this.connection.on('MessageChanged', onChanged);
     this.connection.on('ConversationEnded', onEnded);
     this.connection.onreconnected(onChanged);
     await this.connection.start();

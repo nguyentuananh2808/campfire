@@ -12,17 +12,17 @@ export class ThemeService {
   readonly theme = this.activeTheme.asReadonly();
 
   constructor() {
-    if (!isPlatformBrowser(this.platformId)) {
+    const browserWindow = this.document.defaultView;
+    if (!isPlatformBrowser(this.platformId) || !browserWindow) {
       return;
     }
 
-    const stored = localStorage.getItem(this.storageKey);
-    const preferred: ThemePreference =
-      stored === 'light' || stored === 'dark'
-        ? stored
-        : window.matchMedia?.('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light';
+    const stored = this.readStoredTheme();
+    const preferred: ThemePreference = stored
+      ? stored
+      : browserWindow.matchMedia?.('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
     this.apply(preferred, false);
   }
 
@@ -35,10 +35,33 @@ export class ThemeService {
   }
 
   private apply(theme: ThemePreference, persist: boolean): void {
+    this.document.documentElement.setAttribute('data-theme', theme);
     this.activeTheme.set(theme);
-    this.document.documentElement.dataset['theme'] = theme;
-    if (persist && isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.storageKey, theme);
+
+    if (persist) {
+      this.persistTheme(theme);
+    }
+  }
+
+  private readStoredTheme(): ThemePreference | null {
+    try {
+      const stored = this.document.defaultView?.localStorage.getItem(this.storageKey);
+      return stored === 'light' || stored === 'dark' ? stored : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private persistTheme(theme: ThemePreference): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    try {
+      this.document.defaultView?.localStorage.setItem(this.storageKey, theme);
+    } catch {
+      // Storage may be blocked in privacy-restricted browser contexts.
+      // Theme switching must still work for the current session.
     }
   }
 }

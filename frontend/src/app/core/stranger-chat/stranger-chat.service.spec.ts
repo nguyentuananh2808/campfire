@@ -42,4 +42,29 @@ describe('StrangerChatService', () => {
     expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('stranger-chat-test-token');
     request.flush({});
   });
+
+  it('sends a reply with kind and idempotency key', () => {
+    service.send('conversation-1', 'client-1', 'Sticker', 'campfire', 'message-0').subscribe();
+    http.expectOne('/api/v1/auth/antiforgery').flush(null);
+    const request = http.expectOne('/api/v1/stranger/conversations/conversation-1/messages');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      clientMessageId: 'client-1',
+      kind: 'Sticker',
+      content: 'campfire',
+      replyToMessageId: 'message-0',
+    });
+    request.flush({});
+  });
+
+  it('sets a reaction through the protected participant endpoint', () => {
+    service.setReaction('conversation-1', 'message-1', 'Like').subscribe();
+    http.expectOne('/api/v1/auth/antiforgery').flush(null);
+    const request = http.expectOne(
+      '/api/v1/stranger/conversations/conversation-1/messages/message-1/reaction',
+    );
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({ reaction: 'Like' });
+    request.flush({});
+  });
 });

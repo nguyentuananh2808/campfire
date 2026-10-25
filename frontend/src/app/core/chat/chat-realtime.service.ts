@@ -14,6 +14,7 @@ export class ChatRealtimeService {
     onMessage: (message: ChatMessage) => void,
     onState: (state: ChatConnectionState) => void,
     onReconcile: () => void,
+    onChanged: () => void,
   ): Promise<void> {
     await this.stop();
     this.groupId = groupId;
@@ -23,6 +24,7 @@ export class ChatRealtimeService {
       .build();
     this.connection = connection;
     connection.on('MessageCreated', onMessage);
+    connection.on('MessageChanged', onChanged);
     connection.onreconnecting(() => onState('reconnecting'));
     connection.onreconnected(async () => {
       if (!this.groupId) return;

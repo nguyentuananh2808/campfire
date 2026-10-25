@@ -60,11 +60,25 @@
                   message.sentAtUtc | date: 'shortTime'
                 }}</time>
               </div>
+              @if (message.replyTo; as replyPreview) {
+                <button class="reply-preview" type="button" (click)="reply(message)">
+                  <strong>Trả lời {{ replyPreview.senderDisplayName }}</strong>
+                  <span>{{
+                    replyPreview.kind === 'Sticker'
+                      ? 'Sticker · ' + replyPreview.content
+                      : replyPreview.content
+                  }}</span>
+                </button>
+              }
               @if (message.kind === 'Sticker') {
                 @if (stickerFor(message.content); as sticker) {
-                  <div class="sticker" [attr.data-tone]="sticker.tone">
+                  <div
+                    class="sticker"
+                    role="img"
+                    [attr.aria-label]="'Sticker ' + sticker.label"
+                    [attr.data-tone]="sticker.tone"
+                  >
                     <span aria-hidden="true">{{ sticker.emoji }}</span>
-                    <span class="visually-hidden">Sticker {{ sticker.label }}</span>
                   </div>
                 } @else {
                   <p class="unknown-sticker">Sticker không còn khả dụng.</p>
@@ -80,12 +94,52 @@
                   }
                 </div>
               }
+              @if (message.deliveryState === 'sent') {
+                <div class="message-actions" aria-label="Tương tác với tin nhắn">
+                  <button type="button" (click)="reply(message)">↩ Trả lời</button>
+                  @for (reaction of reactions; track reaction.code) {
+                    <button
+                      type="button"
+                      class="reaction-button"
+                      [class.selected]="message.myReaction === reaction.code"
+                      [attr.aria-label]="reaction.label"
+                      [attr.aria-pressed]="message.myReaction === reaction.code"
+                      (click)="react(message, reaction.code)"
+                    >
+                      {{ reaction.emoji }}
+                    </button>
+                  }
+                </div>
+                @if (message.reactions.length > 0) {
+                  <div class="reaction-summary" aria-label="Cảm xúc cho tin nhắn">
+                    @for (reaction of message.reactions; track reaction.reaction) {
+                      <button
+                        type="button"
+                        [class.selected]="message.myReaction === reaction.reaction"
+                        (click)="react(message, reaction.reaction)"
+                      >
+                        {{ reactionEmoji(reaction.reaction) }} {{ reaction.count }}
+                      </button>
+                    }
+                  </div>
+                }
+              }
             </li>
           }
+          <li #messageEnd class="message-end" aria-hidden="true"></li>
         </ol>
       }
     </section>
     <form class="composer" [formGroup]="form" (ngSubmit)="send()">
+      @if (replyingTo(); as target) {
+        <div class="replying-banner">
+          <span
+            ><strong>Đang trả lời {{ target.senderDisplayName }}</strong
+            ><small>{{ target.kind === 'Sticker' ? 'Sticker' : target.content }}</small></span
+          >
+          <button type="button" (click)="cancelReply()" aria-label="Hủy trả lời">×</button>
+        </div>
+      }
       <div class="composer-tools" aria-label="Công cụ tin nhắn">
         <button
           class="tool-button"
@@ -144,6 +198,7 @@
         maxlength="2000"
         rows="2"
         placeholder="Nhắn điều gì đó cho cả nhóm…"
+        (keydown.enter)="onComposerEnter($event)"
       ></textarea>
       <div class="composer-footer">
         <small>{{ form.controls.content.value.length }}/2000</small>

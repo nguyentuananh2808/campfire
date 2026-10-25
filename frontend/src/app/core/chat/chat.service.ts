@@ -4,6 +4,7 @@ import { Observable, switchMap } from 'rxjs';
 import { ChatMessage } from './chat-message';
 import { ChatMessageKind } from './chat-message-kind';
 import { ChatMessagePage } from './chat-message-page';
+import { ChatReaction } from './chat-reaction-summary';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -22,6 +23,7 @@ export class ChatService {
     clientMessageId: string,
     kind: ChatMessageKind,
     content: string,
+    replyToMessageId: string | null,
   ): Observable<ChatMessage> {
     return this.http.get<void>('/api/v1/auth/antiforgery').pipe(
       switchMap(() =>
@@ -29,6 +31,21 @@ export class ChatService {
           clientMessageId,
           kind,
           content,
+          replyToMessageId,
+        }),
+      ),
+    );
+  }
+
+  setReaction(
+    groupId: string,
+    messageId: string,
+    reaction: ChatReaction | null,
+  ): Observable<ChatMessage> {
+    return this.http.get<void>('/api/v1/auth/antiforgery').pipe(
+      switchMap(() =>
+        this.http.put<ChatMessage>(`/api/v1/groups/${groupId}/messages/${messageId}/reaction`, {
+          reaction,
         }),
       ),
     );

@@ -27,7 +27,7 @@ describe('ChatService', () => {
   });
 
   it('sends through the protected REST endpoint with the caller idempotency key', () => {
-    service.send('group-1', 'client-1', 'Text', 'Xin chào').subscribe();
+    service.send('group-1', 'client-1', 'Text', 'Xin chào', 'message-0').subscribe();
     http.expectOne('/api/v1/auth/antiforgery').flush(null);
     const request = http.expectOne('/api/v1/groups/group-1/messages');
     expect(request.request.method).toBe('POST');
@@ -35,20 +35,31 @@ describe('ChatService', () => {
       clientMessageId: 'client-1',
       kind: 'Text',
       content: 'Xin chào',
+      replyToMessageId: 'message-0',
     });
     expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('chat-test-token');
     request.flush({});
   });
 
   it('sends an allow-listed sticker kind through the same idempotent endpoint', () => {
-    service.send('group-1', 'client-2', 'Sticker', 'campfire').subscribe();
+    service.send('group-1', 'client-2', 'Sticker', 'campfire', null).subscribe();
     http.expectOne('/api/v1/auth/antiforgery').flush(null);
     const request = http.expectOne('/api/v1/groups/group-1/messages');
     expect(request.request.body).toEqual({
       clientMessageId: 'client-2',
       kind: 'Sticker',
       content: 'campfire',
+      replyToMessageId: null,
     });
+    request.flush({});
+  });
+
+  it('sets or removes the caller reaction through the protected endpoint', () => {
+    service.setReaction('group-1', 'message-1', 'Love').subscribe();
+    http.expectOne('/api/v1/auth/antiforgery').flush(null);
+    const request = http.expectOne('/api/v1/groups/group-1/messages/message-1/reaction');
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({ reaction: 'Love' });
     request.flush({});
   });
 

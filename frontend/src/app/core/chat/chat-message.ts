@@ -1,4 +1,6 @@
 import { ChatMessageKind } from './chat-message-kind';
+import { ChatReaction, ChatReactionSummary } from './chat-reaction-summary';
+import { ChatReplyPreview } from './chat-reply-preview';
 
 export interface ChatMessage {
   id: string;
@@ -9,4 +11,7 @@ export interface ChatMessage {
   kind: ChatMessageKind;
   content: string;
   sentAtUtc: string;
+  replyTo: ChatReplyPreview | null;
+  reactions: ChatReactionSummary[];
+  myReaction: ChatReaction | null;
 }

@@ -17,6 +17,7 @@ import { AuthStore } from '../../core/auth/auth.store';
 import { ChatConnectionState, ChatRealtimeService } from '../../core/chat/chat-realtime.service';
 import { ChatMessage } from '../../core/chat/chat-message';
 import { ChatMessageKind } from '../../core/chat/chat-message-kind';
+import { ChatReaction } from '../../core/chat/chat-reaction-summary';
 import { ChatService } from '../../core/chat/chat.service';
 import { ChatSticker } from '../../core/chat/chat-sticker';
 import { CHAT_STICKERS } from '../../core/chat/chat-stickers';
@@ -34,6 +35,7 @@ import { createClientUuid } from '../../core/ids/client-uuid';
 })
 export class ChatPage {
   @ViewChild('messageInput') private messageInput?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('messageEnd') private messageEnd?: ElementRef<HTMLElement>;
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
@@ -50,8 +52,16 @@ export class ChatPage {
   readonly connectionState = signal<ChatConnectionState>('disconnected');
   readonly olderCursor = signal<string | null>(null);
   readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
+  readonly replyingTo = signal<ChatViewMessage | null>(null);
   readonly emojis = ['😀', '😂', '🥰', '😎', '🥳', '😭', '😡', '👍', '❤️', '🔥', '🎉', '✨'];
   readonly stickers = CHAT_STICKERS;
+  readonly reactions: ReadonlyArray<{ code: ChatReaction; emoji: string; label: string }> = [
+    { code: 'Like', emoji: '👍', label: 'Thích' },
+    { code: 'Love', emoji: '❤️', label: 'Yêu thích' },
+    { code: 'Laugh', emoji: '😂', label: 'Haha' },
+    { code: 'Wow', emoji: '😮', label: 'Bất ngờ' },
+    { code: 'Sad', emoji: '😢', label: 'Buồn' },
+  ];
   private readonly latestCursor = signal<string | null>(null);
   readonly form = this.formBuilder.nonNullable.group({
     content: ['', [Validators.required, Validators.maxLength(2000), Validators.pattern(/\S/)]],
@@ -69,6 +79,7 @@ export class ChatPage {
     this.messages.set([]);
     this.olderCursor.set(null);
     this.latestCursor.set(null);
+    this.replyingTo.set(null);
     this.loadInitial(group.id);
   }
 
@@ -86,6 +97,40 @@ export class ChatPage {
     if (!this.stickers.some((sticker) => sticker.code === code)) return;
     this.queueMessage('Sticker', code);
     this.openPicker.set(null);
+  }
+
+  reply(message: ChatViewMessage): void {
+    if (message.deliveryState !== 'sent') return;
+    this.replyingTo.set(message);
+    queueMicrotask(() => this.messageInput?.nativeElement.focus());
+  }
+
+  cancelReply(): void {
+    this.replyingTo.set(null);
+  }
+
+  react(message: ChatViewMessage, reaction: ChatReaction): void {
+    const group = this.selectedGroup();
+    if (!group || message.deliveryState !== 'sent') return;
+    const next = message.myReaction === reaction ? null : reaction;
+    this.chatService
+      .setReaction(group.id, message.id, next)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (saved) => this.upsert({ ...saved, deliveryState: 'sent' }),
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error)),
+      });
+  }
+
+  reactionEmoji(reaction: ChatReaction): string {
+    return this.reactions.find((item) => item.code === reaction)?.emoji ?? '•';
+  }
+
+  onComposerEnter(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.shiftKey || keyboardEvent.isComposing) return;
+    keyboardEvent.preventDefault();
+    this.send();
   }
 
   togglePicker(picker: 'emoji' | 'sticker'): void {
@@ -114,6 +159,7 @@ export class ChatPage {
   private queueMessage(kind: ChatMessageKind, content: string): void {
     const group = this.selectedGroup();
     if (!group) return;
+    const replyTarget = this.replyingTo();
     const clientMessageId = createClientUuid();
     const optimistic: ChatViewMessage = {
       id: clientMessageId,
@@ -124,9 +170,20 @@ export class ChatPage {
       kind,
       content,
       sentAtUtc: new Date().toISOString(),
+      replyTo: replyTarget
+        ? {
+            messageId: replyTarget.id,
+            senderDisplayName: replyTarget.senderDisplayName,
+            kind: replyTarget.kind,
+            content: replyTarget.content.slice(0, 160),
+          }
+        : null,
+      reactions: [],
+      myReaction: null,
       deliveryState: 'pending',
     };
-    this.upsert(optimistic);
+    this.replyingTo.set(null);
+    this.upsert(optimistic, true);
     this.deliver(optimistic);
   }
 
@@ -187,9 +244,10 @@ export class ChatPage {
       .subscribe({
         next: (page) => {
           if (this.selectedGroup()?.id !== groupId) return;
-          this.merge(page.items);
+          this.merge(page.items, true);
           this.olderCursor.set(page.olderCursor);
           this.latestCursor.set(page.latestCursor);
+          this.scrollToLatest();
           void this.startRealtime(groupId);
         },
         error: (error: unknown) => this.error.set(getApiErrorMessage(error)),
@@ -203,6 +261,7 @@ export class ChatPage {
         (message) => this.upsert({ ...message, deliveryState: 'sent' }),
         (state) => this.connectionState.set(state),
         () => this.reconcile(),
+        () => this.refreshLatest(),
       );
     } catch {
       if (this.selectedGroup()?.id === groupId) this.connectionState.set('disconnected');
@@ -218,7 +277,7 @@ export class ChatPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (page) => {
-          this.merge(page.items);
+          this.merge(page.items, true);
           this.latestCursor.set(page.latestCursor);
           if (page.hasMore) this.reconcile();
         },
@@ -228,7 +287,13 @@ export class ChatPage {
 
   private deliver(message: ChatViewMessage): void {
     this.chatService
-      .send(message.groupId, message.clientMessageId, message.kind, message.content)
+      .send(
+        message.groupId,
+        message.clientMessageId,
+        message.kind,
+        message.content,
+        message.replyTo?.messageId ?? null,
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (saved) => this.upsert({ ...saved, deliveryState: 'sent' }),
@@ -236,11 +301,27 @@ export class ChatPage {
       });
   }
 
-  private merge(messages: ChatMessage[]): void {
-    messages.forEach((message) => this.upsert({ ...message, deliveryState: 'sent' }));
+  private refreshLatest(): void {
+    const groupId = this.selectedGroup()?.id;
+    if (!groupId) return;
+    this.chatService
+      .getMessages(groupId, { limit: 100 })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (page) => {
+          this.merge(page.items);
+          this.latestCursor.set(page.latestCursor);
+        },
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error)),
+      });
   }
 
-  private upsert(message: ChatViewMessage): void {
+  private merge(messages: ChatMessage[], scroll = false): void {
+    messages.forEach((message) => this.upsert({ ...message, deliveryState: 'sent' }, false));
+    if (scroll) this.scrollToLatest();
+  }
+
+  private upsert(message: ChatViewMessage, scroll = true): void {
     this.messages.update((current) => {
       const unique = current.filter(
         (item) => item.id !== message.id && item.clientMessageId !== message.clientMessageId,
@@ -250,5 +331,10 @@ export class ChatPage {
           left.sentAtUtc.localeCompare(right.sentAtUtc) || left.id.localeCompare(right.id),
       );
     });
+    if (scroll) this.scrollToLatest();
+  }
+
+  private scrollToLatest(): void {
+    requestAnimationFrame(() => this.messageEnd?.nativeElement.scrollIntoView({ block: 'end' }));
   }
 }
