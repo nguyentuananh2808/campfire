@@ -1,0 +1,39 @@
+
+> campfire-web@0.0.0 start
+> ng serve --host 0.0.0.0 --port 91
+
+> Building...
+√ Building...
+Initial chunk files | Names                  |  Raw size
+main.js             | main                   |  23.70 kB | 
+chunk-2AQZMXIG.js   | -                      |   4.61 kB | 
+styles.css          | styles                 |   2.58 kB | 
+chunk-VUJOFXKG.js   | -                      | 987 bytes | 
+chunk-QX5XRUVT.js   | -                      | 671 bytes | 
+
+                    | Initial total          |  32.55 kB
+
+Lazy chunk files    | Names                  |  Raw size
+chunk-SX2MVMJM.js   | werewolf-page          |  91.99 kB | 
+chunk-UAAZYELE.js   | stranger-chat-page     |  85.20 kB | 
+chunk-SVD6RBNS.js   | events-page            |  62.12 kB | 
+chunk-AW63KVVK.js   | group-detail-page      |  41.82 kB | 
+chunk-D4FQGCXI.js   | chat-page              |  38.69 kB | 
+chunk-DQ6CCQB6.js   | groups-page            |  23.39 kB | 
+chunk-DGMB4BBT.js   | register-page          |  17.59 kB | 
+chunk-5K7REDPA.js   | profile-page           |  16.26 kB | 
+chunk-BZBHKODQ.js   | login-page             |  15.04 kB | 
+chunk-MRUJMAJS.js   | invitation-accept-page |  14.11 kB | 
+chunk-SYNQ35P2.js   | not-found-page         |   3.70 kB | 
+chunk-F2YTSHV5.js   | -                      |   2.51 kB | 
+chunk-52IBFKCM.js   | -                      | 568 bytes | 
+
+Application bundle generation complete. [3.210 seconds] - 2026-10-17T15:54:55.194Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:91/
+  ➜  Network: http://192.168.5.251:91/  Wi-Fi
+  ➜  Network: http://172.26.192.1:91/   vEthernet (Default …
+  ➜  Network: http://192.168.80.1:91/   vEthernet (WSL (Hyp…
+  ➜  press h + enter to show help

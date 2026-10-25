@@ -1,0 +1,9 @@
+# Architecture
+
+Campfire is a single-deployment modular monolith: one ASP.NET Core host, one Angular SPA and one PostgreSQL database. Identity, Groups, Chat, Events, Werewolf and StrangerChat each own Domain, Application, Infrastructure, Presentation and Contracts projects plus a private schema/DbContext. Cross-module calls use Contracts only; IDs may cross boundaries but EF entities, tables and navigation properties do not.
+
+The host contains composition only. Every module uses the same request path: `Presentation API endpoint -> MediatR ISender -> Application command/query handler -> injected Application port -> Infrastructure adapter -> EF Core/PostgreSQL or another framework service`. Endpoints never resolve handlers, DbContexts or framework identity services directly. Handlers never reference Infrastructure types. FluentValidation runs before handlers in a MediatR pipeline behavior; no generic repository framework is introduced. REST owns mutations; SignalR distributes best-effort post-commit chat notifications. PostgreSQL remains the source of truth.
+
+Werewolf follows the same REST/MediatR boundary for commands. Its authenticated SignalR hub carries only room/version invalidation messages; clients fetch a caller-filtered snapshot from REST. LiveKit is a separate self-hosted SFU adapter owned by Werewolf Infrastructure. Browser voice tokens are short-lived and phase/channel scoped; API secrets never cross the server boundary.
+
+The host owns cross-cutting transport defenses only: trusted forwarded headers, production HTTPS/HSTS and configuration validation, uniform ProblemDetails/antiforgery handling, rate limiting and security/cache headers. It does not authorize module resources or contain product rules. OpenAPI is Development-only. Production static hosting for Angular remains responsible for equivalent browser-facing CSP/frame/referrer headers.

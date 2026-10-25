@@ -1,0 +1,77 @@
+{
+  "files": 86,
+  "symbols": 4945,
+  "edges": 11458,
+  "warnings": 1,
+  "tests": 9,
+  "routes": 0,
+  "cache": {
+    "mode": "full",
+    "changedFiles": 86,
+    "deletedFiles": 0,
+    "unchangedFiles": 0,
+    "reason": "build command"
+  },
+  "hotspots": [
+    {
+      "id": "file:d417d11b0e515824",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/core-DhnrSFht.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/core-DhnrSFht.js",
+      "score": 2961
+    },
+    {
+      "id": "file:53254e03382d9f5f",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/livekit-client.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/livekit-client.js",
+      "score": 2435
+    },
+    {
+      "id": "file:281233c2d2b9f877",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_router.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_router.js",
+      "score": 848
+    },
+    {
+      "id": "file:f2849e2269a119e0",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/_resource-chunk-cHyxXqZV.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/_resource-chunk-cHyxXqZV.js",
+      "score": 650
+    },
+    {
+      "id": "file:b30b96772ecac7aa",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/common-aHtEeQq3.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/common-aHtEeQq3.js",
+      "score": 552
+    },
+    {
+      "id": "file:e1b5ac399a8dd57b",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/esm5-DYNb5pjm.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/esm5-DYNb5pjm.js",
+      "score": 462
+    },
+    {
+      "id": "file:ecd4c4cc952f2e20",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_forms.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_forms.js",
+      "score": 426
+    },
+    {
+      "id": "function:89c094216a3721a5",
+      "name": "concat",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/esm5-DYNb5pjm.js",
+      "score": 366
+    },
+    {
+      "id": "file:a3c8c359e5874272",
+      "name": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/http-C9NMynpL.js",
+      "filePath": "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/http-C9NMynpL.js",
+      "score": 362
+    },
+    {
+      "id": "method:7f7daee06c2973c5",
+      "name": "EventsService.get",
+      "filePath": "frontend/src/app/core/events/events.service.ts",
+      "score": 270
+    }
+  ]
+}

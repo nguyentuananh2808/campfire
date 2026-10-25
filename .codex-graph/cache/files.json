@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "graphSchemaVersion": 1,
+  "generatedAt": "2026-10-18T13:39:56.675Z",
+  "files": {
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_common.js": {
+      "sha256": "e07de2b7272ca769764ced4c6aa42019a0b65dac9687cd4944357748d2ecae24",
+      "size": 4539,
+      "mtimeMs": 1792250556339.1912
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_common_http.js": {
+      "sha256": "88105ca2484a63886b961a326bb4a82db556bf1ccbda29703a923cbeefa530e5",
+      "size": 1966,
+      "mtimeMs": 1792250556339.1912
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_core.js": {
+      "sha256": "94bcb8be3aa872c3658393e75ddc588408bace8aed2691b522436d52f1a475d4",
+      "size": 28189,
+      "mtimeMs": 1792250556339.1912
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_core_rxjs-interop.js": {
+      "sha256": "6ea127a21754191188c97bbc049eb0235a33b441d9809f051f074904dc30dc9a",
+      "size": 7428,
+      "mtimeMs": 1792250556339.1912
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_forms.js": {
+      "sha256": "9067f83918ae0c5f8db8157630ee3fb21f3962a0f067bc51b0ec2b08d1700198",
+      "size": 155989,
+      "mtimeMs": 1792250556341.3381
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_platform-browser.js": {
+      "sha256": "8916086e82fadb53f4ea065d0b3c68a3a835b28ca09d8e361f907be82fd446a2",
+      "size": 1845,
+      "mtimeMs": 1792250556341.3381
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@angular_router.js": {
+      "sha256": "05daa3fd1511fae59ffd0f9a339bb67f54c1dee7bdb54ddda3358b328e24a080",
+      "size": 212319,
+      "mtimeMs": 1792250556342.3945
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/@microsoft_signalr.js": {
+      "sha256": "2d59850b0d78d4c12c9ed29a5b030d0099ec9d4a05873e48b7e930e0daefd5f6",
+      "size": 101734,
+      "mtimeMs": 1792250556343.0671
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/_resource-chunk-cHyxXqZV.js": {
+      "sha256": "e5190734717c3f8ebd8753cd8480134cb59bb5c8b1044cf41a197233df17c031",
+      "size": 132208,
+      "mtimeMs": 1792250556344.695
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/_xhr-chunk-B-XaNNQn.js": {
+      "sha256": "bfd692338ac11520745ca5bac5bef6ee70620b3e716240551fb0f30feebc4adc",
+      "size": 5589,
+      "mtimeMs": 1792250556345.2395
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/common-aHtEeQq3.js": {
+      "sha256": "f4b5f43b07c4fec4cc0d6d20e6227fa02ea2489772068c3c91ae75caef514266",
+      "size": 156455,
+      "mtimeMs": 1792250556346.37
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/core-DhnrSFht.js": {
+      "sha256": "9f1fe00b32a9283d8a00d6699b85d257f2348a4ba92949639e5b1e0379797076",
+      "size": 817202,
+      "mtimeMs": 1792250556346.9402
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/esm5-DYNb5pjm.js": {
+      "sha256": "29f8a4f602193cd42554bd82acd5db05a294cbdf138759192685f6291048cea6",
+      "size": 162895,
+      "mtimeMs": 1792250556347.6042
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/http-C9NMynpL.js": {
+      "sha256": "058a5d14e64a699fcb88c68a4c03f7868231dbb123516cd4d3079d0d042e523b",
+      "size": 82000,
+      "mtimeMs": 1792250556348.1377
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/livekit-client.js": {
+      "sha256": "ecdaaa4c9c1a47597bab71355c59f993b38deb2f65bb5b0594edab2d42446b71",
+      "size": 1115759,
+      "mtimeMs": 1792250556343.6147
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/platform-browser-Cmlu74We.js": {
+      "sha256": "794615062b99000d869d42371186d3352357d70b5540f56c305436aa0cbe4315",
+      "size": 49156,
+      "mtimeMs": 1792250556348.6677
+    },
+    "frontend/.angular/cache/22.2.2/campfire-web/vite/deps/rxjs.js": {
+      "sha256": "9b27df5d8e02c32c238e651cf239d99953802ef618a599bc6a3cee7b9dc3a783",
+      "size": 4991,
+      "mtimeMs": 1792250556344.151
+    },
+    "frontend/src/app/app.config.ts": {
+      "sha256": "b1005bcfcad1e05ce67553257d9564df55874cfab16ef02740652a547b304c0b",
+      "size": 535,
+      "mtimeMs": 1792080592731.0957
+    },
+    "frontend/src/app/app.routes.ts": {
+      "sha256": "bf295f86f2b7c0eae7bf3c3c2b44d0f2e2c2411857d3e6806a3da44f46ec82c2",
+      "size": 2237,
+      "mtimeMs": 1792163251934.1282
+    },
+    "frontend/src/app/app.spec.ts": {
+      "sha256": "8ed84838bc97e45e8b7da5d7194534f7b10affdb7e7667d7f8d86bc46ef160ff",
+      "size": 1181,
+      "mtimeMs": 1792108687031.3955
+    },
+    "frontend/src/app/app.ts": {
+      "sha256": "a9176f47d456a3a3b6452148eb22faf41c828c083dd56fcae526ca23f932df1d",
+      "size": 888,
+      "mtimeMs": 1792080592908.0403
+    },
+    "frontend/src/app/core/auth/api-error.ts": {
+      "sha256": "0fd1af43f231d69b39893e4e25dcb2654284ad24c1d8d45454a6fdc6fdb441ab",
+      "size": 597,
+      "mtimeMs": 1792080592929.0867
+    },
+    "frontend/src/app/core/auth/api-problem.ts": {
+      "sha256": "0f3b86a6ea29660b189b27040c011085967c8ccacdfd9f385fab60cf95a4529e",
+      "size": 123,
+      "mtimeMs": 1792079393521.6921
+    },
+    "frontend/src/app/core/auth/auth-status.ts": {
+      "sha256": "05ff2ba4ba910c8b2bcce4a9837fab1de3b38b485c3020f59b67333130b1d96a",
+      "size": 77,
+      "mtimeMs": 1792079409025.8203
+    },
+    "frontend/src/app/core/auth/auth.guard.ts": {
+      "sha256": "753b3e9a668630f96b1c35900309469a9f30a2b122163041340f47c6db39aaa0",
+      "size": 484,
+      "mtimeMs": 1792080592955.8425
+    },
+    "frontend/src/app/core/auth/auth.service.spec.ts": {
+      "sha256": "09961ece3aed17c290d7c634fddf2691f3b987884e5d1a4f87d405e51ebe6b6c",
+      "size": 1387,
+      "mtimeMs": 1792080592969.6045
+    },
+    "frontend/src/app/core/auth/auth.service.ts": {
+      "sha256": "c49adc4c4ef144d0ca80603f4364d0f6d1ef3c4dcd2045e25df71c2f62effeba",
+      "size": 1506,
+      "mtimeMs": 1792079409285.5
+    },
+    "frontend/src/app/core/auth/auth.store.ts": {
+      "sha256": "f00318f17cfa039cd3abf705561a310ffac9e4a07695580e52b9b52e518f3e84",
+      "size": 2951,
+      "mtimeMs": 1792079409546.9836
+    },
+    "frontend/src/app/core/auth/change-password-request.ts": {
+      "sha256": "21488939414c2d0a93165cc17709f7b0741ebac55a7e2915a4f862661a4646cd",
+      "size": 93,
+      "mtimeMs": 1792079408771.1167
+    },
+    "frontend/src/app/core/auth/login-request.ts": {
+      "sha256": "583cb41ecb4f03441fc62eee2e72728b4c806158be1cdcd8a1a7e33134e3056f",
+      "size": 71,
+      "mtimeMs": 1792079408506.1228
+    },
+    "frontend/src/app/core/auth/register-request.ts": {
+      "sha256": "92e6d5539509b36f64c8f9e5d0d2e6a9b567d369c23cbf45544b5132ba56924f",
+      "size": 97,
+      "mtimeMs": 1792079408250.0608
+    },
+    "frontend/src/app/core/auth/user-account.ts": {
+      "sha256": "21cbb60bb39e7ba57d81bdbac0f32a848f535a88eb383bd9add6529866a39f5b",
+      "size": 87,
+      "mtimeMs": 1792079407991.005
+    },
+    "frontend/src/app/core/chat/chat-delivery-state.ts": {
+      "sha256": "f40dce60b683f9e3a97c089b28d199404f589b62dfcc8108241da866e6ead9b7",
+      "size": 63,
+      "mtimeMs": 1792082863195.5706
+    },
+    "frontend/src/app/core/chat/chat-message-page.ts": {
+      "sha256": "0579f3789b45531bd3c41db0cc9fef5f5141f482a18f23647167311271da8afd",
+      "size": 188,
+      "mtimeMs": 1792083056571.9438
+    },
+    "frontend/src/app/core/chat/chat-message.ts": {
+      "sha256": "d05f27f051ec56575449daf529775a4dab3d82e8ab5add9c965c4ea918cbd8b9",
+      "size": 186,
+      "mtimeMs": 1792083056577.0862
+    },
+    "frontend/src/app/core/chat/chat-realtime.service.ts": {
+      "sha256": "cffa026c8282640e7468dfdd789eb5ec49de013588c072199dd1d8a4d91be877",
+      "size": 1846,
+      "mtimeMs": 1792083056594.7234
+    },
+    "frontend/src/app/core/chat/chat-view-message.ts": {
+      "sha256": "ccbbc0e3b6161292e5cb0805e1d3b78769dcc1bce98524c97dcc9c66d85c40e0",
+      "size": 198,
+      "mtimeMs": 1792083056602.4546
+    },
+    "frontend/src/app/core/chat/chat.service.spec.ts": {
+      "sha256": "b3a40d844710fb0218fb51e0085ae1125c88700c4859bc4bd0f9ab9ace722bbc",
+      "size": 1822,
+      "mtimeMs": 1792083056619.8596
+    },
+    "frontend/src/app/core/chat/chat.service.ts": {
+      "sha256": "68c73004ad88c1a0ff15d70f877d1049fe410a5d1a88602aeb0cd2a93112d0fb",
+      "size": 1155,
+      "mtimeMs": 1792083254894.6719
+    },
+    "frontend/src/app/core/events/event-detail.ts": {
+      "sha256": "e418701c641e5fc90fa93359de6caf72bd56975b801197e42759db522d0bc955",
+      "size": 587,
+      "mtimeMs": 1792107256934.5505
+    },
+    "frontend/src/app/core/events/event-participant.ts": {
+      "sha256": "0aa24e351a0ac0154626c2008051655ad008a535afa392ea4dfd3b74aea45b7d",
+      "size": 208,
+      "mtimeMs": 1792107256943.8157
+    },
+    "frontend/src/app/core/events/event-status.ts": {
+      "sha256": "d29d942ffcc06584f17120a0275d7f2371c335ea1a988e8aa1e62325d0b61d1c",
+      "size": 62,
+      "mtimeMs": 1792107063761.4175
+    },
+    "frontend/src/app/core/events/event-summary.ts": {
+      "sha256": "37bf12e444ea6d2b539eed1e146543ac5ba2bf8aba0c10ba4cdff9c89deaae87",
+      "size": 371,
+      "mtimeMs": 1792107256959.7056
+    },
+    "frontend/src/app/core/events/events.service.spec.ts": {
+      "sha256": "f555a1c976b50d0a7d583e740824d55a9f73667f18bc5b79c20f67c4d5e5fd47",
+      "size": 1906,
+      "mtimeMs": 1792107256987.7224
+    },
+    "frontend/src/app/core/events/events.service.ts": {
+      "sha256": "022d0eac79916235becaeb2194bb54b3e8da1a7c7e0422e774a19c297fb3d5e7",
+      "size": 2210,
+      "mtimeMs": 1792107257016.3748
+    },
+    "frontend/src/app/core/events/rsvp-response.ts": {
+      "sha256": "f6f7a056457659d1a43fd0f893a15a94966ba4bc2ddf3fb98ca104257cea2dd8",
+      "size": 49,
+      "mtimeMs": 1792107064028.3618
+    },
+    "frontend/src/app/core/events/unanswered-member.ts": {
+      "sha256": "ed38de798e034ed9f05baafeab3f220b821716124a5059f2935e3d3bb0242df7",
+      "size": 79,
+      "mtimeMs": 1792107257033.734
+    },
+    "frontend/src/app/core/groups/group-invitation.ts": {
+      "sha256": "1bec8d7c7d0754e4e5f17caa49c6dd403fc3164d5d0cd029a59da7b8d7548e48",
+      "size": 130,
+      "mtimeMs": 1792081496262.437
+    },
+    "frontend/src/app/core/groups/group-member.ts": {
+      "sha256": "2e9158d1f0e35ef4d5115cbcb8742e0ea48187a8df8b3c00f8c284f5c4853f6c",
+      "size": 125,
+      "mtimeMs": 1792081495986.525
+    },
+    "frontend/src/app/core/groups/group-summary.ts": {
+      "sha256": "1da936171bcbe9b8f590062fcb0a618707ff72cddb09d9d21054f4ef418ef880",
+      "size": 134,
+      "mtimeMs": 1792081495717.8972
+    },
+    "frontend/src/app/core/groups/groups.service.spec.ts": {
+      "sha256": "1d9bf0035822172818b95da66ab3a2dd0f619f2de26b5dd4a42919bf746ae6f9",
+      "size": 1791,
+      "mtimeMs": 1792081626005.3857
+    },
+    "frontend/src/app/core/groups/groups.service.ts": {
+      "sha256": "745290bfe161aabce45f50db0467d8831fe20c33d33413cd23c62d00317d2a80",
+      "size": 2947,
+      "mtimeMs": 1792081497108.2737
+    },
+    "frontend/src/app/core/groups/invitation-created.ts": {
+      "sha256": "687287186de1774a694a13aade13173ce8bd5d3a191e0bee07fd58955be69399",
+      "size": 94,
+      "mtimeMs": 1792081496535.7976
+    },
+    "frontend/src/app/core/groups/invitation-preview.ts": {
+      "sha256": "b05199744eee78d056404547e73c3688b59d0f84645711fa8747fec5fa22b32c",
+      "size": 105,
+      "mtimeMs": 1792081496824.9275
+    },
+    "frontend/src/app/core/ids/client-uuid.spec.ts": {
+      "sha256": "ecabc332a7d6c3daa43e16784f2ba045e1e7ae3f5989ecbeab69cb2522128ff6",
+      "size": 461,
+      "mtimeMs": 1792250885694.1416
+    },
+    "frontend/src/app/core/ids/client-uuid.ts": {
+      "sha256": "99572e7c603996636371399cbced4b8be3e05212dd69302bbe68bb1dec4c6565",
+      "size": 437,
+      "mtimeMs": 1792250885386.1616
+    },
+    "frontend/src/app/core/stranger-chat/stranger-chat-realtime.service.ts": {
+      "sha256": "9cf856bd65fa3713c51632c095a13c040cbb02b79d8379c597f6b9a5bd124fd8",
+      "size": 916,
+      "mtimeMs": 1792163421898.839
+    },
+    "frontend/src/app/core/stranger-chat/stranger-chat.models.ts": {
+      "sha256": "b253e3d3cae49817fe57dbc4a7c1767c6e4fba49fc40af982be0356638d2ee08",
+      "size": 765,
+      "mtimeMs": 1792329774756.558
+    },
+    "frontend/src/app/core/stranger-chat/stranger-chat.service.spec.ts": {
+      "sha256": "b6c0afb35fadb193291e7ff1f2dde9f1aad0be865714197d16a8b6a25f703cbd",
+      "size": 1560,
+      "mtimeMs": 1792251478790.5347
+    },
+    "frontend/src/app/core/stranger-chat/stranger-chat.service.ts": {
+      "sha256": "c65e3f7f01a764bf19f0119bcf0266ea672c8a82b47a892f20333a53e5ed6a97",
+      "size": 2468,
+      "mtimeMs": 1792251294854.113
+    },
+    "frontend/src/app/core/theme/theme-preference.ts": {
+      "sha256": "fff69ffdc6f267fdcf4532aabc113b3fb983a8b635b2ea0b9d4e858ab65f1452",
+      "size": 48,
+      "mtimeMs": 1792079979391.505
+    },
+    "frontend/src/app/core/theme/theme.service.spec.ts": {
+      "sha256": "fbf8d6ccae5f6d269376b8443fdf5b34b9254bd10bc4767ff872bce24a928c6d",
+      "size": 725,
+      "mtimeMs": 1792080003549.4717
+    },
+    "frontend/src/app/core/theme/theme.service.ts": {
+      "sha256": "ca37ed06f5c3e279460de1f5d8ba3e66575b1719f8dd3b147674ce5740a1a899",
+      "size": 1373,
+      "mtimeMs": 1792080593075.5945
+    },
+    "frontend/src/app/core/werewolf/private-role.ts": {
+      "sha256": "db4fc2200a37f96580c11ca21fa4576ebae85be727f96b902e39c6918dce34d2",
+      "size": 353,
+      "mtimeMs": 1792112079414.0552
+    },
+    "frontend/src/app/core/werewolf/voice-access.ts": {
+      "sha256": "7af26ca7662170c5d813ff13acfed3cdff502cc29f02dcae912111661d10b4c6",
+      "size": 184,
+      "mtimeMs": 1792108361259.2383
+    },
+    "frontend/src/app/core/werewolf/werewolf-game-event.ts": {
+      "sha256": "edd4361253e8336cd0f7bba77d66ae695232ea847f470b11e05e83ee8b1f5377",
+      "size": 113,
+      "mtimeMs": 1792108360740.462
+    },
+    "frontend/src/app/core/werewolf/werewolf-player.ts": {
+      "sha256": "5a4813557da48902ac24d46db0e0091238ea5fa01f81a7958a5f0633bcded108",
+      "size": 255,
+      "mtimeMs": 1792108360213.201
+    },
+    "frontend/src/app/core/werewolf/werewolf-realtime.service.ts": {
+      "sha256": "fc5a23b03942b08582a737f3112807985baf00257dc735355c307fee2d7dd1a2",
+      "size": 1539,
+      "mtimeMs": 1792108693411.9148
+    },
+    "frontend/src/app/core/werewolf/werewolf-room-snapshot.ts": {
+      "sha256": "aee3c62de93d41feb6beb70da485dee8be6e5a696b70d5ab377b1ae2298f829c",
+      "size": 842,
+      "mtimeMs": 1792108952550.5144
+    },
+    "frontend/src/app/core/werewolf/werewolf-room-summary.ts": {
+      "sha256": "e832de43bfaf43fa9110c029cc63cd86c8fa416e28006ea60d2514808179c958",
+      "size": 243,
+      "mtimeMs": 1792108359946.9087
+    },
+    "frontend/src/app/core/werewolf/werewolf-voice.service.ts": {
+      "sha256": "be46d412100588b97ae1ff6cd042e1ee12440d02e685bef4444f7f6f8151a3f8",
+      "size": 4026,
+      "mtimeMs": 1792112410035.5933
+    },
+    "frontend/src/app/core/werewolf/werewolf.service.spec.ts": {
+      "sha256": "965b4914b08ea6ddcd8ffce2609e5e16c54544973ab16d7ded6230c89a7879a6",
+      "size": 2063,
+      "mtimeMs": 1792108693455.1362
+    },
+    "frontend/src/app/core/werewolf/werewolf.service.ts": {
+      "sha256": "d926e8e5b29f28cab2b734133062edc6e2d76b187724617ef83fc4d86a43b5e2",
+      "size": 3574,
+      "mtimeMs": 1792250886684.3308
+    },
+    "frontend/src/app/features/auth/login/login-page.ts": {
+      "sha256": "c0ee1b6d9d75b07aa175a5297b6f53711049794a9f69d02169802915a97e019b",
+      "size": 2009,
+      "mtimeMs": 1792080593149.6152
+    },
+    "frontend/src/app/features/auth/profile/profile-page.ts": {
+      "sha256": "b00be1c275abdde5e371f7d5c3202a3d87549848193b7226086005bbb442c980",
+      "size": 2528,
+      "mtimeMs": 1792080593228.6
+    },
+    "frontend/src/app/features/auth/register/register-page.ts": {
+      "sha256": "91ebceef43e1cf362f67659d3919ea14c9ae9cab61214fb70bd05ffc3a89d102",
+      "size": 1860,
+      "mtimeMs": 1792080593340.6885
+    },
+    "frontend/src/app/features/chat/chat-page.ts": {
+      "sha256": "e013e296c6b5a66625f583ca57819506128f4e68a4a4034b567f7481619bf7c3",
+      "size": 7132,
+      "mtimeMs": 1792250886330.9531
+    },
+    "frontend/src/app/features/events/events-page.ts": {
+      "sha256": "76d26be43116de0b1c42b7ee265d5270f38e731c884721e965d98cc0920ed970",
+      "size": 8372,
+      "mtimeMs": 1792107132165.3645
+    },
+    "frontend/src/app/features/groups/group-detail/group-detail-page.ts": {
+      "sha256": "c34d0d40b50ab56591152096703b71d09b709cbce3a36b3892560ae798f96153",
+      "size": 6749,
+      "mtimeMs": 1792082144775.5234
+    },
+    "frontend/src/app/features/groups/groups-page.ts": {
+      "sha256": "3bc5682c9aa3f6af7484f545ed9b3ca9a09b8cb8d819a1d3c889427b5716a0ce",
+      "size": 2331,
+      "mtimeMs": 1792081525803.1816
+    },
+    "frontend/src/app/features/groups/invitation-accept/invitation-accept-page.ts": {
+      "sha256": "28eeb7eee36f4e07bb15fb609eef9c6e426c5371ded0576c5df120dd3c09785a",
+      "size": 2505,
+      "mtimeMs": 1792081847324.1045
+    },
+    "frontend/src/app/features/not-found/not-found-page.ts": {
+      "sha256": "2bcdb0abc699f1b68cacde6188ea1dad89082c718accc95dcb88221e2cc86937",
+      "size": 347,
+      "mtimeMs": 1792080593460.9778
+    },
+    "frontend/src/app/features/stranger-chat/stranger-chat-page.ts": {
+      "sha256": "58b130d6873cd2c7c5f03b018cf354d7537960d70fb0cef658e13cf6afdfdf63",
+      "size": 7135,
+      "mtimeMs": 1792251295258.1094
+    },
+    "frontend/src/app/features/werewolf/werewolf-page.ts": {
+      "sha256": "558edc8051810b51e40c8c7034c266bb141d9e8e8490aa45109602874ae26c66",
+      "size": 12426,
+      "mtimeMs": 1792108694160.71
+    },
+    "frontend/src/app/shared/theme-toggle/theme-toggle.ts": {
+      "sha256": "b8a7bef7d74fdf1727526d3fa87c6aaab251e3558db2e7c6b9af7c3509d65e0e",
+      "size": 382,
+      "mtimeMs": 1792079979916.4026
+    },
+    "frontend/src/main.ts": {
+      "sha256": "ecc610fb7d56c95a01a8aa6c274a63210d45b2944dd6b9a88b2c8f70b6351037",
+      "size": 219,
+      "mtimeMs": 1792080593521.4307
+    }
+  }
+}

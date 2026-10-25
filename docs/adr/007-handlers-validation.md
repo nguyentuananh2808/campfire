@@ -1,0 +1,3 @@
+# ADR 007: Handlers and validation
+
+Context: use cases need separation and consistent validation, and the project requires mediator-based dispatch. Decision: commands and queries implement MediatR requests, handlers contain one use case, and FluentValidation runs through an open pipeline behavior. MediatR is pinned to the stable 12.5 line, which provides the required API without the runtime license-key requirement introduced by later major versions. Consequences: endpoints depend on `ISender`, cross-cutting validation is centralized, and MediatR is an explicit Application/Presentation dependency in every module. Alternative rejected: direct handler invocation would duplicate dispatch and validation plumbing across endpoints.
