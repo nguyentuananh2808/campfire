@@ -38,7 +38,7 @@
       <a routerLink="/groups">Đến trang nhóm</a>
     </div>
   } @else {
-    <section class="conversation" aria-label="Tin nhắn của nhóm">
+    <section #messageViewport class="conversation" aria-label="Tin nhắn của nhóm">
       @if (olderCursor()) {
         <button class="load-more" type="button" (click)="loadOlder()" [disabled]="loadingOlder()">
           {{ loadingOlder() ? 'Đang tải…' : 'Tải tin cũ hơn' }}
@@ -53,7 +53,12 @@
       } @else {
         <ol class="message-list">
           @for (message of messages(); track message.id) {
-            <li class="message" [class.mine]="message.senderUserId === auth.user()?.id">
+            <li
+              class="message"
+              [class.mine]="message.senderUserId === auth.user()?.id"
+              appLongPress
+              (appLongPress)="setMessageActions(message.id, true)"
+            >
               <div class="message-meta">
                 <strong>{{ message.senderDisplayName }}</strong>
                 <time [dateTime]="message.sentAtUtc">{{
@@ -95,21 +100,14 @@
                 </div>
               }
               @if (message.deliveryState === 'sent') {
-                <div class="message-actions" aria-label="Tương tác với tin nhắn">
-                  <button type="button" (click)="reply(message)">↩ Trả lời</button>
-                  @for (reaction of reactions; track reaction.code) {
-                    <button
-                      type="button"
-                      class="reaction-button"
-                      [class.selected]="message.myReaction === reaction.code"
-                      [attr.aria-label]="reaction.label"
-                      [attr.aria-pressed]="message.myReaction === reaction.code"
-                      (click)="react(message, reaction.code)"
-                    >
-                      {{ reaction.emoji }}
-                    </button>
-                  }
-                </div>
+                <app-message-actions
+                  [open]="openActionsFor() === message.id"
+                  [mine]="message.senderUserId === auth.user()?.id"
+                  [selectedReaction]="message.myReaction"
+                  (openChange)="setMessageActions(message.id, $event)"
+                  (replyRequested)="reply(message)"
+                  (reactionSelected)="react(message, $event)"
+                />
                 @if (message.reactions.length > 0) {
                   <div class="reaction-summary" aria-label="Cảm xúc cho tin nhắn">
                     @for (reaction of message.reactions; track reaction.reaction) {
@@ -126,7 +124,6 @@
               }
             </li>
           }
-          <li #messageEnd class="message-end" aria-hidden="true"></li>
         </ol>
       }
     </section>

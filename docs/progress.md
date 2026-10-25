@@ -32,6 +32,8 @@ Updated: 2026-10-25 (Asia/Saigon)
 - Production dark mode is hardened: the runtime selector is present in the optimized CSS, theme changes update the DOM independently of persistence, and browsers that block `localStorage` no longer abort theme initialization or toggle actions.
 - Group and Stranger Chat stickers now expose their accessible name directly on the sticker container instead of rendering a large-font hidden text node. Group stickers are size-bounded and clip overflow so a missing utility style cannot break the conversation layout in production.
 - The AWS production manifest is aligned with `tamsuvoinhau.cloud`: Caddy, ASP.NET host filtering, secure cookies and LiveKit remain HTTPS/same-origin; the API healthcheck now supplies the allowed production host; the SPA shell is revalidated after deployment while versioned assets retain a seven-day cache.
+- M14 unifies Group Chat and Stranger Chat message UX around one compact action component: each sent bubble exposes a small reaction trigger, long-press opens the same floating reaction/reply toolbar, reply is icon-only with an accessible name, and reaction totals remain compact. Both conversations now own a bounded scroll viewport and scroll that viewport after rendered new messages so the sticky composer does not hide the latest content.
+- Dark theme activation now applies both `data-theme` and an explicit root fallback class. The token library accepts either selector, while persistence remains optional, so an observed state change cannot leave the production UI on light tokens solely because one selector path failed.
 
 ## Verification status
 
@@ -54,4 +56,4 @@ Updated: 2026-10-25 (Asia/Saigon)
 
 ## Next action
 
-Deploy the updated manifest to `tamsuvoinhau.cloud` without the former IP/Development override, then run physical-browser cookie/antiforgery, SignalR and LiveKit acceptance. Prove backup/restore and rollback drills before treating the single-host pilot as production-ready. Keep registration and Stranger Chat controlled until recovery, rollout gating, moderation, privacy and support requirements are staffed and verified.
+Rebuild the frontend container on `tamsuvoinhau.cloud`, hard-refresh/service-worker-clear the deployed page, then verify long-press, reaction/reply toolbar, latest-message auto-scroll and light/dark switching on a physical 360–430px phone. Continue cookie/antiforgery, SignalR and LiveKit acceptance before treating the single-host pilot as production-ready. Keep registration and Stranger Chat controlled until recovery, rollout gating, moderation, privacy and support requirements are staffed and verified.

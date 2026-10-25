@@ -77,7 +77,8 @@ $ember-950: #170d09;
   @include light-theme;
 }
 
-:root[data-theme='dark'] {
+:root[data-theme='dark'],
+:root.theme-dark {
   @include dark-theme;
 }
 

@@ -35,7 +35,10 @@ export class ThemeService {
   }
 
   private apply(theme: ThemePreference, persist: boolean): void {
-    this.document.documentElement.setAttribute('data-theme', theme);
+    const root = this.document.documentElement;
+    root.setAttribute('data-theme', theme);
+    root.classList.toggle('theme-dark', theme === 'dark');
+    root.classList.toggle('theme-light', theme === 'light');
     this.activeTheme.set(theme);
 
     if (persist) {

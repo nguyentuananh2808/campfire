@@ -1,6 +1,22 @@
 # Implementation plan
 
-Updated: 2026-10-18 (Asia/Saigon)
+Updated: 2026-10-25 (Asia/Saigon)
+
+## M14 Unified chat interactions and production theme repair
+
+- [ ] Build one shared compact message-action control for Group Chat and Stranger Chat.
+- [ ] Open reactions from a small trigger or a deliberate long press; keep reply icon-only with an accessible name.
+- [ ] Keep reaction summaries compact and close the action tray after an action.
+- [ ] Give both conversations a bounded scrolling viewport and reliably reveal newly rendered optimistic, REST and realtime messages.
+- [ ] Apply dark mode through both the root attribute and a root class, then verify production tokens, responsive layouts, lint, tests and build.
+
+### Acceptance criteria
+
+- Message actions are not permanently expanded. Every sent message shows one compact action trigger; touch long-press and keyboard/click access open the same shared tray.
+- The tray contains five allow-listed reactions and an icon-only reply action with Vietnamese accessible labels. Existing server authorization and persistence remain unchanged.
+- Both chat variants use the shared core component/directive and preserve pending, failed, reply, reaction and sticker states.
+- Initial history and every genuinely new message scroll the conversation viewport to the latest item without moving the whole page; loading older history does not force the user to the bottom.
+- Selecting dark mode changes computed semantic colors even if browser storage is blocked; reload persistence remains best-effort.
 
 ## AWS single-EC2 container packaging
 

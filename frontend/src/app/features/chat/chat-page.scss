@@ -75,9 +75,13 @@ textarea:focus {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  min-height: 48vh;
+  height: clamp(420px, 62dvh, 720px);
   min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space-4);
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
   box-shadow: var(--shadow-sm);
 }
 .message-list {
@@ -95,6 +99,8 @@ textarea:focus {
   border-radius: 18px 18px 18px 5px;
   max-width: min(78%, 620px);
   padding: var(--space-3) var(--space-4);
+  position: relative;
+  touch-action: pan-y;
 }
 .message.mine {
   align-self: flex-end;

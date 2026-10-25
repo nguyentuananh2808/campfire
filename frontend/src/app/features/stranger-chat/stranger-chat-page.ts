@@ -26,17 +26,19 @@ import {
 } from '../../core/stranger-chat/stranger-chat.models';
 import { ChatSticker } from '../../core/chat/chat-sticker';
 import { CHAT_STICKERS } from '../../core/chat/chat-stickers';
+import { LongPressDirective } from '../../shared/long-press/long-press.directive';
+import { MessageActions } from '../../shared/message-actions/message-actions';
 
 @Component({
   selector: 'app-stranger-chat-page',
-  imports: [DatePipe, FormsModule, RouterLink],
+  imports: [DatePipe, FormsModule, LongPressDirective, MessageActions, RouterLink],
   templateUrl: './stranger-chat-page.html',
   styleUrl: './stranger-chat-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StrangerChatPage {
   @ViewChild('messageInput') private messageInput?: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('messageEnd') private messageEnd?: ElementRef<HTMLElement>;
+  @ViewChild('messageViewport') private messageViewport?: ElementRef<HTMLElement>;
   private readonly api = inject(StrangerChatService);
   private readonly realtime = inject(StrangerChatRealtimeService);
   private readonly destroyRef = inject(DestroyRef);
@@ -51,6 +53,7 @@ export class StrangerChatPage {
   readonly error = signal('');
   readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
   readonly replyingTo = signal<StrangerMessage | null>(null);
+  readonly openActionsFor = signal<string | null>(null);
   readonly stickers = CHAT_STICKERS;
   readonly emojis = ['😀', '😂', '🥰', '😎', '🥳', '😭', '😡', '👍', '❤️', '🔥', '🎉', '✨'];
   readonly reactions: ReadonlyArray<{ code: StrangerReaction; emoji: string; label: string }> = [
@@ -192,6 +195,7 @@ export class StrangerChatPage {
   }
   reply(message: StrangerMessage) {
     if (message.state !== 'sent') return;
+    this.openActionsFor.set(null);
     this.replyingTo.set(message);
     queueMicrotask(() => this.messageInput?.nativeElement.focus());
   }
@@ -227,6 +231,9 @@ export class StrangerChatPage {
   }
   reactionEmoji(reaction: StrangerReaction): string {
     return this.reactions.find((item) => item.code === reaction)?.emoji ?? '•';
+  }
+  setMessageActions(messageId: string, open: boolean) {
+    this.openActionsFor.set(open ? messageId : null);
   }
   onComposerEnter(event: Event) {
     const keyboardEvent = event as KeyboardEvent;
@@ -317,7 +324,12 @@ export class StrangerChatPage {
   }
 
   private scrollToLatest(): void {
-    requestAnimationFrame(() => this.messageEnd?.nativeElement.scrollIntoView({ block: 'end' }));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const viewport = this.messageViewport?.nativeElement;
+        if (viewport) viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      }),
+    );
   }
 
   private connectRealtime(): void {

@@ -144,3 +144,11 @@ The integration suite additionally requires a working Docker engine because it i
 - Source security review passed for same-origin relative frontend API/hub URLs, HTTPS-required cookies, trusted-proxy forwarded scheme and explicit production host filtering. The old `compose.ip.yml` Development/HTTP override must not be included in the domain deployment.
 - Blocked locally: Nginx container syntax/runtime validation was not run because the Docker Desktop Linux engine is unavailable. Compose parsing passed; the target EC2 rebuild and HTTPS/SignalR smoke tests remain required.
 
+# Unified mobile chat actions and theme fallback — 2026-10-25
+
+- Passed: Angular production build. Group Chat and Stranger Chat compile with the shared long-press/action-toolbar component; the existing Stranger Chat component stylesheet remains below its 10 kB error budget at 9.96 kB.
+- Passed: frontend Prettier lint and Vitest 21/21 across 10 files. New focused tests prove the compact trigger opens the toolbar, reaction selection closes it and the reply action is icon-only with an accessible label. Theme tests prove both the DOM attribute and fallback root classes switch correctly.
+- Passed source review: each chat binds the same action component, long-press directive and bounded scroll viewport. New-message reconciliation calls the viewport scroll only after Angular has rendered the updated list (two animation frames).
+- Passed: `git diff --check` found no whitespace errors; only the repository's existing LF-to-CRLF notices were reported.
+- Blocked visual acceptance: the Angular development server built and listened on `127.0.0.1:4200`, but the available in-app browser returned `ERR_CONNECTION_TIMED_OUT`, and no Chrome automation provider was available. Physical-device acceptance at 360/390/430px and deployed-origin dark-mode verification remain pending.
+

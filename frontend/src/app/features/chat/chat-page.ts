@@ -25,17 +25,19 @@ import { ChatViewMessage } from '../../core/chat/chat-view-message';
 import { GroupSummary } from '../../core/groups/group-summary';
 import { GroupsService } from '../../core/groups/groups.service';
 import { createClientUuid } from '../../core/ids/client-uuid';
+import { LongPressDirective } from '../../shared/long-press/long-press.directive';
+import { MessageActions } from '../../shared/message-actions/message-actions';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, ReactiveFormsModule, RouterLink],
+  imports: [DatePipe, LongPressDirective, MessageActions, ReactiveFormsModule, RouterLink],
   selector: 'app-chat-page',
   templateUrl: './chat-page.html',
   styleUrl: './chat-page.scss',
 })
 export class ChatPage {
   @ViewChild('messageInput') private messageInput?: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('messageEnd') private messageEnd?: ElementRef<HTMLElement>;
+  @ViewChild('messageViewport') private messageViewport?: ElementRef<HTMLElement>;
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
@@ -53,6 +55,7 @@ export class ChatPage {
   readonly olderCursor = signal<string | null>(null);
   readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
   readonly replyingTo = signal<ChatViewMessage | null>(null);
+  readonly openActionsFor = signal<string | null>(null);
   readonly emojis = ['😀', '😂', '🥰', '😎', '🥳', '😭', '😡', '👍', '❤️', '🔥', '🎉', '✨'];
   readonly stickers = CHAT_STICKERS;
   readonly reactions: ReadonlyArray<{ code: ChatReaction; emoji: string; label: string }> = [
@@ -101,6 +104,7 @@ export class ChatPage {
 
   reply(message: ChatViewMessage): void {
     if (message.deliveryState !== 'sent') return;
+    this.openActionsFor.set(null);
     this.replyingTo.set(message);
     queueMicrotask(() => this.messageInput?.nativeElement.focus());
   }
@@ -120,6 +124,10 @@ export class ChatPage {
         next: (saved) => this.upsert({ ...saved, deliveryState: 'sent' }),
         error: (error: unknown) => this.error.set(getApiErrorMessage(error)),
       });
+  }
+
+  setMessageActions(messageId: string, open: boolean): void {
+    this.openActionsFor.set(open ? messageId : null);
   }
 
   reactionEmoji(reaction: ChatReaction): string {
@@ -335,6 +343,11 @@ export class ChatPage {
   }
 
   private scrollToLatest(): void {
-    requestAnimationFrame(() => this.messageEnd?.nativeElement.scrollIntoView({ block: 'end' }));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const viewport = this.messageViewport?.nativeElement;
+        if (viewport) viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      }),
+    );
   }
 }
