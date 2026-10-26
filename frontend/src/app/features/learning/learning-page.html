@@ -42,6 +42,28 @@
   @if (notice()) {
     <div class="notice" role="status">🔥 {{ notice() }}</div>
   }
+  @if (speech.target() || speech.listening() || speech.transcript() || speech.error()) {
+    <div class="speech-overlay" role="status" aria-live="polite">
+      <div class="speech-overlay-main">
+        <span class="recording-dot" aria-hidden="true"></span>
+        @if (speech.listening()) {
+          <strong>Đang thu âm…</strong>
+        } @else if (speech.error()) {
+          <strong>{{ speech.error() }}</strong>
+        } @else {
+          <span
+            >Đã nhận:
+            <strong lang="zh">{{ speech.transcript() || 'Chưa nhận được giọng nói' }}</strong></span
+          >
+        }
+      </div>
+      @if (speech.listening()) {
+        <button type="button" class="speech-stop" (click)="speech.stopListening()">Dừng</button>
+      } @else {
+        <button type="button" class="speech-stop" (click)="speech.clear()">Xóa</button>
+      }
+    </div>
+  }
 
   @if (!loading() && mode() === 'path' && path(); as learningPath) {
     <div class="learning-grid">
@@ -130,6 +152,11 @@
                         <strong lang="zh">{{ item.chinese }}</strong
                         ><span>{{ item.pinyin }}</span>
                         <p>{{ 'meaningVi' in item ? item.meaningVi : item.translationVi }}</p>
+                        @if (speech.target() === item.chinese && speech.score() !== null) {
+                          <strong class="pronunciation-score card-score"
+                            >{{ speech.score() }}/100</strong
+                          >
+                        }
                         <div class="speech-actions">
                           <button
                             type="button"
@@ -159,6 +186,11 @@
                         <strong lang="zh">{{ item.chinese }}</strong
                         ><span>{{ item.pinyin }}</span>
                         <p>{{ 'translationVi' in item ? item.translationVi : item.meaningVi }}</p>
+                        @if (speech.target() === item.chinese && speech.score() !== null) {
+                          <strong class="pronunciation-score card-score"
+                            >{{ speech.score() }}/100</strong
+                          >
+                        }
                         <div class="speech-actions">
                           <button
                             type="button"
@@ -181,34 +213,6 @@
                       </div>
                     }
                   </div>
-                  @if (
-                    speech.target() || speech.listening() || speech.transcript() || speech.error()
-                  ) {
-                    <div class="speech-status" role="status" aria-live="polite">
-                      @if (speech.listening()) {
-                        <span class="recording-dot" aria-hidden="true"></span
-                        ><strong>Đang thu âm…</strong>
-                        <button type="button" class="speech-stop" (click)="speech.stopListening()">
-                          Dừng
-                        </button>
-                      } @else if (speech.error()) {
-                        <strong>{{ speech.error() }}</strong>
-                      } @else {
-                        <span
-                          >Đã nhận:
-                          <strong lang="zh">{{
-                            speech.transcript() || 'Chưa nhận được giọng nói'
-                          }}</strong></span
-                        >
-                        @if (speech.score() !== null) {
-                          <strong class="pronunciation-score">{{ speech.score() }}/100</strong>
-                        }
-                        <button type="button" class="speech-stop" (click)="speech.clear()">
-                          Xóa
-                        </button>
-                      }
-                    </div>
-                  }
                 } @else if (activity.type === 'GRAMMAR') {
                   <div class="grammar">
                     <strong>{{ content(activity).name }}</strong>

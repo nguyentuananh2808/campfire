@@ -355,6 +355,37 @@ p {
   margin-top: 10px;
   padding: 9px 11px;
 }
+.speech-overlay {
+  align-items: center;
+  background: color-mix(in srgb, var(--surface-raised) 96%, transparent);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  bottom: calc(var(--bottom-nav-height, 76px) + env(safe-area-inset-bottom) + 14px);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  left: 50%;
+  max-width: min(560px, calc(100vw - 24px));
+  padding: 11px 12px;
+  position: fixed;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 200;
+}
+.speech-overlay-main {
+  align-items: center;
+  color: var(--ink);
+  display: flex;
+  gap: 9px;
+  min-width: 0;
+}
+.speech-overlay-main strong,
+.speech-overlay-main span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .recording-dot {
   animation: recording-pulse 1.1s ease-in-out infinite;
   background: var(--danger);
@@ -375,6 +406,13 @@ p {
 .pronunciation-score {
   color: var(--primary-strong);
   margin-left: auto;
+}
+.card-score {
+  background: var(--success-soft);
+  border-radius: 999px;
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 9px;
 }
 .speech-button:disabled {
   cursor: not-allowed;
@@ -648,6 +686,10 @@ p {
   }
   .capability-note {
     font-size: 0.82rem;
+  }
+  .speech-overlay {
+    bottom: calc(var(--bottom-nav-height, 76px) + env(safe-area-inset-bottom) + 8px);
+    border-radius: 14px;
   }
   .xp-card {
     grid-template-columns: auto auto;
