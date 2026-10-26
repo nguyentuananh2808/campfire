@@ -144,7 +144,6 @@
                             type="button"
                             class="speech-button"
                             (click)="speech.startListening(item.chinese)"
-                            [disabled]="!speech.canListen"
                             [attr.aria-label]="'Đọc theo ' + item.chinese"
                           >
                             🎙️
@@ -174,7 +173,6 @@
                             type="button"
                             class="speech-button"
                             (click)="speech.startListening(item.chinese)"
-                            [disabled]="!speech.canListen"
                             [attr.aria-label]="'Đọc theo ' + item.chinese"
                           >
                             🎙️
@@ -183,7 +181,9 @@
                       </div>
                     }
                   </div>
-                  @if (speech.listening() || speech.transcript() || speech.error()) {
+                  @if (
+                    speech.target() || speech.listening() || speech.transcript() || speech.error()
+                  ) {
                     <div class="speech-status" role="status" aria-live="polite">
                       @if (speech.listening()) {
                         <span class="recording-dot" aria-hidden="true"></span
@@ -195,8 +195,14 @@
                         <strong>{{ speech.error() }}</strong>
                       } @else {
                         <span
-                          >Đã nhận: <strong lang="zh">{{ speech.transcript() }}</strong></span
+                          >Đã nhận:
+                          <strong lang="zh">{{
+                            speech.transcript() || 'Chưa nhận được giọng nói'
+                          }}</strong></span
                         >
+                        @if (speech.score() !== null) {
+                          <strong class="pronunciation-score">{{ speech.score() }}/100</strong>
+                        }
                         <button type="button" class="speech-stop" (click)="speech.clear()">
                           Xóa
                         </button>

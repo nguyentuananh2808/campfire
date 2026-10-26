@@ -372,6 +372,10 @@ p {
   min-height: 34px;
   padding: 0 11px;
 }
+.pronunciation-score {
+  color: var(--primary-strong);
+  margin-left: auto;
+}
 .speech-button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
