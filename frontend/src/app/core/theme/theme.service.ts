@@ -39,6 +39,12 @@ export class ThemeService {
     root.setAttribute('data-theme', theme);
     root.classList.toggle('theme-dark', theme === 'dark');
     root.classList.toggle('theme-light', theme === 'light');
+    root.style.colorScheme = theme;
+    this.document.body?.classList.toggle('theme-dark', theme === 'dark');
+    this.document.body?.classList.toggle('theme-light', theme === 'light');
+    this.document
+      .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+      ?.setAttribute('content', theme === 'dark' ? '#170d09' : '#fffaf2');
     this.activeTheme.set(theme);
 
     if (persist) {

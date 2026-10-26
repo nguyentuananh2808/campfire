@@ -1,0 +1,293 @@
+<section class="learning-shell">
+  <header class="hero">
+    <div>
+      <span class="eyebrow">HỌC QUANH LỬA</span>
+      <h1>Tiếng Trung, mỗi ngày một chút</h1>
+      <p>Lộ trình có cấu trúc và bản đồ từ vựng trực quan, giữ nhịp học nhẹ nhàng bên ánh lửa.</p>
+    </div>
+    @if (path(); as learningPath) {
+      <div class="xp-card">
+        <span>XP của bạn</span><strong>{{ learningPath.totalXp }}</strong
+        ><small
+          >HSK {{ learningPath.course.hskLevel }} · v{{ learningPath.course.contentVersion }}</small
+        >
+      </div>
+    }
+  </header>
+
+  <nav class="mode-tabs" aria-label="Chức năng học">
+    <button type="button" [class.active]="mode() === 'path'" (click)="setMode('path')">
+      <span aria-hidden="true">路</span
+      ><span><strong>Lộ trình HSK 1</strong><small>Học theo ngày</small></span>
+    </button>
+    <button type="button" [class.active]="mode() === 'mindmap'" (click)="setMode('mindmap')">
+      <span aria-hidden="true">图</span
+      ><span><strong>Bản đồ từ vựng</strong><small>Khám phá liên kết</small></span>
+    </button>
+  </nav>
+
+  @if (loading()) {
+    <div class="state-card" role="status">
+      <span class="loader"></span>
+      <p>Đang chuẩn bị góc học của bạn…</p>
+    </div>
+  }
+  @if (error()) {
+    <div class="state-card error" role="alert">
+      <strong>Chưa thể tải nội dung</strong>
+      <p>{{ error() }}</p>
+      <button type="button" (click)="ngOnInit()">Thử lại</button>
+    </div>
+  }
+  @if (notice()) {
+    <div class="notice" role="status">🔥 {{ notice() }}</div>
+  }
+
+  @if (!loading() && mode() === 'path' && path(); as learningPath) {
+    <div class="learning-grid">
+      <aside class="path-panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">LỘ TRÌNH NỀN TẢNG</span>
+            <h2>{{ learningPath.course.name }}</h2>
+          </div>
+          <span class="hsk-badge">HSK {{ learningPath.course.hskLevel }}</span>
+        </div>
+        @for (unit of learningPath.units; track unit.id) {
+          <section class="unit">
+            <h3>{{ unit.title }}</h3>
+            <ol>
+              @for (item of unit.days; track item.id) {
+                <li
+                  [class.completed]="item.status === 'Completed'"
+                  [class.locked]="item.status === 'Locked'"
+                  [class.current]="day()?.day?.id === item.id"
+                >
+                  <button
+                    type="button"
+                    [disabled]="item.status === 'Locked' || pending() === item.id"
+                    (click)="openDay(item.id)"
+                  >
+                    <span class="day-marker">{{
+                      item.status === 'Completed'
+                        ? '✓'
+                        : item.status === 'Locked'
+                          ? '🔒'
+                          : item.dayNumber
+                    }}</span>
+                    <span
+                      ><strong>Ngày {{ item.dayNumber }} · {{ item.titleChinese }}</strong
+                      ><small>{{ item.title }} · {{ item.progressPercent }}%</small></span
+                    >
+                  </button>
+                </li>
+              }
+            </ol>
+          </section>
+        }
+      </aside>
+
+      @if (day(); as selectedDay) {
+        <main class="lesson-panel">
+          <header class="lesson-heading">
+            <div>
+              <span class="eyebrow">NGÀY {{ selectedDay.day.dayNumber }}</span>
+              <h2>{{ selectedDay.day.titleChinese }}</h2>
+              <p>{{ selectedDay.day.title }} · {{ selectedDay.day.description }}</p>
+            </div>
+            <div class="lesson-meta">
+              <span>◷ {{ selectedDay.day.estimatedMinutes }} phút</span
+              ><span>✦ {{ selectedDay.day.xpReward }} XP</span>
+            </div>
+          </header>
+          <div class="progress" aria-label="Tiến độ ngày học">
+            <span [style.width.%]="selectedDay.day.progressPercent"></span>
+          </div>
+          <div class="activities">
+            @for (activity of selectedDay.activities; track activity.id) {
+              <article class="activity" [class.done]="activity.completed">
+                <header>
+                  <span class="activity-icon" aria-hidden="true">{{
+                    activity.type === 'VOCABULARY'
+                      ? '词'
+                      : activity.type === 'GRAMMAR'
+                        ? '文'
+                        : activity.type === 'EXERCISE'
+                          ? '练'
+                          : '句'
+                  }}</span
+                  ><span
+                    ><small>{{ activity.type }}</small>
+                    <h3>{{ activity.title }}</h3></span
+                  ><span class="status">{{
+                    activity.completed ? 'Đã học ✓' : activity.required ? 'Bắt buộc' : 'Tự chọn'
+                  }}</span>
+                </header>
+                @if (activity.type === 'VOCABULARY') {
+                  <div class="vocabulary-list">
+                    @for (item of content(activity).items ?? []; track item.chinese) {
+                      <div class="word-card">
+                        <strong lang="zh">{{ item.chinese }}</strong
+                        ><span>{{ item.pinyin }}</span>
+                        <p>{{ 'meaningVi' in item ? item.meaningVi : item.translationVi }}</p>
+                      </div>
+                    }
+                  </div>
+                } @else if (activity.type === 'SENTENCE') {
+                  <div class="sentence-list">
+                    @for (item of content(activity).items ?? []; track item.chinese) {
+                      <div>
+                        <strong lang="zh">{{ item.chinese }}</strong
+                        ><span>{{ item.pinyin }}</span>
+                        <p>{{ 'translationVi' in item ? item.translationVi : item.meaningVi }}</p>
+                      </div>
+                    }
+                  </div>
+                } @else if (activity.type === 'GRAMMAR') {
+                  <div class="grammar">
+                    <strong>{{ content(activity).name }}</strong>
+                    <p>{{ content(activity).explanationVi }}</p>
+                    <div>
+                      @for (example of content(activity).examples ?? []; track example) {
+                        <span lang="zh">{{ example }}</span>
+                      }
+                    </div>
+                  </div>
+                } @else if (activity.type === 'EXERCISE') {
+                  <div class="questions">
+                    @for (
+                      question of content(activity).questions ?? [];
+                      track question.id;
+                      let index = $index
+                    ) {
+                      <fieldset>
+                        <legend>{{ index + 1 }}. {{ question.question }}</legend>
+                        @if (question.options.length) {
+                          @for (option of question.options; track option) {
+                            <label
+                              ><input
+                                type="radio"
+                                [name]="question.id"
+                                [value]="option"
+                                [checked]="answers()[question.id] === option"
+                                (change)="setAnswer(question, option)"
+                              />
+                              <span>{{ option }}</span></label
+                            >
+                          }
+                        } @else {
+                          <input
+                            type="text"
+                            [value]="answers()[question.id] ?? ''"
+                            (input)="setAnswer(question, $any($event.target).value)"
+                            placeholder="Nhập câu trả lời"
+                          />
+                        }
+                      </fieldset>
+                    }
+                  </div>
+                }
+                @if (!activity.completed) {
+                  <button
+                    class="primary"
+                    type="button"
+                    [disabled]="pending() === activity.id"
+                    (click)="activity.type === 'EXERCISE' ? submit(activity) : complete(activity)"
+                  >
+                    {{
+                      pending() === activity.id
+                        ? 'Đang lưu…'
+                        : activity.type === 'EXERCISE'
+                          ? 'Nộp bài'
+                          : 'Hoàn thành hoạt động'
+                    }}
+                  </button>
+                }
+              </article>
+            }
+          </div>
+        </main>
+      }
+    </div>
+  }
+
+  @if (!loading() && mode() === 'mindmap') {
+    <section class="mindmap-panel">
+      <header>
+        <span class="eyebrow">TỪ MỘT GỐC, MỞ RỘNG CẢ MẠNG LƯỚI</span>
+        <h2>Bản đồ từ vựng HSK</h2>
+        <p>Tra từ trong curriculum đã kiểm duyệt để khám phá từ ghép và nhóm nghĩa liên quan.</p>
+      </header>
+      <form class="mindmap-search" (ngSubmit)="createMindMap()">
+        <label for="mindmap-word">Từ tiếng Trung</label>
+        <div>
+          <input
+            id="mindmap-word"
+            name="word"
+            maxlength="20"
+            [(ngModel)]="word"
+            placeholder="Ví dụ: 学生"
+            lang="zh"
+          /><button type="submit" [disabled]="pending() === 'mindmap'">
+            {{ pending() === 'mindmap' ? 'Đang tạo…' : 'Tạo bản đồ' }}
+          </button>
+        </div>
+      </form>
+      @if (capabilities(); as capability) {
+        <div class="capability-note">
+          <span aria-hidden="true">🛡</span>
+          <p><strong>Dữ liệu đáng tin cậy trước tiên</strong>{{ capability.message }}</p>
+        </div>
+      }
+      @if (mindMap(); as map) {
+        <div class="map-canvas" aria-label="Bản đồ từ vựng">
+          <button
+            class="map-node root"
+            type="button"
+            [class.selected]="selectedNode() === map.root.id"
+            (click)="selectNode(map.root.id)"
+          >
+            <strong>{{ map.root.chinese }}</strong
+            ><span>{{ map.root.pinyin }}</span
+            ><small>{{ map.root.meaningVi }}</small>
+          </button>
+          <div class="branches">
+            @for (node of map.children; track node.id) {
+              <button
+                class="map-node"
+                type="button"
+                [class.selected]="selectedNode() === node.id"
+                (click)="selectNode(node.id)"
+              >
+                <em>{{ node.relationType === 'Compound' ? 'Từ ghép' : 'Liên quan' }}</em
+                ><strong>{{ node.chinese }}</strong
+                ><span>{{ node.pinyin }}</span
+                ><small>{{ node.meaningVi }}</small>
+              </button>
+            }
+          </div>
+        </div>
+        @if (selectedMindMapNode(); as node) {
+          <article class="node-detail">
+            <div>
+              <span class="eyebrow">CHI TIẾT TỪ VỰNG</span>
+              <h3 lang="zh">{{ node.chinese }}</h3>
+              <strong>{{ node.pinyin }}</strong>
+              <p>{{ node.meaningVi }}</p>
+            </div>
+            <blockquote>
+              <strong lang="zh">{{ node.exampleChinese }}</strong
+              ><span>{{ node.examplePinyin }}</span>
+              <p>{{ node.exampleTranslationVi }}</p>
+            </blockquote>
+          </article>
+        }
+      } @else {
+        <div class="mindmap-empty">
+          <span aria-hidden="true">🧠</span><strong>Bắt đầu với “学生”</strong>
+          <p>Bản đồ sẽ hiện từ gốc, pinyin, nghĩa và các nhánh liên quan.</p>
+        </div>
+      }
+    </section>
+  }
+</section>

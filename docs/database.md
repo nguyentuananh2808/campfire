@@ -1,6 +1,8 @@
 # Database
 
-One PostgreSQL 18 database is divided into `identity`, `groups`, `chat`, `events` and `werewolf` schemas. Each module owns one DbContext and a schema-local `__EFMigrationsHistory` table. No cross-schema foreign key, navigation or direct table query is allowed.
+One PostgreSQL 18 database is divided into `identity`, `groups`, `chat`, `events`, `werewolf`, `stranger_chat` and `learning` schemas. Each module owns one DbContext and a schema-local `__EFMigrationsHistory` table. No cross-schema foreign key, navigation or direct table query is allowed.
+
+Learning is implemented by `LearningDbContext` and `InitialLearning`. It owns curriculum, lesson activities, vocabulary relations and user progress. Foreign keys exist only inside `learning`; Identity user IDs are UUID values without a cross-schema FK. Composite progress keys make completion idempotent, while score/progress/status/HSK check constraints protect direct writes. Seeded HSK content uses deterministic IDs and a content version.
 
 Identity is implemented by `IdentityDbContext` and migration `InitialIdentity`. It owns `identity.Users`, `Roles`, `RoleClaims`, `UserClaims`, `UserLogins`, `UserRoles` and `UserTokens`. `NormalizedEmail` is required and uniquely indexed; display name is required and limited to 50 characters. Password hash, lockout, concurrency stamp and security stamp use ASP.NET Core Identity columns. The migrator applies Identity, Groups, Chat, Events and Werewolf migrations sequentially and fails nonzero when a connection or migration fails.
 

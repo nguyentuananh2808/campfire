@@ -2,6 +2,27 @@
 
 Updated: 2026-10-25 (Asia/Saigon)
 
+## M15 — Học quanh lửa: Chinese Learning base
+
+Phạm vi triển khai đã điều chỉnh theo kiến trúc và provider hiện có:
+
+1. Tạo module `Learning` sở hữu schema PostgreSQL `learning`, đủ Domain/Application/Infrastructure/Presentation/Contracts và đi đúng `endpoint -> ISender -> handler -> ILearningService -> EfLearningService`.
+2. Mô hình generic `Course -> Unit -> LearningDay -> LessonActivity`; HSK1 là curriculum data có version, không có controller/component riêng theo từng ngày.
+3. Seed idempotent nội dung HSK1 cơ sở, vocabulary/sentence/grammar/exercise và relation graph. API thật cho dashboard hôm nay, lộ trình, chi tiết ngày, hoàn thành activity, nộp bài và vocabulary mind map.
+4. Progress theo user Identity hiện tại, unique constraints chống trùng, transaction khi cộng XP/unlock và không có foreign key xuyên schema.
+5. Angular thêm tab `Học quanh lửa`, hai chế độ `Lộ trình HSK1` và `Bản đồ từ vựng`, lazy route, typed API, loading/empty/error/pending và mobile-first.
+6. AI/TTS/Speech không có provider nên không dựng fake success hoặc nút hoạt động giả. Mind map base dùng graph curriculum đã kiểm duyệt/cache trong PostgreSQL; capability response giải thích rõ giới hạn để nối provider thật ở phase sau.
+7. Tạo tài liệu trực quan ánh xạ bài toán -> giải pháp -> file và luồng dữ liệu của module.
+
+Acceptance criteria:
+
+- User đã đăng nhập mở tab Học quanh lửa, xem lộ trình HSK1 và Day 1 từ API/database.
+- User hoàn thành activity bắt buộc, nhận XP đúng một lần và mở ngày tiếp theo trong transaction.
+- Exercise được chấm server-side; frontend không nhận đáp án đúng trước khi submit.
+- Nhập vocabulary có trong curriculum trả mind map pinyin/nghĩa/example/relation; input ngoài dữ liệu trả trạng thái không hỗ trợ thay vì giả AI.
+- Mutation có antiforgery, mọi endpoint yêu cầu Identity cookie, validation chạy qua MediatR và schema/migration thuộc riêng module.
+- Backend/frontend build, test liên quan và migration PostgreSQL thật được ghi bằng chứng; phần không chạy được phải đánh dấu rõ.
+
 ## M14 Unified chat interactions and production theme repair
 
 - [ ] Build one shared compact message-action control for Group Chat and Stranger Chat.

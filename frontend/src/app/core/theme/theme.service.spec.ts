@@ -7,6 +7,7 @@ describe('ThemeService', () => {
     localStorage.clear();
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.classList.remove('theme-dark', 'theme-light');
+    document.body.classList.remove('theme-dark', 'theme-light');
     TestBed.configureTestingModule({});
   });
 
@@ -15,6 +16,7 @@ describe('ThemeService', () => {
     localStorage.clear();
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.classList.remove('theme-dark', 'theme-light');
+    document.body.classList.remove('theme-dark', 'theme-light');
   });
 
   it('applies and persists the Campfire dark theme', () => {
@@ -25,6 +27,7 @@ describe('ThemeService', () => {
     expect(document.documentElement.dataset['theme']).toBe('dark');
     expect(document.documentElement.classList.contains('theme-dark')).toBe(true);
     expect(document.documentElement.classList.contains('theme-light')).toBe(false);
+    expect(document.body.classList.contains('theme-dark')).toBe(true);
     expect(localStorage.getItem('campfire-theme')).toBe('dark');
   });
 
@@ -40,6 +43,7 @@ describe('ThemeService', () => {
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     expect(document.documentElement.classList.contains('theme-dark')).toBe(false);
     expect(document.documentElement.classList.contains('theme-light')).toBe(true);
+    expect(document.body.classList.contains('theme-light')).toBe(true);
   });
 
   it('keeps theme switching functional when browser storage is unavailable', () => {

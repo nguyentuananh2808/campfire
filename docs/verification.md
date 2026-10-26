@@ -152,3 +152,19 @@ The integration suite additionally requires a working Docker engine because it i
 - Passed: `git diff --check` found no whitespace errors; only the repository's existing LF-to-CRLF notices were reported.
 - Blocked visual acceptance: the Angular development server built and listened on `127.0.0.1:4200`, but the available in-app browser returned `ERR_CONNECTION_TIMED_OUT`, and no Chrome automation provider was available. Physical-device acceptance at 360/390/430px and deployed-origin dark-mode verification remain pending.
 
+# Learning base and Stranger Chat composer polish — 2026-10-26
+
+- Passed: force-evaluated NuGet locks, then full 39-project backend build with 0 warnings/errors. The Learning module projects, host composition, migrator and tests compile.
+- Passed: frontend Prettier lint, Vitest 23/23 and Angular production build. The Learning lazy chunk is emitted; Stranger Chat picker styles stay below the updated 16kB component-style error budget.
+- Passed: EF query review fixed exercise-answer sanitization to run after materialization, avoiding a non-translatable custom method inside an EF projection.
+- Passed: `git diff --check` after the UI and Learning changes.
+- Not run: PostgreSQL migration/runtime integration and browser visual QA. Docker Desktop's Linux engine was unavailable in this environment, and physical 360–430px/deployed-origin testing still requires the target device/browser.
+- Scope limitation: the seeded course currently contains the HSK 1 base structure plus Day 1/Day 2 content. TTS, microphone/pronunciation scoring, conversation AI and AI vocabulary expansion remain explicitly unavailable until a provider and privacy/retention policy are configured; no UI action reports fake success.
+
+# Production dark-mode diagnosis and hardening — 2026-10-26
+
+- Source diagnosis: the optimized stylesheet contains both `:root[data-theme='dark']` and `.theme-dark`; ThemeService already toggled the DOM and persisted safely. Therefore a production-only failure is most likely stale SPA shell/container cache or a deployment serving an older frontend image, not Sass selector removal.
+- Changed: ThemeService now also sets `document.documentElement.style.colorScheme`, body fallback classes and the `theme-color` meta tag. Nginx now sends `Cache-Control: no-cache, no-store, must-revalidate` for the SPA shell while retaining long-lived caching only for hashed static assets.
+- Passed: frontend Prettier lint, Vitest 23/23 and Angular production build after the hardening.
+- Required deployment verification: rebuild/restart the web container, confirm the response HTML is fresh, hard-refresh/clear site data once, then toggle and inspect `html[data-theme="dark"]`, `html.theme-dark`, `body.theme-dark` and computed `--background` in DevTools. If the DOM changes but computed variables do not, the deployed CSS is stale or from an old image.
+

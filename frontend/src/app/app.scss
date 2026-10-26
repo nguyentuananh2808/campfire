@@ -140,7 +140,7 @@
   box-shadow: 0 16px 40px var(--shadow-strong);
   display: grid;
   gap: 4px;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   left: max(10px, env(safe-area-inset-left));
   padding: 6px;
   position: fixed;
@@ -280,5 +280,13 @@
   }
   .bottom-nav a {
     font-size: 0.62rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .bottom-nav a {
+    font-size: 0.6rem;
+    line-height: 1.05;
+    text-align: center;
   }
 }

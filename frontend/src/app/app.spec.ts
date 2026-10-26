@@ -7,7 +7,7 @@ import { routes } from './app.routes';
 import { AuthStore } from './core/auth/auth.store';
 
 describe('App', () => {
-  it('renders the four primary mobile navigation destinations', async () => {
+  it('renders the primary mobile navigation destinations', async () => {
     const user = signal({ id: '1', email: 'friend@example.com', displayName: 'Tuan Anh' });
     const status = signal<'authenticated'>('authenticated');
     await TestBed.configureTestingModule({
@@ -29,6 +29,7 @@ describe('App', () => {
     expect(links.map((link) => link.textContent?.trim())).toEqual([
       'Trò chuyện',
       'Kèo',
+      'Học quanh lửa',
       'Ma Sói',
       'Nhóm',
     ]);
