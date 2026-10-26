@@ -143,7 +143,7 @@
                           <button
                             type="button"
                             class="speech-button"
-                            (click)="speech.startListening()"
+                            (click)="speech.startListening(item.chinese)"
                             [disabled]="!speech.canListen"
                             [attr.aria-label]="'Đọc theo ' + item.chinese"
                           >
@@ -173,7 +173,7 @@
                           <button
                             type="button"
                             class="speech-button"
-                            (click)="speech.startListening()"
+                            (click)="speech.startListening(item.chinese)"
                             [disabled]="!speech.canListen"
                             [attr.aria-label]="'Đọc theo ' + item.chinese"
                           >
@@ -183,6 +183,26 @@
                       </div>
                     }
                   </div>
+                  @if (speech.listening() || speech.transcript() || speech.error()) {
+                    <div class="speech-status" role="status" aria-live="polite">
+                      @if (speech.listening()) {
+                        <span class="recording-dot" aria-hidden="true"></span
+                        ><strong>Đang thu âm…</strong>
+                        <button type="button" class="speech-stop" (click)="speech.stopListening()">
+                          Dừng
+                        </button>
+                      } @else if (speech.error()) {
+                        <strong>{{ speech.error() }}</strong>
+                      } @else {
+                        <span
+                          >Đã nhận: <strong lang="zh">{{ speech.transcript() }}</strong></span
+                        >
+                        <button type="button" class="speech-stop" (click)="speech.clear()">
+                          Xóa
+                        </button>
+                      }
+                    </div>
+                  }
                 } @else if (activity.type === 'GRAMMAR') {
                   <div class="grammar">
                     <strong>{{ content(activity).name }}</strong>

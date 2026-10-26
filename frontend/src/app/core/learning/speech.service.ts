@@ -19,6 +19,8 @@ export class SpeechService {
   readonly listening = signal(false);
   readonly transcript = signal('');
   readonly error = signal('');
+  readonly target = signal('');
+  private recognition: SpeechRecognitionLike | null = null;
 
   get canSpeak(): boolean {
     return typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -40,11 +42,12 @@ export class SpeechService {
     window.speechSynthesis.speak(utterance);
   }
 
-  startListening(): void {
+  startListening(target = ''): void {
     const Constructor = this.recognitionConstructor();
     if (!Constructor || this.listening()) return;
     this.error.set('');
     this.transcript.set('');
+    this.target.set(target);
     const recognition = new Constructor();
     recognition.lang = 'zh-CN';
     recognition.interimResults = false;
@@ -57,8 +60,21 @@ export class SpeechService {
           : 'Không thể nhận giọng nói.',
       );
     recognition.onend = () => this.listening.set(false);
+    this.recognition = recognition;
     this.listening.set(true);
     recognition.start();
+  }
+
+  stopListening(): void {
+    this.recognition?.stop();
+    this.listening.set(false);
+  }
+
+  clear(): void {
+    this.stopListening();
+    this.transcript.set('');
+    this.target.set('');
+    this.error.set('');
   }
 
   private recognitionConstructor(): SpeechRecognitionConstructor | null {
