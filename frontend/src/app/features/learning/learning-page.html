@@ -130,6 +130,26 @@
                         <strong lang="zh">{{ item.chinese }}</strong
                         ><span>{{ item.pinyin }}</span>
                         <p>{{ 'meaningVi' in item ? item.meaningVi : item.translationVi }}</p>
+                        <div class="speech-actions">
+                          <button
+                            type="button"
+                            class="speech-button"
+                            (click)="speech.speak(item.chinese)"
+                            [disabled]="!speech.canSpeak"
+                            [attr.aria-label]="'Nghe cách đọc ' + item.chinese"
+                          >
+                            🔊
+                          </button>
+                          <button
+                            type="button"
+                            class="speech-button"
+                            (click)="speech.startListening()"
+                            [disabled]="!speech.canListen"
+                            [attr.aria-label]="'Đọc theo ' + item.chinese"
+                          >
+                            🎙️
+                          </button>
+                        </div>
                       </div>
                     }
                   </div>
@@ -140,6 +160,26 @@
                         <strong lang="zh">{{ item.chinese }}</strong
                         ><span>{{ item.pinyin }}</span>
                         <p>{{ 'translationVi' in item ? item.translationVi : item.meaningVi }}</p>
+                        <div class="speech-actions">
+                          <button
+                            type="button"
+                            class="speech-button"
+                            (click)="speech.speak(item.chinese)"
+                            [disabled]="!speech.canSpeak"
+                            [attr.aria-label]="'Nghe cách đọc ' + item.chinese"
+                          >
+                            🔊
+                          </button>
+                          <button
+                            type="button"
+                            class="speech-button"
+                            (click)="speech.startListening()"
+                            [disabled]="!speech.canListen"
+                            [attr.aria-label]="'Đọc theo ' + item.chinese"
+                          >
+                            🎙️
+                          </button>
+                        </div>
                       </div>
                     }
                   </div>

@@ -12,6 +12,7 @@ import {
   VocabularyMindMap,
 } from '../../core/learning/learning.models';
 import { LearningService } from '../../core/learning/learning.service';
+import { SpeechService } from '../../core/learning/speech.service';
 
 @Component({
   selector: 'app-learning-page',
@@ -22,6 +23,7 @@ import { LearningService } from '../../core/learning/learning.service';
 })
 export class LearningPage implements OnInit {
   private readonly api = inject(LearningService);
+  readonly speech = inject(SpeechService);
   readonly mode = signal<'path' | 'mindmap'>('path');
   readonly loading = signal(true);
   readonly pending = signal<string | null>(null);

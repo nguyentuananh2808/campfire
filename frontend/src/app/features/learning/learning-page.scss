@@ -318,6 +318,35 @@ p {
   border-radius: 16px;
   padding: 14px;
 }
+.word-card,
+.sentence-list > div {
+  position: relative;
+}
+.speech-button {
+  align-items: center;
+  background: var(--primary-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--primary-strong);
+  cursor: pointer;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  min-width: 32px;
+  padding: 0;
+}
+.speech-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.speech-actions .speech-button {
+  margin-top: 0;
+}
+.speech-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .word-card strong,
 .sentence-list strong {
   display: block;
@@ -528,9 +557,64 @@ p {
   }
 }
 @media (max-width: 560px) {
+  .learning-shell {
+    gap: 14px;
+  }
   .hero {
     align-items: flex-start;
+    border-radius: 20px;
     flex-direction: column;
+    gap: 16px;
+    padding: 20px 16px;
+  }
+  .hero h1 {
+    font-size: clamp(1.85rem, 9vw, 2.7rem);
+  }
+  .hero p {
+    font-size: 0.9rem;
+  }
+  .mode-tabs {
+    gap: 8px;
+  }
+  .mode-tabs button {
+    border-radius: 16px;
+    min-height: 62px;
+    padding: 9px 12px;
+  }
+  .mode-tabs button > span:first-child {
+    flex: 0 0 38px;
+    font-size: 1.2rem;
+    height: 38px;
+    width: 38px;
+  }
+  .path-panel,
+  .lesson-panel,
+  .mindmap-panel {
+    min-width: 0;
+  }
+  .lesson-heading h2 {
+    font-size: 1.7rem;
+  }
+  .lesson-heading p {
+    font-size: 0.88rem;
+  }
+  .activity > header {
+    align-items: flex-start;
+  }
+  .activity > header h3 {
+    font-size: 1rem;
+  }
+  .word-card strong,
+  .sentence-list strong {
+    font-size: 1.65rem;
+  }
+  .speech-button {
+    height: 40px;
+    margin-top: 10px;
+    min-width: 40px;
+  }
+  .capability-note {
+    font-size: 0.82rem;
   }
   .xp-card {
     grid-template-columns: auto auto;
@@ -579,6 +663,17 @@ p {
   .map-canvas {
     min-height: 340px;
     padding: 18px;
+  }
+}
+@media (max-width: 380px) {
+  .vocabulary-list,
+  .sentence-list {
+    grid-template-columns: 1fr;
+  }
+  .path-panel,
+  .lesson-panel,
+  .mindmap-panel {
+    padding: 13px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
