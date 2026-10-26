@@ -78,8 +78,13 @@ $ember-950: #170d09;
 }
 
 :root[data-theme='dark'],
-:root.theme-dark {
+:root.theme-dark,
+body.theme-dark {
   @include dark-theme;
+}
+
+body.theme-light {
+  @include light-theme;
 }
 
 @media (prefers-color-scheme: dark) {

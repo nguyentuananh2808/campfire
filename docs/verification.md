@@ -165,6 +165,13 @@ The integration suite additionally requires a working Docker engine because it i
 
 - Source diagnosis: the optimized stylesheet contains both `:root[data-theme='dark']` and `.theme-dark`; ThemeService already toggled the DOM and persisted safely. Therefore a production-only failure is most likely stale SPA shell/container cache or a deployment serving an older frontend image, not Sass selector removal.
 - Changed: ThemeService now also sets `document.documentElement.style.colorScheme`, body fallback classes and the `theme-color` meta tag. Nginx now sends `Cache-Control: no-cache, no-store, must-revalidate` for the SPA shell while retaining long-lived caching only for hashed static assets.
+- Changed: the global token stylesheet now applies the dark/light palettes through both the root selector and `body.theme-dark`/`body.theme-light`, so production style scoping cannot leave the body on light tokens after the DOM state changes.
 - Passed: frontend Prettier lint, Vitest 23/23 and Angular production build after the hardening.
 - Required deployment verification: rebuild/restart the web container, confirm the response HTML is fresh, hard-refresh/clear site data once, then toggle and inspect `html[data-theme="dark"]`, `html.theme-dark`, `body.theme-dark` and computed `--background` in DevTools. If the DOM changes but computed variables do not, the deployed CSS is stale or from an old image.
+
+# Learning navigation visibility — 2026-10-26
+
+- Source check: the authenticated shell contains the `/learning` navigation item and the route is lazy-loaded behind the authentication guard. The item is intentionally hidden for guests.
+- Passed after restoring the auth condition: frontend lint, Vitest 23/23 and Angular production build. The emitted production output includes the `learning-page` lazy chunk.
+- Diagnosis for the supplied screenshot: it is serving an older frontend artifact/image; the current source cannot produce an authenticated five-item shell without the `/learning` link.
 
