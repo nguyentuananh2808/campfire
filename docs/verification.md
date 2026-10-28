@@ -194,3 +194,12 @@ The integration suite additionally requires a working Docker engine because it i
 - Source review passed for keyboard behavior, accessible icon labels, long-press/context-menu handling, bounded mobile viewports, history-position preservation and near-bottom/unread message reconciliation.
 - Not run: physical visual/keyboard acceptance at 360/390/430 px and deployed-origin testing. Rebuild the frontend container before evaluating these changes on `tamsuvoinhau.cloud`.
 
+# NuGet locked-restore CI repair — 2026-10-28
+
+- Root cause: the committed lock graph did not include the direct FluentValidation/MediatR dependencies and EF Core dependencies introduced by the Learning module restructure. GitHub Actions correctly failed `dotnet restore backend/Campfire.slnx --locked-mode` with NU1004 before build.
+- Changed: regenerated the solution's `packages.lock.json` files with `--force-evaluate`; CI remains strict and no workflow security/quality gate was disabled.
+- Passed: exact solution `dotnet restore backend/Campfire.slnx --locked-mode --disable-parallel` using the regenerated lock graph.
+- Passed: Release solution build with 0 warnings and 0 errors.
+- Passed: UnitTests 32/32 and ArchitectureTests 4/4.
+- Environment note: the workstation has SDK 10.0.402 while CI pins 10.0.112. Lock generation/verification temporarily selected the installed SDK, then `global.json` was restored unchanged to 10.0.112; centrally pinned NuGet versions and resulting hashes are committed in the lock files.
+
