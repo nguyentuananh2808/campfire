@@ -54,6 +54,8 @@ export class StrangerChatPage {
   readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
   readonly replyingTo = signal<StrangerMessage | null>(null);
   readonly openActionsFor = signal<string | null>(null);
+  readonly showLatestButton = signal(false);
+  readonly unseenCount = signal(0);
   readonly stickers = CHAT_STICKERS;
   readonly emojis = ['😀', '😂', '🥰', '😎', '🥳', '😭', '😡', '👍', '❤️', '🔥', '🎉', '✨'];
   readonly reactions: ReadonlyArray<{ code: StrangerReaction; emoji: string; label: string }> = [
@@ -300,6 +302,7 @@ export class StrangerChatPage {
         const previousLastId = this.messages()
           .filter((item) => item.state === 'sent')
           .at(-1)?.id;
+        const shouldFollow = this.isNearBottom();
         const pending = this.messages().filter(
           (x) => x.state === 'pending' || x.state === 'failed',
         );
@@ -309,7 +312,13 @@ export class StrangerChatPage {
           ...pending.filter((x) => !ids.has(x.clientMessageId)),
         ]);
         const latestId = p.items.at(-1)?.id;
-        if (latestId && latestId !== previousLastId) this.scrollToLatest();
+        if (latestId && latestId !== previousLastId) {
+          if (shouldFollow) this.scrollToLatest();
+          else {
+            this.unseenCount.update((count) => count + 1);
+            this.showLatestButton.set(true);
+          }
+        }
       },
       error: () => {},
     });
@@ -323,7 +332,27 @@ export class StrangerChatPage {
     );
   }
 
+  onViewportScroll(): void {
+    this.openActionsFor.set(null);
+    if (this.isNearBottom()) {
+      this.showLatestButton.set(false);
+      this.unseenCount.set(0);
+    }
+  }
+
+  jumpToLatest(): void {
+    this.scrollToLatest();
+  }
+
+  private isNearBottom(): boolean {
+    const viewport = this.messageViewport?.nativeElement;
+    if (!viewport) return true;
+    return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 96;
+  }
+
   private scrollToLatest(): void {
+    this.showLatestButton.set(false);
+    this.unseenCount.set(0);
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         const viewport = this.messageViewport?.nativeElement;

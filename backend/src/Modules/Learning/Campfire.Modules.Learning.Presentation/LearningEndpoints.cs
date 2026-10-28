@@ -1,5 +1,15 @@
 using System.Security.Claims;
-using Campfire.Modules.Learning.Application;
+using Campfire.Modules.Learning.Application.Common;
+using Campfire.Modules.Learning.Application.CompleteActivity;
+using Campfire.Modules.Learning.Application.GetCapabilities;
+using Campfire.Modules.Learning.Application.GetDay;
+using Campfire.Modules.Learning.Application.GetMindMap;
+using Campfire.Modules.Learning.Application.GetPath;
+using Campfire.Modules.Learning.Application.GetToday;
+using Campfire.Modules.Learning.Application.Models;
+using Campfire.Modules.Learning.Application.SubmitExercise;
+using Campfire.Modules.Learning.Presentation.Endpoints;
+using Campfire.Modules.Learning.Presentation.Models;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

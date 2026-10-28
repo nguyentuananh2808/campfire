@@ -56,6 +56,8 @@ export class ChatPage {
   readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
   readonly replyingTo = signal<ChatViewMessage | null>(null);
   readonly openActionsFor = signal<string | null>(null);
+  readonly showLatestButton = signal(false);
+  readonly unseenCount = signal(0);
   readonly emojis = ['😀', '😂', '🥰', '😎', '🥳', '😭', '😡', '👍', '❤️', '🔥', '🎉', '✨'];
   readonly stickers = CHAT_STICKERS;
   readonly reactions: ReadonlyArray<{ code: ChatReaction; emoji: string; label: string }> = [
@@ -83,6 +85,8 @@ export class ChatPage {
     this.olderCursor.set(null);
     this.latestCursor.set(null);
     this.replyingTo.set(null);
+    this.showLatestButton.set(false);
+    this.unseenCount.set(0);
     this.loadInitial(group.id);
   }
 
@@ -204,6 +208,9 @@ export class ChatPage {
     const group = this.selectedGroup();
     const before = this.olderCursor();
     if (!group || !before || this.loadingOlder()) return;
+    const viewport = this.messageViewport?.nativeElement;
+    const previousHeight = viewport?.scrollHeight ?? 0;
+    const previousTop = viewport?.scrollTop ?? 0;
     this.loadingOlder.set(true);
     this.chatService
       .getMessages(group.id, { before, limit: 50 })
@@ -215,6 +222,10 @@ export class ChatPage {
         next: (page) => {
           this.merge(page.items);
           this.olderCursor.set(page.olderCursor);
+          requestAnimationFrame(() => {
+            const current = this.messageViewport?.nativeElement;
+            if (current) current.scrollTop = previousTop + current.scrollHeight - previousHeight;
+          });
         },
         error: (error: unknown) => this.error.set(getApiErrorMessage(error)),
       });
@@ -330,6 +341,8 @@ export class ChatPage {
   }
 
   private upsert(message: ChatViewMessage, scroll = true): void {
+    const shouldFollow =
+      scroll && (message.senderUserId === this.auth.user()?.id || this.isNearBottom());
     this.messages.update((current) => {
       const unique = current.filter(
         (item) => item.id !== message.id && item.clientMessageId !== message.clientMessageId,
@@ -339,10 +352,34 @@ export class ChatPage {
           left.sentAtUtc.localeCompare(right.sentAtUtc) || left.id.localeCompare(right.id),
       );
     });
-    if (scroll) this.scrollToLatest();
+    if (shouldFollow) this.scrollToLatest();
+    else if (scroll) {
+      this.unseenCount.update((count) => count + 1);
+      this.showLatestButton.set(true);
+    }
+  }
+
+  onViewportScroll(): void {
+    this.openActionsFor.set(null);
+    if (this.isNearBottom()) {
+      this.showLatestButton.set(false);
+      this.unseenCount.set(0);
+    }
+  }
+
+  jumpToLatest(): void {
+    this.scrollToLatest();
+  }
+
+  private isNearBottom(): boolean {
+    const viewport = this.messageViewport?.nativeElement;
+    if (!viewport) return true;
+    return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 96;
   }
 
   private scrollToLatest(): void {
+    this.showLatestButton.set(false);
+    this.unseenCount.set(0);
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         const viewport = this.messageViewport?.nativeElement;

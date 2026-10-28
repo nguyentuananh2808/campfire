@@ -2,6 +2,16 @@
 
 All times use Asia/Saigon. A check is marked passed only when it was actually executed successfully.
 
+## Learning Clean Architecture refactor — 2026-10-27
+
+- Passed: `dotnet restore backend/src/Host/Campfire.Api/Campfire.Api.csproj --force-evaluate --disable-parallel -m:1` (cập nhật lock files thành công).
+- Passed: `dotnet build backend/src/Host/Campfire.Api/Campfire.Api.csproj --no-restore -m:1` — 0 warnings, 0 errors.
+- Passed: `dotnet test backend/tests/Campfire.UnitTests/Campfire.UnitTests.csproj --no-restore -m:1` — 32/32.
+- Passed: `dotnet test backend/tests/Campfire.ArchitectureTests/Campfire.ArchitectureTests.csproj --no-restore -m:1` — 4/4.
+- Passed: `dotnet ef migrations has-pending-model-changes ... --context LearningDbContext --no-build` — no pending model changes.
+- Blocked: `dotnet format` trong sandbox không kết nối được Roslyn build-host named pipe (`UnauthorizedAccessException`); build compiler/analyzers vẫn pass sạch.
+- Not run: PostgreSQL integration/migration từ database trắng vì Docker engine chưa được xác nhận trong phiên này.
+
 | Date | Check | Result |
 |---|---|---|
 | 2026-10-15 | `git status`, repository inventory | Repository initialized; all scaffolded files remain untracked because no baseline commit exists. No user-owned tracked changes were overwritten. |
@@ -174,4 +184,13 @@ The integration suite additionally requires a working Docker engine because it i
 - Source check: the authenticated shell contains the `/learning` navigation item and the route is lazy-loaded behind the authentication guard. The item is intentionally hidden for guests.
 - Passed after restoring the auth condition: frontend lint, Vitest 23/23 and Angular production build. The emitted production output includes the `learning-page` lazy chunk.
 - Diagnosis for the supplied screenshot: it is serving an older frontend artifact/image; the current source cannot produce an authenticated five-item shell without the `/learning` link.
+
+# Unified professional chat UX — 2026-10-28
+
+- Passed: frontend Prettier lint.
+- Passed: Vitest 23/23 across 11 test files.
+- Passed: Angular production build; Group Chat and Stranger Chat are emitted as lazy chunks and all component styles remain inside the configured warning/error budgets.
+- Passed: `git diff --check`; only the repository's existing LF-to-CRLF conversion notices were emitted.
+- Source review passed for keyboard behavior, accessible icon labels, long-press/context-menu handling, bounded mobile viewports, history-position preservation and near-bottom/unread message reconciliation.
+- Not run: physical visual/keyboard acceptance at 360/390/430 px and deployed-origin testing. Rebuild the frontend container before evaluating these changes on `tamsuvoinhau.cloud`.
 

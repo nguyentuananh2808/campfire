@@ -24,10 +24,10 @@ button {
   background: transparent;
   border-radius: 999px;
   color: currentColor;
-  height: 32px;
+  height: 28px;
   opacity: 0.66;
   padding: 6px;
-  width: 32px;
+  width: 28px;
 }
 .action-trigger:hover,
 .action-trigger[aria-expanded='true'] {
@@ -37,12 +37,12 @@ button {
 .action-trigger svg,
 .reply-option svg {
   fill: none;
-  height: 20px;
+  height: 18px;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
-  width: 20px;
+  width: 18px;
 }
 .action-tray {
   align-items: center;
@@ -57,10 +57,24 @@ button {
   padding: 5px;
   position: absolute;
   z-index: 20;
+  animation: action-tray-in 120ms ease-out;
+  transform-origin: bottom left;
 }
 .mine .action-tray {
   left: auto;
   right: 0;
+  transform-origin: bottom right;
+}
+@keyframes action-tray-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .action-tray {
+    animation: none;
+  }
 }
 .reaction-option,
 .reply-option {

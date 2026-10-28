@@ -1,6 +1,6 @@
 # Học quanh lửa — bản đồ triển khai
 
-Ngày cập nhật: 26/10/2026
+Ngày cập nhật: 27/10/2026
 
 ## Kiến trúc đã triển khai
 
@@ -25,15 +25,15 @@ HSK1 là dữ liệu seed có version. Learning Engine là code dùng chung, vì
 | Bài toán | Cách giải quyết | File chính |
 |---|---|---|
 | Giữ modular monolith | Module riêng đủ Domain, Application, Infrastructure, Presentation, Contracts; Host chỉ composition | `backend/src/Modules/Learning/*`, `backend/src/Host/Campfire.Api/Composition/*` |
-| Dispatch đúng MediatR | Endpoint gọi `ISender`; handler chỉ gọi port Application | `LearningEndpoints.cs`, `*CommandHandler.cs`, `*QueryHandler.cs` |
-| Curriculum không hard-code ở UI | Course/Unit/Day/Activity và JSON content được seed bằng migration idempotent | `LearningSeed.cs`, `Migrations/*InitialLearning.cs` |
-| Không lộ đáp án | Loại `correctAnswer` trước khi trả activity; chấm server-side | `ExerciseScorer.cs`, `EfLearningService.cs` |
-| Không cộng XP lặp | PK `(UserId, ActivityId)`, transaction Serializable và hoàn thành day idempotent | `UserActivityProgress.cs`, `UserLearningDayProgress.cs`, `EfLearningService.cs` |
+| Dispatch đúng MediatR | Endpoint gọi `ISender`; handler chỉ gọi port Application | `Presentation/LearningEndpoints.cs`, `Application/<UseCase>/*Handler.cs` |
+| Curriculum không hard-code ở UI | Course/Unit/Day/Activity và JSON content được seed bằng migration idempotent | `Infrastructure/Persistence/Seed/LearningSeed.cs`, `Infrastructure/Migrations/*InitialLearning.cs` |
+| Không lộ đáp án | Loại `correctAnswer` trước khi trả activity; chấm server-side | `Infrastructure/Scoring/ExerciseScorer.cs`, `Infrastructure/Services/EfLearningService.cs` |
+| Không cộng XP lặp | PK `(UserId, ActivityId)`, transaction Serializable và hoàn thành day idempotent | `Domain/Progress/*`, `Infrastructure/Services/EfLearningService.cs` |
 | Mở khóa tuần tự | Ngày N yêu cầu ngày N-1 `Completed`, kiểm tra lại ở mọi mutation | `EfLearningService.CanAccessDayAsync` |
-| Không xuyên schema Identity | Chỉ lưu `UserId` UUID, không FK/navigation tới schema `identity` | `LearningDbContext.cs` |
+| Không xuyên schema Identity | Chỉ lưu `UserId` UUID, không FK/navigation tới schema `identity` | `Infrastructure/Persistence/LearningDbContext.cs`, `Persistence/Configurations/*` |
 | Mind map chưa có AI provider | Trả graph curriculum đã kiểm duyệt; từ ngoài dữ liệu trả lỗi rõ ràng | `GetMindMapQuery*`, `EfLearningService.GetMindMapAsync` |
 | Không dựng nút AI giả | Capability API công bố provider đang tắt; UI giải thích giới hạn | `GetCapabilitiesQuery*`, `learning-page.html` |
-| Bảo vệ mutation | Identity authorization, antiforgery, FluentValidation và ProblemDetails có traceId | `LearningEndpoints.cs`, `AntiforgeryEndpointFilter.cs`, validators |
+| Bảo vệ mutation | Identity authorization, antiforgery, FluentValidation và ProblemDetails có traceId | `Presentation/LearningEndpoints.cs`, `Presentation/Endpoints/AntiforgeryEndpointFilter.cs`, `Application/<UseCase>/*Validator.cs` |
 | Mobile/dark mode | Semantic design tokens, layout một cột dưới 900px, touch target 44px | `frontend/src/app/features/learning/learning-page.scss` |
 
 ## Mô hình dữ liệu
@@ -79,6 +79,6 @@ sequenceDiagram
     P-->>A: Day 1 completed, Day 2 unlocked
 ```
 
-## Chưa giả lập
+## Giới hạn provider
 
-TTS, upload microphone, pronunciation/tone assessment, conversation AI, AI vocabulary expansion và smart review chưa hoạt động vì chưa có provider/credential/storage. Phase sau phải thêm Application port và Infrastructure adapter; endpoint không được gọi provider trực tiếp.
+Frontend có thể dùng Web Speech API của trình duyệt cho TTS, transcript và điểm khớp văn bản. Đây không phải chấm âm học thanh điệu/âm vị và không upload audio lên backend. Conversation AI, AI vocabulary expansion và smart review chưa hoạt động vì chưa có provider/credential/storage. Nếu thêm provider phía server, phải đặt port ở Application và adapter ở Infrastructure; endpoint không gọi provider trực tiếp.

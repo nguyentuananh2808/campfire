@@ -1,12 +1,26 @@
 <section class="chat-shell">
   <header class="chat-header">
-    <div>
-      <p class="eyebrow">Lửa trại chung</p>
-      <h1>Trò chuyện</h1>
+    <div class="chat-identity">
+      <span class="group-avatar" aria-hidden="true">{{
+        selectedGroup()?.name?.charAt(0) ?? '🔥'
+      }}</span>
+      <div>
+        <h1>{{ selectedGroup()?.name ?? 'Trò chuyện nhóm' }}</h1>
+        <p class="presence">
+          <i aria-hidden="true"></i
+          >{{
+            connectionState() === 'connected'
+              ? 'Đang kết nối trực tiếp'
+              : connectionState() === 'reconnecting'
+                ? 'Đang kết nối lại'
+                : 'Tin nhắn được lưu an toàn'
+          }}
+        </p>
+      </div>
     </div>
     @if (groups().length > 0) {
-      <label
-        >Nhóm
+      <label class="group-switcher"
+        ><span>Đổi nhóm</span>
         <select [value]="selectedGroup()?.id" (change)="selectGroup($any($event.target).value)">
           @for (group of groups(); track group.id) {
             <option [value]="group.id">{{ group.name }}</option>
@@ -38,7 +52,12 @@
       <a routerLink="/groups">Đến trang nhóm</a>
     </div>
   } @else {
-    <section #messageViewport class="conversation" aria-label="Tin nhắn của nhóm">
+    <section
+      #messageViewport
+      class="conversation"
+      aria-label="Tin nhắn của nhóm"
+      (scroll)="onViewportScroll()"
+    >
       @if (olderCursor()) {
         <button class="load-more" type="button" (click)="loadOlder()" [disabled]="loadingOlder()">
           {{ loadingOlder() ? 'Đang tải…' : 'Tải tin cũ hơn' }}
@@ -126,6 +145,12 @@
           }
         </ol>
       }
+      @if (showLatestButton()) {
+        <button class="jump-latest" type="button" (click)="jumpToLatest()">
+          <span aria-hidden="true">↓</span>
+          {{ unseenCount() > 0 ? unseenCount() + ' tin mới' : 'Tin mới nhất' }}
+        </button>
+      }
     </section>
     <form class="composer" [formGroup]="form" (ngSubmit)="send()">
       @if (replyingTo(); as target) {
@@ -137,28 +162,6 @@
           <button type="button" (click)="cancelReply()" aria-label="Hủy trả lời">×</button>
         </div>
       }
-      <div class="composer-tools" aria-label="Công cụ tin nhắn">
-        <button
-          class="tool-button"
-          type="button"
-          [class.active]="openPicker() === 'emoji'"
-          [attr.aria-expanded]="openPicker() === 'emoji'"
-          aria-controls="emoji-picker"
-          (click)="togglePicker('emoji')"
-        >
-          <span aria-hidden="true">☺</span> Emoji
-        </button>
-        <button
-          class="tool-button"
-          type="button"
-          [class.active]="openPicker() === 'sticker'"
-          [attr.aria-expanded]="openPicker() === 'sticker'"
-          aria-controls="sticker-picker"
-          (click)="togglePicker('sticker')"
-        >
-          <span aria-hidden="true">▣</span> Sticker
-        </button>
-      </div>
       @if (openPicker() === 'emoji') {
         <div class="picker emoji-picker" id="emoji-picker" aria-label="Chọn emoji">
           @for (emoji of emojis; track emoji) {
@@ -187,20 +190,51 @@
           }
         </div>
       }
-      <label for="message">Tin nhắn</label>
-      <textarea
-        #messageInput
-        id="message"
-        formControlName="content"
-        maxlength="2000"
-        rows="2"
-        placeholder="Nhắn điều gì đó cho cả nhóm…"
-        (keydown.enter)="onComposerEnter($event)"
-      ></textarea>
-      <div class="composer-footer">
-        <small>{{ form.controls.content.value.length }}/2000</small>
-        <button type="submit" [disabled]="form.invalid">Gửi</button>
+      <div class="composer-row">
+        <div class="composer-tools" aria-label="Công cụ tin nhắn">
+          <button
+            class="tool-button"
+            type="button"
+            [class.active]="openPicker() === 'emoji'"
+            [attr.aria-expanded]="openPicker() === 'emoji'"
+            aria-controls="emoji-picker"
+            (click)="togglePicker('emoji')"
+          >
+            <span aria-hidden="true">☺</span><span class="visually-hidden">Emoji</span>
+          </button>
+          <button
+            class="tool-button"
+            type="button"
+            [class.active]="openPicker() === 'sticker'"
+            [attr.aria-expanded]="openPicker() === 'sticker'"
+            aria-controls="sticker-picker"
+            (click)="togglePicker('sticker')"
+          >
+            <span aria-hidden="true">▣</span><span class="visually-hidden">Sticker</span>
+          </button>
+        </div>
+        <label class="visually-hidden" for="message">Tin nhắn</label>
+        <textarea
+          #messageInput
+          id="message"
+          formControlName="content"
+          maxlength="2000"
+          rows="1"
+          placeholder="Nhắn điều gì đó cho cả nhóm…"
+          (keydown.enter)="onComposerEnter($event)"
+        ></textarea>
+        <button
+          class="send-button"
+          type="submit"
+          [disabled]="form.invalid"
+          aria-label="Gửi tin nhắn"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m4 4 17 8-17 8 3-8-3-8Zm3 8h14"></path>
+          </svg>
+        </button>
       </div>
+      <small class="character-count">{{ form.controls.content.value.length }}/2000</small>
       @if (form.controls.content.touched && form.controls.content.invalid) {
         <small class="field-error">Tin nhắn phải có chữ và không quá 2.000 ký tự.</small>
       }

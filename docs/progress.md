@@ -2,6 +2,14 @@
 
 Updated: 2026-10-25 (Asia/Saigon)
 
+## 2026-10-27 — Learning Clean Architecture refactor
+
+- Đã tái cấu trúc module Learning theo cùng convention với Events/Groups: Domain chia theo aggregate concern; Application chia theo use case; Infrastructure chia Persistence/Configurations/Seed/Services/Scoring; Presentation chia Endpoints/Models/Errors.
+- Đã tách toàn bộ EF mapping khỏi `LearningDbContext` thành một `IEntityTypeConfiguration<T>` cho mỗi entity. Schema, tên bảng, index, check constraint và migration `20261025133611_InitialLearning` được giữ nguyên.
+- Luồng vẫn là `LearningEndpoints -> ISender -> command/query handler -> ILearningService -> EfLearningService -> LearningDbContext/PostgreSQL`; Host chỉ đăng ký composition.
+- Đã build `Campfire.Api` thành công, unit test 32/32 và architecture test 4/4. EF báo không có pending model changes.
+- Việc còn lại: PostgreSQL integration test trên Docker và browser/mobile acceptance cho Learning vẫn cần môi trường Docker/browser mục tiêu.
+
 ## Current state
 
 - AWS single-EC2 packaging is implemented: Caddy provides the public TLS edge, Angular/Nginx keeps HTTP and SignalR same-origin, the API trusts only the fixed Nginx address, and API/PostgreSQL remain private on a dedicated Docker network. The manifest also persists PostgreSQL, Data Protection and Caddy state and runs module migrations before API startup.
@@ -37,6 +45,7 @@ Updated: 2026-10-25 (Asia/Saigon)
 - Dark theme activation now applies both `data-theme` and an explicit root fallback class. The token library accepts either selector, while persistence remains optional, so an observed state change cannot leave the production UI on light tokens solely because one selector path failed.
 - M15 Learning is implemented as a generic Learning Engine module with a seeded HSK 1 base course: path/today/day queries, unlock progression, idempotent activity completion, server-side exercise grading, XP progress, curated vocabulary mind map and an explicit capabilities response that keeps AI/TTS/speech actions disabled until providers are configured. Angular adds the lazy, authenticated “Học quanh lửa” tab with responsive HSK path and vocabulary-map views.
 - Stranger Chat composer polish: emoji/sticker pickers now span the composer safely, open in bounded scrollable panels above the input, use semantic Campfire tokens in light/dark mode and keep the reply banner compact on narrow phones. The production component-style budget was raised to 14kB warning/16kB error to account for the richer picker UI without allowing unbounded growth.
+- M16 professional chat UX is implemented for Group Chat and Stranger Chat. Both now use compact conversation headers/bubbles, icon-led single-row composers, floating newest-message controls, preserved history position, and the same reply/reaction/sticker interaction language. New messages follow automatically while the reader is at the bottom; when reading older content, an unread counter avoids yanking the viewport. Long press suppresses the native context menu and gives supported devices brief haptic feedback.
 
 ## Verification status
 

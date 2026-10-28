@@ -2,6 +2,15 @@
 
 Updated: 2026-10-25 (Asia/Saigon)
 
+## M15.1 — Chuẩn hóa cấu trúc Clean Architecture của Learning
+
+- [x] Tổ chức Domain theo `Courses`, `Progress`, `Vocabulary` và giữ Domain độc lập framework.
+- [x] Tổ chức Application theo từng use case, đưa port vào `Abstractions`, validation/result vào `Common`, DTO vào `Models`.
+- [x] Tổ chức Infrastructure theo `Persistence`, `Configurations`, `Seed`, `Services`, `Scoring`; mỗi EF entity có configuration riêng.
+- [x] Tổ chức Presentation theo `Endpoints`, `Models`, `Errors` và giữ endpoint chỉ gọi `ISender`.
+- [x] Giữ nguyên schema `learning`, table/index/constraint và migration ID; xác nhận EF không có pending model changes.
+- [x] Build API, chạy unit test và architecture test sau tái cấu trúc.
+
 ## M15 — Học quanh lửa: Chinese Learning base
 
 Phạm vi triển khai đã điều chỉnh theo kiến trúc và provider hiện có:
@@ -286,3 +295,21 @@ Each milestone is complete only after its recorded checks pass. Optional CodeGra
 4. Complete typed Angular models/services and mobile-first interaction UI, including auto-scroll and desktop keyboard behavior.
 5. Add focused domain, API and frontend tests; run backend/frontend quality gates and record exact results.
 6. Review authorization, privacy/logging, HTML rendering and cross-module boundaries, then update progress and verification documentation.
+
+## M16 Unified professional chat experience
+
+### Acceptance criteria
+
+- Group Chat and Stranger Chat keep their existing authorization and persistence boundaries, but use the same compact visual language for bubbles, replies, reactions, stickers and composing.
+- A short press exposes a small action affordance; long press opens the reaction/reply tray and suppresses the browser context menu. Supported mobile devices provide a brief haptic acknowledgement without making vibration a requirement.
+- Incoming messages auto-follow only while the reader is near the bottom. While reading history, the viewport is preserved and a visible unread counter returns to the latest message. Sending a local message always follows it.
+- Loading older Group Chat history preserves the reader's visual position. Scrolling closes any floating message action tray.
+- The composer is thumb-friendly, icon-led, keyboard accessible, supports Enter to send and Shift+Enter for a newline, and keeps emoji/sticker pickers above the mobile keyboard area.
+- Both screens remain token-driven in light/dark themes and compile inside the configured component-style budgets.
+
+### Delivery steps
+
+1. Add shared follow/unread viewport behavior to both chat screens without changing backend contracts.
+2. Replace oversized chat headers and composers with compact responsive conversation surfaces.
+3. Harden long-press behavior and accessible labels for reaction, reply, emoji, sticker and send controls.
+4. Run frontend formatting, unit tests, production build and whitespace verification; record physical-device visual QA separately.

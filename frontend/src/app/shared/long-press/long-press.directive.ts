@@ -16,6 +16,7 @@ export class LongPressDirective implements OnDestroy {
     this.startY = event.clientY;
     this.timer = setTimeout(() => {
       this.timer = null;
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate(12);
       this.appLongPress.emit();
     }, 480);
   }
@@ -35,6 +36,11 @@ export class LongPressDirective implements OnDestroy {
       clearTimeout(this.timer);
       this.timer = null;
     }
+  }
+
+  @HostListener('contextmenu', ['$event'])
+  onContextMenu(event: Event): void {
+    event.preventDefault();
   }
 
   ngOnDestroy(): void {

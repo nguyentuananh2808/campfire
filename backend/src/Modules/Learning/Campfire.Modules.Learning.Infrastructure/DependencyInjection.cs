@@ -1,4 +1,7 @@
 using Campfire.Modules.Learning.Application;
+using Campfire.Modules.Learning.Application.Abstractions;
+using Campfire.Modules.Learning.Infrastructure.Persistence;
+using Campfire.Modules.Learning.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

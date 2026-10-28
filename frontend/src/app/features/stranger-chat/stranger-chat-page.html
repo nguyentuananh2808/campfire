@@ -195,7 +195,7 @@
       <span aria-hidden="true">🛡</span
       ><span>Giữ riêng số điện thoại, địa chỉ và tài khoản mạng xã hội.</span>
     </aside>
-    <div #messageViewport class="messages" aria-live="polite">
+    <div #messageViewport class="messages" aria-live="polite" (scroll)="onViewportScroll()">
       @if (messages().length === 0) {
         <div class="empty">
           <span aria-hidden="true">👋</span><strong>Bạn đã được ghép đôi!</strong>
@@ -270,6 +270,12 @@
           }
         </article>
       }
+      @if (showLatestButton()) {
+        <button class="jump-latest" type="button" (click)="jumpToLatest()">
+          <span aria-hidden="true">↓</span>
+          {{ unseenCount() > 0 ? unseenCount() + ' tin mới' : 'Tin mới nhất' }}
+        </button>
+      }
     </div>
     <form class="composer" (ngSubmit)="send()">
       @if (replyingTo(); as target) {
@@ -283,24 +289,8 @@
           <button type="button" (click)="cancelReply()" aria-label="Hủy trả lời">×</button>
         </div>
       }
-      <div class="composer-tools" aria-label="Công cụ tin nhắn">
-        <button
-          type="button"
-          [class.active]="openPicker() === 'emoji'"
-          (click)="togglePicker('emoji')"
-        >
-          ☺ Emoji
-        </button>
-        <button
-          type="button"
-          [class.active]="openPicker() === 'sticker'"
-          (click)="togglePicker('sticker')"
-        >
-          ▣ Sticker
-        </button>
-      </div>
       @if (openPicker() === 'emoji') {
-        <div class="chat-picker emoji-picker" aria-label="Chọn emoji">
+        <div class="chat-picker emoji-picker" id="stranger-emoji-picker" aria-label="Chọn emoji">
           @for (emoji of emojis; track emoji) {
             <button type="button" (click)="insertEmoji(emoji)" [attr.aria-label]="'Chèn ' + emoji">
               {{ emoji }}
@@ -309,7 +299,11 @@
         </div>
       }
       @if (openPicker() === 'sticker') {
-        <div class="chat-picker sticker-picker" aria-label="Chọn sticker">
+        <div
+          class="chat-picker sticker-picker"
+          id="stranger-sticker-picker"
+          aria-label="Chọn sticker"
+        >
           @for (sticker of stickers; track sticker.code) {
             <button
               type="button"
@@ -322,23 +316,49 @@
           }
         </div>
       }
-      <div class="message-field">
-        <textarea
-          #messageInput
-          id="stranger-message"
-          name="message"
-          [(ngModel)]="message"
-          maxlength="1000"
-          rows="2"
-          placeholder="Viết tin nhắn…"
-          aria-label="Nội dung tin nhắn"
-          (keydown.enter)="onComposerEnter($event)"
-        ></textarea
-        ><small>{{ message.length }}/1000</small>
+      <div class="composer-row">
+        <div class="composer-tools" aria-label="Công cụ tin nhắn">
+          <button
+            type="button"
+            [class.active]="openPicker() === 'emoji'"
+            [attr.aria-expanded]="openPicker() === 'emoji'"
+            aria-controls="stranger-emoji-picker"
+            aria-label="Chọn emoji"
+            (click)="togglePicker('emoji')"
+          >
+            <span aria-hidden="true">☺</span>
+          </button>
+          <button
+            type="button"
+            [class.active]="openPicker() === 'sticker'"
+            [attr.aria-expanded]="openPicker() === 'sticker'"
+            aria-controls="stranger-sticker-picker"
+            aria-label="Chọn sticker"
+            (click)="togglePicker('sticker')"
+          >
+            <span aria-hidden="true">▣</span>
+          </button>
+        </div>
+        <div class="message-field">
+          <textarea
+            #messageInput
+            id="stranger-message"
+            name="message"
+            [(ngModel)]="message"
+            maxlength="1000"
+            rows="1"
+            placeholder="Viết tin nhắn…"
+            aria-label="Nội dung tin nhắn"
+            (keydown.enter)="onComposerEnter($event)"
+          ></textarea
+          ><small>{{ message.length }}/1000</small>
+        </div>
+        <button class="send-button" aria-label="Gửi tin nhắn" [disabled]="!message.trim()">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m4 4 17 8-17 8 3-8-3-8Zm3 8h14"></path>
+          </svg>
+        </button>
       </div>
-      <button class="send-button" aria-label="Gửi tin nhắn" [disabled]="!message.trim()">
-        <span aria-hidden="true">➤</span>
-      </button>
     </form>
   }
   @if (error()) {
