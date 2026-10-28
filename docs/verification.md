@@ -203,3 +203,16 @@ The integration suite additionally requires a working Docker engine because it i
 - Passed: UnitTests 32/32 and ArchitectureTests 4/4.
 - Environment note: the workstation has SDK 10.0.402 while CI pins 10.0.112. Lock generation/verification temporarily selected the installed SDK, then `global.json` was restored unchanged to 10.0.112; centrally pinned NuGet versions and resulting hashes are committed in the lock files.
 
+# GitHub Actions checkout repair — 2026-10-28
+
+- Root cause: `.backend-publish` was committed as a mode `160000` gitlink, but the repository had no `.gitmodules` entry or URL for it. `actions/checkout` therefore failed during recursive submodule cleanup with exit code 128 before restore/build could start.
+- Changed: removed only the `.backend-publish` gitlink from the Git index, preserved the local directory, and ignored `.backend-publish/` so the deployment scratch repository cannot be committed again accidentally.
+- Passed: `git ls-files --stage` no longer contains `.backend-publish` or any other mode `160000` entry.
+- Passed: `git submodule status` returns no submodules. A `.gitmodules` lookup returns no entries as expected; `git diff --check` reports no whitespace errors.
+
+# Local .NET 10 Visual Studio compatibility — 2026-10-28
+
+- Diagnosis: Visual Studio 2022 17.14 opened the solution and selected SDK 9.0.319, which cannot target `net10.0`. Visual Studio Community 2026 18.11 and .NET SDK 10.0.402 are already installed on the workstation.
+- Changed: `global.json` still requests the CI baseline SDK 10.0.112 but now uses `latestFeature`, allowing newer installed .NET 10 feature bands such as 10.0.402 while refusing a different major/minor runtime.
+- Passed: repository CLI SDK resolution selects 10.0.402 and the full Release solution build completes with 0 warnings and 0 errors.
+
