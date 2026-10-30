@@ -2,6 +2,8 @@
 
 Chat sends text/sticker mutations through REST and uses authenticated SignalR at `/hubs/chat` only for subscription and `MessageCreated` notifications. Notifications include the persisted `kind` and allow-listed content code, never a client-provided media URL. `Subscribe(groupId)` verifies current membership on the server before joining `chat:{groupId}`. PostgreSQL is authoritative and the message commit completes before best-effort broadcast.
 
+Edits also use REST and emit the existing ID-only `MessageChanged` event after commit. Clients reconcile the authoritative row from PostgreSQL; no uncommitted edited body is broadcast.
+
 Angular uses automatic reconnect, subscribes again after reconnect, queries REST with its latest time-plus-ID cursor, and deduplicates by message ID/client message ID. Delivery is intentionally at-least-once at the UI boundary; exactly-once delivery is not claimed. If realtime publication fails after commit, REST still reports the persisted message and reconciliation recovers it.
 
 The initial deployment is single-instance. An in-memory connection registry records user/group subscriptions. Groups publishes a post-commit membership-revoked contract when a member leaves or is removed; Chat immediately removes every matching live connection from that SignalR group. A future multi-instance deployment must replace this process-local coordination with an appropriate distributed backplane/revocation mechanism before scaling out.

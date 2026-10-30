@@ -80,9 +80,10 @@
             >
               <div class="message-meta">
                 <strong>{{ message.senderDisplayName }}</strong>
-                <time [dateTime]="message.sentAtUtc">{{
-                  message.sentAtUtc | date: 'shortTime'
-                }}</time>
+                <time [dateTime]="message.sentAtUtc"
+                  >{{ message.sentAtUtc | date: 'shortTime'
+                  }}{{ message.editedAtUtc ? ' · Đã sửa' : '' }}</time
+                >
               </div>
               @if (message.replyTo; as replyPreview) {
                 <button class="reply-preview" type="button" (click)="reply(message)">
@@ -122,9 +123,11 @@
                 <app-message-actions
                   [open]="openActionsFor() === message.id"
                   [mine]="message.senderUserId === auth.user()?.id"
+                  [editable]="message.senderUserId === auth.user()?.id && message.kind === 'Text'"
                   [selectedReaction]="message.myReaction"
                   (openChange)="setMessageActions(message.id, $event)"
                   (replyRequested)="reply(message)"
+                  (editRequested)="edit(message)"
                   (reactionSelected)="react(message, $event)"
                 />
                 @if (message.reactions.length > 0) {
@@ -153,6 +156,14 @@
       }
     </section>
     <form class="composer" [formGroup]="form" (ngSubmit)="send()">
+      @if (editingMessage(); as target) {
+        <div class="replying-banner editing-banner">
+          <span
+            ><strong>Đang sửa tin nhắn</strong><small>{{ target.content }}</small></span
+          >
+          <button type="button" (click)="cancelEdit()" aria-label="Hủy sửa tin nhắn">×</button>
+        </div>
+      }
       @if (replyingTo(); as target) {
         <div class="replying-banner">
           <span
@@ -227,7 +238,7 @@
           class="send-button"
           type="submit"
           [disabled]="form.invalid"
-          aria-label="Gửi tin nhắn"
+          [attr.aria-label]="editingMessage() ? 'Lưu chỉnh sửa' : 'Gửi tin nhắn'"
         >
           <svg aria-hidden="true" viewBox="0 0 24 24">
             <path d="m4 4 17 8-17 8 3-8-3-8Zm3 8h14"></path>

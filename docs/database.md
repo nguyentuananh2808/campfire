@@ -16,6 +16,8 @@ Groups is implemented by `GroupsDbContext` and migration `InitialGroups`. It own
 
 Chat is implemented by `ChatDbContext`, `InitialChat`, `AddChatMessageKinds` and `CompleteChatInteractions`. It owns `chat.Messages` and `MessageReactions`; group, sender and reactor UUIDs deliberately have no cross-schema foreign keys. Content is required and bounded to 2,000 characters. `Kind` is a required 16-character enum string guarded by `CK_Messages_Kind` (`Text|Sticker`). `ReplyToMessageId` is a restrictive self-FK; Application checks that the target belongs to the same group. Reactions use `(MessageId, UserId)` as their primary key and a fixed check constraint. The unique `(GroupId, SenderUserId, ClientMessageId)` index enforces retry idempotency under races, while `(GroupId, SentAtUtc, Id)` supports stable cursor reads. All timestamps use `timestamptz`.
 
+`AddMessageEditing` adds nullable `EditedAtUtc` and application-managed UUID `Version` to every Chat message. Existing rows receive random versions during migration; edits compare the submitted version through EF concurrency handling and rotate it on success.
+
 Events is implemented by `EventsDbContext` and migration `InitialEvents`. It owns `events.Events`, `EventRsvps` and `EventAuditRecords`; group/user UUIDs have no cross-schema foreign keys.
 
 - Event text is bounded to 120 characters for title, 2,000 for description and 200 for location. Absolute times use `timestamptz`.
@@ -26,6 +28,8 @@ Events is implemented by `EventsDbContext` and migration `InitialEvents`. It own
 Rolling back an initial module migration drops its module data and is destructive once real data exists.
 
 Stranger Chat is implemented by `StrangerChatDbContext`, its prior migrations and `CompleteChatInteractions`. It owns `stranger_chat.guest_sessions`, `matchmaking_tickets`, `conversations`, `messages`, `message_reactions`, `blocks` and `reports`. Session cookies are represented only by unique SHA-256 hashes. Message kind is constrained to `Text|Sticker`; reply uses a restrictive self-FK plus a same-conversation Application check. `(MessageId, SessionId)` permits one allow-listed reaction per guest. Queue membership is unique per session, message retries are unique on `(ConversationId, SenderSessionId, ClientMessageId)`, and `UX_reports_conversation_reporter` permits only one report per conversation/reporter under concurrent retries. It has no cross-schema foreign key.
+
+Stranger Chat's `AddMessageEditing` migration independently adds `EditedAtUtc` and a UUID concurrency `Version` to its own messages; no authenticated Chat table or identity record is shared.
 
 Werewolf is implemented by `WerewolfDbContext` and migration `InitialWerewolf`. It owns `werewolf.Rooms`, `RoomPlayers`, `Games`, `GamePlayers`, `GameActions`, `GameVotes` and `GameEvents`; Identity user IDs are UUID values without cross-schema foreign keys.
 

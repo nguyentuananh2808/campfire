@@ -225,3 +225,23 @@ The integration suite additionally requires a working Docker engine because it i
 - Security review: notification state is memory-only; no chat content, sender/group identity, guest token or cookie is stored or placed in the browser title. Background subscriptions use the existing authenticated `/hubs/chat` membership checks, and current-user messages are ignored for unread counting.
 - Not run: physical-device audio acceptance and background-tab throttling behavior on Safari/iOS, Chrome/Android and desktop browsers. Browsers may suppress Web Audio until the first pointer or keyboard interaction; the implementation unlocks audio on that first gesture and keeps unread counters functional even when sound is unavailable.
 
+# Message editing — 2026-10-30
+
+- Passed: full Debug solution build, 0 warnings and 0 errors.
+- Passed: UnitTests 34/34, including text edit/version rotation and sticker rejection in both chat domains.
+- Passed: ArchitectureTests 4/4; both edit endpoints preserve the required MediatR/Application/Infrastructure boundary.
+- Passed: Chat and Stranger Chat EF `has-pending-model-changes`; both generated migrations match their module models.
+- Passed: reviewed generated PostgreSQL SQL; each module adds nullable `EditedAtUtc` plus a non-null UUID `Version` initialized with `gen_random_uuid()` inside one transaction.
+- Passed: frontend Prettier lint, Vitest 27/27 and Angular production build.
+- Security review passed at source level: every edit revalidates membership/active conversation, exact sender ownership, text-only kind, antiforgery, rate limiting and expected version; message bodies are not logged and remain plain text.
+- Blocked: seven focused PostgreSQL integration tests could not start because Docker Desktop's `npipe://./pipe/docker_engine` endpoint is unavailable. The integration project and new authorization/concurrency tests compile, but runtime PostgreSQL evidence must be rerun after Docker starts.
+- Pending: physical 360/390/430px long-press/edit-composer acceptance.
+
+# Be Vietnam Pro typography — 2026-10-30
+
+- Changed: replaced the global Inter/system preference with a `--font-sans` token headed by self-hosted `Be Vietnam Pro`; bundled only weights 400/500/600/700 with `font-display: swap` and kept native fallbacks.
+- Dependency: `@fontsource/be-vietnam-pro` is pinned exactly in `package.json`/`package-lock.json`; no runtime request to Google Fonts is required and the production CSP remains same-origin.
+- Passed: frontend Prettier lint, Vitest 27/27 and Angular production build. The emitted CSS contains Vietnamese/Latin `@font-face` rules and same-origin hashed WOFF2 assets; no Google Fonts URL is present.
+- Audit note: `npm audit --omit=dev` reports one high advisory in transitive `zod@4.6.5`, selected by the pinned Angular 22.2 toolchain and Angular Forms. It is unrelated to the font package and was not force-upgraded outside the pinned compatibility range.
+- Pending: visual typography review at 360/390/430px and desktop after rebuilding the production web container.
+

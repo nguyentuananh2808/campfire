@@ -236,7 +236,9 @@
           } @else {
             <span>{{ m.content }}</span>
           }
-          <time [dateTime]="m.sentAtUtc">{{ m.sentAtUtc | date: 'HH:mm' }}</time>
+          <time [dateTime]="m.sentAtUtc"
+            >{{ m.sentAtUtc | date: 'HH:mm' }}{{ m.editedAtUtc ? ' · Đã sửa' : '' }}</time
+          >
           @if (m.state === 'pending') {
             <small>Đang gửi…</small>
           } @else if (m.state === 'sent' && m.isMine) {
@@ -249,9 +251,11 @@
             <app-message-actions
               [open]="openActionsFor() === m.id"
               [mine]="m.isMine"
+              [editable]="m.isMine && m.kind === 'Text'"
               [selectedReaction]="m.myReaction"
               (openChange)="setMessageActions(m.id, $event)"
               (replyRequested)="reply(m)"
+              (editRequested)="edit(m)"
               (reactionSelected)="react(m, $event)"
             />
             @if (m.reactions.length > 0) {
@@ -278,6 +282,14 @@
       }
     </div>
     <form class="composer" (ngSubmit)="send()">
+      @if (editingMessage(); as target) {
+        <div class="replying-banner editing-banner">
+          <span
+            ><strong>Đang sửa tin nhắn</strong><small>{{ target.content }}</small></span
+          >
+          <button type="button" (click)="cancelEdit()" aria-label="Hủy sửa tin nhắn">×</button>
+        </div>
+      }
       @if (replyingTo(); as target) {
         <div class="replying-banner">
           <span
@@ -353,7 +365,11 @@
           ></textarea
           ><small>{{ message.length }}/1000</small>
         </div>
-        <button class="send-button" aria-label="Gửi tin nhắn" [disabled]="!message.trim()">
+        <button
+          class="send-button"
+          [attr.aria-label]="editingMessage() ? 'Lưu chỉnh sửa' : 'Gửi tin nhắn'"
+          [disabled]="!message.trim()"
+        >
           <svg aria-hidden="true" viewBox="0 0 24 24">
             <path d="m4 4 17 8-17 8 3-8-3-8Zm3 8h14"></path>
           </svg>

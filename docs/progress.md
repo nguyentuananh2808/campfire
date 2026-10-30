@@ -50,6 +50,8 @@ Updated: 2026-10-25 (Asia/Saigon)
 - The subsequent GitHub Actions checkout blocker is repaired: the orphaned `.backend-publish` gitlink has been removed from the index and the local deployment scratch directory is ignored. CI can now complete checkout instead of failing recursive submodule cleanup before the build starts.
 - Local .NET 10 development is aligned with the installed toolchain: `global.json` retains the 10.0.112 CI baseline and permits newer .NET 10 feature bands, while Visual Studio Community 2026 18.11 is the required IDE instead of the still-installed Visual Studio 2022 instance.
 - M17 browser message notifications are implemented. Authenticated Group Chat maintains a separate lazy-loaded SignalR subscription across routes, Stranger Chat detects new peer messages in its active guest session, and both use the same memory-only unread/title/sound service. The Trò chuyện navigation item shows the Group Chat unread total; active visible conversations clear their own scope without discarding unread messages from other groups.
+- M18 message editing is code-complete for Group Chat and Stranger Chat. Only the current sender can edit text, each edit uses an application-managed UUID concurrency version, `EditedAtUtc` is shown in both UIs, stale requests return 409, and post-commit `MessageChanged` reconciliation updates other clients. Mobile long-press exposes an icon-only edit action and the composer provides explicit edit/cancel state.
+- The frontend typography is standardized on self-hosted `Be Vietnam Pro` for Vietnamese readability. Four deliberate weights are bundled from the same origin, while controls inherit the global font and retain a system fallback.
 
 ## Verification status
 
@@ -72,4 +74,4 @@ Updated: 2026-10-25 (Asia/Saigon)
 
 ## Next action
 
-Rebuild the frontend container on `tamsuvoinhau.cloud`, hard-refresh/service-worker-clear the deployed page, then verify long-press, reaction/reply toolbar, latest-message auto-scroll and light/dark switching on a physical 360–430px phone. Continue cookie/antiforgery, SignalR and LiveKit acceptance before treating the single-host pilot as production-ready. Keep registration and Stranger Chat controlled until recovery, rollout gating, moderation, privacy and support requirements are staffed and verified.
+Start Docker Desktop and rerun the focused Chat/StrangerChat PostgreSQL integration tests, then apply both `AddMessageEditing` migrations through `Campfire.DbMigrator`. Rebuild the API and frontend containers on `tamsuvoinhau.cloud`, then verify long-press edit/cancel/save, conflict refresh, realtime reconciliation and light/dark rendering on a physical 360–430px phone. Continue cookie/antiforgery, SignalR and LiveKit acceptance before treating the single-host pilot as production-ready. Keep registration and Stranger Chat controlled until recovery, rollout gating, moderation, privacy and support requirements are staffed and verified.

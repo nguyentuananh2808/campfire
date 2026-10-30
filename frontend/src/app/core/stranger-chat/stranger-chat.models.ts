@@ -24,6 +24,8 @@ export interface StrangerMessage {
   kind: 'Text' | 'Sticker';
   content: string;
   sentAtUtc: string;
+  editedAtUtc: string | null;
+  version: string;
   isMine: boolean;
   replyTo: StrangerReplyPreview | null;
   reactions: StrangerReactionSummary[];

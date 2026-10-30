@@ -2,7 +2,7 @@
 
 Campfire uses the repository-owned Sass color library at `frontend/src/styles/_campfire-colors.scss`. The palette is campfire-like: amber/yellow for sparks and highlights, orange/red for primary actions, and deep ember brown for text and dark surfaces. Components consume semantic CSS variables rather than raw colors so light and dark themes stay consistent.
 
-The refreshed visual system adds semantic muted/glass surfaces, strong borders, success/info states, layered shadows and shared spacing/radius scales. Page heroes use a restrained ember glow, controls use consistent focus rings and primary actions use the flame gradient. System fonts remain deliberate so Vietnamese text renders quickly and reliably without a third-party font dependency.
+The refreshed visual system adds semantic muted/glass surfaces, strong borders, success/info states, layered shadows and shared spacing/radius scales. Page heroes use a restrained ember glow, controls use consistent focus rings and primary actions use the flame gradient. `Be Vietnam Pro` is the product-wide sans-serif typeface at weights 400/500/600/700. It is bundled through `@fontsource/be-vietnam-pro`, served from the same origin with `font-display: swap`, and falls back to the native system stack when unavailable.
 
 The product mark is the supplied campfire-and-friends artwork at `frontend/public/campfire-logo.jpeg`. The shell displays it as a clipped circular brand mark and the browser reuses it for the favicon and Apple touch icon; feature navigation keeps distinct semantic icons so destinations remain scannable.
 

@@ -57,6 +57,7 @@ export class ChatPage {
   readonly olderCursor = signal<string | null>(null);
   readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
   readonly replyingTo = signal<ChatViewMessage | null>(null);
+  readonly editingMessage = signal<ChatViewMessage | null>(null);
   readonly openActionsFor = signal<string | null>(null);
   readonly showLatestButton = signal(false);
   readonly unseenCount = signal(0);
@@ -91,6 +92,7 @@ export class ChatPage {
     this.olderCursor.set(null);
     this.latestCursor.set(null);
     this.replyingTo.set(null);
+    this.editingMessage.set(null);
     this.showLatestButton.set(false);
     this.unseenCount.set(0);
     this.loadInitial(group.id);
@@ -101,12 +103,18 @@ export class ChatPage {
     const group = this.selectedGroup();
     if (!group || this.form.invalid) return;
     const content = this.form.controls.content.value;
+    const editing = this.editingMessage();
+    if (editing) {
+      this.saveEdit(group.id, editing, content);
+      return;
+    }
     this.queueMessage('Text', content);
     this.form.reset();
     this.openPicker.set(null);
   }
 
   sendSticker(code: string): void {
+    if (this.editingMessage()) return;
     if (!this.stickers.some((sticker) => sticker.code === code)) return;
     this.queueMessage('Sticker', code);
     this.openPicker.set(null);
@@ -115,12 +123,37 @@ export class ChatPage {
   reply(message: ChatViewMessage): void {
     if (message.deliveryState !== 'sent') return;
     this.openActionsFor.set(null);
+    if (this.editingMessage()) this.cancelEdit();
     this.replyingTo.set(message);
     queueMicrotask(() => this.messageInput?.nativeElement.focus());
   }
 
   cancelReply(): void {
     this.replyingTo.set(null);
+  }
+
+  edit(message: ChatViewMessage): void {
+    if (
+      message.deliveryState !== 'sent' ||
+      message.kind !== 'Text' ||
+      message.senderUserId !== this.auth.user()?.id
+    )
+      return;
+    this.openActionsFor.set(null);
+    this.replyingTo.set(null);
+    this.editingMessage.set(message);
+    this.form.controls.content.setValue(message.content);
+    queueMicrotask(() => {
+      const input = this.messageInput?.nativeElement;
+      input?.focus();
+      input?.setSelectionRange(input.value.length, input.value.length);
+    });
+  }
+
+  cancelEdit(): void {
+    if (!this.editingMessage()) return;
+    this.editingMessage.set(null);
+    this.form.reset();
   }
 
   react(message: ChatViewMessage, reaction: ChatReaction): void {
@@ -188,6 +221,8 @@ export class ChatPage {
       kind,
       content,
       sentAtUtc: new Date().toISOString(),
+      editedAtUtc: null,
+      version: createClientUuid(),
       replyTo: replyTarget
         ? {
             messageId: replyTarget.id,
@@ -325,6 +360,20 @@ export class ChatPage {
       .subscribe({
         next: (saved) => this.upsert({ ...saved, deliveryState: 'sent' }),
         error: () => this.upsert({ ...message, deliveryState: 'failed' }),
+      });
+  }
+
+  private saveEdit(groupId: string, message: ChatViewMessage, content: string): void {
+    this.chatService
+      .edit(groupId, message.id, content, message.version)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (saved) => {
+          this.upsert({ ...saved, deliveryState: 'sent' }, false);
+          this.editingMessage.set(null);
+          this.form.reset();
+        },
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error)),
       });
   }
 

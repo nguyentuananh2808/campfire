@@ -51,4 +51,21 @@ describe('MessageActions', () => {
     expect(reply?.getAttribute('aria-label')).toBe('Trả lời tin nhắn');
     expect(reply?.textContent?.trim()).toBe('');
   });
+
+  it('shows an icon-only edit action for own messages', () => {
+    const edited = vi.fn();
+    component.editRequested.subscribe(edited);
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('mine', true);
+    fixture.componentRef.setInput('editable', true);
+    fixture.detectChanges();
+
+    const edit = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-label="Sửa tin nhắn"]',
+    );
+    edit?.click();
+
+    expect(edit?.textContent?.trim()).toBe('');
+    expect(edited).toHaveBeenCalledOnce();
+  });
 });

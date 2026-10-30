@@ -50,4 +50,20 @@ export class ChatService {
       ),
     );
   }
+
+  edit(
+    groupId: string,
+    messageId: string,
+    content: string,
+    expectedVersion: string,
+  ): Observable<ChatMessage> {
+    return this.http.get<void>('/api/v1/auth/antiforgery').pipe(
+      switchMap(() =>
+        this.http.put<ChatMessage>(`/api/v1/groups/${groupId}/messages/${messageId}`, {
+          content,
+          expectedVersion,
+        }),
+      ),
+    );
+  }
 }

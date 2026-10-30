@@ -32,6 +32,15 @@
           <path d="m9 8-5 4 5 4v-3h4.5c3 0 5 1.4 6.5 4-0.3-5.4-2.7-8-7-8H9V8Z"></path>
         </svg>
       </button>
+      @if (editable()) {
+        <button class="reply-option" type="button" aria-label="Sửa tin nhắn" (click)="edit()">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path
+              d="m4 20 4.2-1 10.6-10.6a2 2 0 0 0-2.8-2.8L5.4 16.2 4 20Zm10.5-12.9 2.8 2.8"
+            ></path>
+          </svg>
+        </button>
+      }
     </div>
   }
 </div>

@@ -11,6 +11,8 @@ export interface ChatMessage {
   kind: ChatMessageKind;
   content: string;
   sentAtUtc: string;
+  editedAtUtc: string | null;
+  version: string;
   replyTo: ChatReplyPreview | null;
   reactions: ChatReactionSummary[];
   myReaction: ChatReaction | null;

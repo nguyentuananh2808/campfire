@@ -331,3 +331,10 @@ Each milestone is complete only after its recorded checks pass. Optional CodeGra
 2. Add an authenticated background SignalR subscriber that subscribes all server-returned groups and ignores the current user's messages.
 3. Integrate active/read state into Group Chat and incoming-message detection into Stranger Chat.
 4. Add an accessible navigation badge and focused unit tests, then run frontend lint, tests, build and security review.
+# M18 — Edit chat messages
+
+- [x] Add owner-only text-message editing with optimistic concurrency to Chat and StrangerChat.
+- [x] Persist `EditedAtUtc` and a message version in each module-owned schema/migration.
+- [x] Broadcast post-commit changes through the existing SignalR `MessageChanged` event.
+- [x] Add mobile-first edit actions and composer state for both chat experiences.
+- [x] Add focused authorization/concurrency tests and run backend/frontend verification.

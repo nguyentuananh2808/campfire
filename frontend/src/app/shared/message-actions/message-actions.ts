@@ -10,10 +10,12 @@ import { MessageActionReaction } from './message-action-reaction';
 export class MessageActions {
   readonly open = input(false);
   readonly mine = input(false);
+  readonly editable = input(false);
   readonly selectedReaction = input<MessageActionReaction | null>(null);
 
   readonly openChange = output<boolean>();
   readonly replyRequested = output<void>();
+  readonly editRequested = output<void>();
   readonly reactionSelected = output<MessageActionReaction>();
 
   readonly reactions: ReadonlyArray<{
@@ -34,6 +36,11 @@ export class MessageActions {
 
   reply(): void {
     this.replyRequested.emit();
+    this.openChange.emit(false);
+  }
+
+  edit(): void {
+    this.editRequested.emit();
     this.openChange.emit(false);
   }
 

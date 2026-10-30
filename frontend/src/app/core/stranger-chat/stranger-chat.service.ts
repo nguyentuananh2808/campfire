@@ -80,6 +80,19 @@ export class StrangerChatService {
       ),
     );
   }
+  edit(
+    conversationId: string,
+    messageId: string,
+    content: string,
+    expectedVersion: string,
+  ): Observable<StrangerMessage> {
+    return this.mutate(() =>
+      this.http.put<StrangerMessage>(
+        `/api/v1/stranger/conversations/${conversationId}/messages/${messageId}`,
+        { content, expectedVersion },
+      ),
+    );
+  }
   end(id: string, block = false): Observable<boolean> {
     return this.mutate(() =>
       this.http.post<boolean>(`/api/v1/stranger/conversations/${id}/end`, { block }),

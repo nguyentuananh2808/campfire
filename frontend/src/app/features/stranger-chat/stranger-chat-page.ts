@@ -55,6 +55,7 @@ export class StrangerChatPage {
   readonly error = signal('');
   readonly openPicker = signal<'emoji' | 'sticker' | null>(null);
   readonly replyingTo = signal<StrangerMessage | null>(null);
+  readonly editingMessage = signal<StrangerMessage | null>(null);
   readonly openActionsFor = signal<string | null>(null);
   readonly showLatestButton = signal(false);
   readonly unseenCount = signal(0);
@@ -129,11 +130,17 @@ export class StrangerChatPage {
     const text = this.message.trim(),
       c = this.conversation();
     if (!text || !c) return;
+    const editing = this.editingMessage();
+    if (editing) {
+      this.saveEdit(c.id, editing, text);
+      return;
+    }
     this.queueMessage('Text', text);
     this.message = '';
     this.openPicker.set(null);
   }
   sendSticker(code: string) {
+    if (this.editingMessage()) return;
     if (!this.stickers.some((sticker) => sticker.code === code)) return;
     this.queueMessage('Sticker', code);
     this.openPicker.set(null);
@@ -150,6 +157,8 @@ export class StrangerChatPage {
       kind,
       content,
       sentAtUtc: new Date().toISOString(),
+      editedAtUtc: null,
+      version: createClientUuid(),
       isMine: true,
       replyTo: replyTarget
         ? {
@@ -200,11 +209,38 @@ export class StrangerChatPage {
   reply(message: StrangerMessage) {
     if (message.state !== 'sent') return;
     this.openActionsFor.set(null);
+    if (this.editingMessage()) this.cancelEdit();
     this.replyingTo.set(message);
     queueMicrotask(() => this.messageInput?.nativeElement.focus());
   }
   cancelReply() {
     this.replyingTo.set(null);
+  }
+  edit(message: StrangerMessage) {
+    if (message.state !== 'sent' || !message.isMine || message.kind !== 'Text') return;
+    this.openActionsFor.set(null);
+    this.replyingTo.set(null);
+    this.editingMessage.set(message);
+    this.message = message.content;
+    queueMicrotask(() => {
+      const input = this.messageInput?.nativeElement;
+      input?.focus();
+      input?.setSelectionRange(input.value.length, input.value.length);
+    });
+  }
+  cancelEdit() {
+    this.editingMessage.set(null);
+    this.message = '';
+  }
+  private saveEdit(conversationId: string, message: StrangerMessage, content: string) {
+    this.api.edit(conversationId, message.id, content, message.version).subscribe({
+      next: (saved) => {
+        this.replaceMessage({ ...saved, state: 'sent' });
+        this.editingMessage.set(null);
+        this.message = '';
+      },
+      error: (error) => this.fail(error),
+    });
   }
   togglePicker(picker: 'emoji' | 'sticker') {
     this.openPicker.update((current) => (current === picker ? null : picker));
