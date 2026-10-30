@@ -16,6 +16,7 @@ import { interval, switchMap } from 'rxjs';
 import { StrangerChatService } from '../../core/stranger-chat/stranger-chat.service';
 import { StrangerChatRealtimeService } from '../../core/stranger-chat/stranger-chat-realtime.service';
 import { createClientUuid } from '../../core/ids/client-uuid';
+import { TabNotificationService } from '../../core/notifications/tab-notification.service';
 import {
   GuestSession,
   GuestGender,
@@ -42,6 +43,7 @@ export class StrangerChatPage {
   private readonly api = inject(StrangerChatService);
   private readonly realtime = inject(StrangerChatRealtimeService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly notifications = inject(TabNotificationService);
   readonly session = signal<GuestSession | null>(null);
   readonly conversation = signal<StrangerConversation | null>(null);
   readonly messages = signal<StrangerMessage[]>([]);
@@ -247,6 +249,7 @@ export class StrangerChatPage {
     const c = this.conversation();
     if (!c) return;
     this.api.end(c.id, block).subscribe(() => {
+      this.notifications.clear('stranger-chat');
       this.conversation.set(null);
       this.safetyOpen.set(false);
       this.realtimeConnected.set(false);
@@ -262,6 +265,7 @@ export class StrangerChatPage {
   }
   leave() {
     this.api.deleteSession().subscribe(() => {
+      this.notifications.clear('stranger-chat');
       void this.realtime.stop();
       this.session.set(null);
       this.conversation.set(null);
@@ -313,9 +317,22 @@ export class StrangerChatPage {
         ]);
         const latestId = p.items.at(-1)?.id;
         if (latestId && latestId !== previousLastId) {
+          const previousIndex = previousLastId
+            ? p.items.findIndex((item) => item.id === previousLastId)
+            : -1;
+          const incomingCount = previousLastId
+            ? p.items.slice(previousIndex + 1).filter((item) => !item.isMine).length
+            : 0;
+          if (incomingCount > 0) {
+            this.notifications.announce(
+              'stranger-chat',
+              incomingCount,
+              !shouldFollow || !this.notifications.isPageVisible(),
+            );
+          }
           if (shouldFollow) this.scrollToLatest();
           else {
-            this.unseenCount.update((count) => count + 1);
+            this.unseenCount.update((count) => count + Math.max(incomingCount, 1));
             this.showLatestButton.set(true);
           }
         }
@@ -337,6 +354,7 @@ export class StrangerChatPage {
     if (this.isNearBottom()) {
       this.showLatestButton.set(false);
       this.unseenCount.set(0);
+      this.notifications.clear('stranger-chat');
     }
   }
 
@@ -353,6 +371,7 @@ export class StrangerChatPage {
   private scrollToLatest(): void {
     this.showLatestButton.set(false);
     this.unseenCount.set(0);
+    this.notifications.clear('stranger-chat');
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         const viewport = this.messageViewport?.nativeElement;

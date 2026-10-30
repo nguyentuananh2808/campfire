@@ -49,6 +49,7 @@ Updated: 2026-10-25 (Asia/Saigon)
 - The GitHub Actions NU1004 blocker after the Learning restructure is repaired: all solution NuGet lock files now match their direct and transitive project dependencies. Locked restore, the full Release build, 32 unit tests and four architecture tests pass without weakening CI's `--locked-mode` gate.
 - The subsequent GitHub Actions checkout blocker is repaired: the orphaned `.backend-publish` gitlink has been removed from the index and the local deployment scratch directory is ignored. CI can now complete checkout instead of failing recursive submodule cleanup before the build starts.
 - Local .NET 10 development is aligned with the installed toolchain: `global.json` retains the 10.0.112 CI baseline and permits newer .NET 10 feature bands, while Visual Studio Community 2026 18.11 is the required IDE instead of the still-installed Visual Studio 2022 instance.
+- M17 browser message notifications are implemented. Authenticated Group Chat maintains a separate lazy-loaded SignalR subscription across routes, Stranger Chat detects new peer messages in its active guest session, and both use the same memory-only unread/title/sound service. The Trò chuyện navigation item shows the Group Chat unread total; active visible conversations clear their own scope without discarding unread messages from other groups.
 
 ## Verification status
 

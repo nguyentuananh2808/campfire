@@ -216,3 +216,12 @@ The integration suite additionally requires a working Docker engine because it i
 - Changed: `global.json` still requests the CI baseline SDK 10.0.112 but now uses `latestFeature`, allowing newer installed .NET 10 feature bands such as 10.0.402 while refusing a different major/minor runtime.
 - Passed: repository CLI SDK resolution selects 10.0.402 and the full Release solution build completes with 0 warnings and 0 errors.
 
+# Browser message notifications — 2026-10-30
+
+- Passed: full frontend Prettier lint after formatting the previously unformatted, otherwise unchanged `auth-shared.scss`.
+- Passed: Vitest 26/26 across 12 test files. New tests cover total/group unread aggregation, scoped clearing, browser-title count updates and the accessible navigation badge.
+- Passed: Angular production build with no budget warnings. SignalR remains in a lazy chunk; the initial `main` bundle is 114.06 kB raw rather than absorbing the approximately 55 kB SignalR dependency.
+- Passed: `git diff --check`; only the repository's expected LF-to-CRLF notices were emitted.
+- Security review: notification state is memory-only; no chat content, sender/group identity, guest token or cookie is stored or placed in the browser title. Background subscriptions use the existing authenticated `/hubs/chat` membership checks, and current-user messages are ignored for unread counting.
+- Not run: physical-device audio acceptance and background-tab throttling behavior on Safari/iOS, Chrome/Android and desktop browsers. Browsers may suppress Web Audio until the first pointer or keyboard interaction; the implementation unlocks audio on that first gesture and keeps unread counters functional even when sound is unavailable.
+

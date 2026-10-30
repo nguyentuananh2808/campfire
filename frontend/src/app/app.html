@@ -30,13 +30,26 @@
 @if (auth.status() === 'authenticated') {
   <nav class="bottom-nav" aria-label="Điều hướng chính">
     <span class="nav-heading">Không gian của bạn</span>
-    <a routerLink="/chat" routerLinkActive="active" ariaCurrentWhenActive="page"
+    <a
+      routerLink="/chat"
+      routerLinkActive="active"
+      ariaCurrentWhenActive="page"
+      [attr.aria-label]="
+        notifications.groupUnreadCount() > 0
+          ? 'Trò chuyện, ' + notifications.groupUnreadCount() + ' tin nhắn chưa đọc'
+          : 'Trò chuyện'
+      "
       ><span class="nav-icon" aria-hidden="true"
         ><svg viewBox="0 0 24 24">
           <path d="M7 17.5 3.5 20v-5.2A8 8 0 1 1 7 17.5Z" />
           <path d="M8 9.5h8M8 13h5" /></svg></span
-      ><span>Trò chuyện</span></a
-    >
+      ><span>Trò chuyện</span>
+      @if (notifications.groupUnreadCount() > 0) {
+        <span class="nav-badge" aria-hidden="true">{{
+          notifications.groupUnreadCount() > 99 ? '99+' : notifications.groupUnreadCount()
+        }}</span>
+      }
+    </a>
     <a routerLink="/events" routerLinkActive="active" ariaCurrentWhenActive="page"
       ><span class="nav-icon" aria-hidden="true"
         ><svg viewBox="0 0 24 24">

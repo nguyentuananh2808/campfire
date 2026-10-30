@@ -313,3 +313,21 @@ Each milestone is complete only after its recorded checks pass. Optional CodeGra
 2. Replace oversized chat headers and composers with compact responsive conversation surfaces.
 3. Harden long-press behavior and accessible labels for reaction, reply, emoji, sticker and send controls.
 4. Run frontend formatting, unit tests, production build and whitespace verification; record physical-device visual QA separately.
+
+## M17 Message notifications and unread badge
+
+### Acceptance criteria
+
+- Authenticated users receive a subtle in-browser sound for new Group Chat messages from another member, including while viewing another route.
+- Guest Stranger Chat uses the same sound and browser-tab unread counter while its conversation is active.
+- The browser title displays the total unread count as `(n) Campfire`, capped visually at `99+`; authenticated navigation displays the unread Group Chat count on the Trò chuyện destination.
+- Reading the active group/conversation clears only its unread count. Messages sent by the current user never increment unread state, and messages from other groups remain counted.
+- Notification state is memory-only. Do not persist message content, sender identity, group names, guest identifiers or unread metadata in browser storage, and do not expose private content through operating-system notifications.
+- The background group SignalR connection subscribes only after authenticated group membership is loaded; the server remains authoritative for every subscription. SignalR is lazy-loaded after authentication so anonymous startup does not absorb its bundle cost.
+
+### Delivery steps
+
+1. Add a browser-tab notification service for scoped unread counts, title updates and a user-gesture-compatible Web Audio tone.
+2. Add an authenticated background SignalR subscriber that subscribes all server-returned groups and ignores the current user's messages.
+3. Integrate active/read state into Group Chat and incoming-message detection into Stranger Chat.
+4. Add an accessible navigation badge and focused unit tests, then run frontend lint, tests, build and security review.

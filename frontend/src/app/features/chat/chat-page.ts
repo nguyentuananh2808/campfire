@@ -25,6 +25,7 @@ import { ChatViewMessage } from '../../core/chat/chat-view-message';
 import { GroupSummary } from '../../core/groups/group-summary';
 import { GroupsService } from '../../core/groups/groups.service';
 import { createClientUuid } from '../../core/ids/client-uuid';
+import { GroupMessageNotificationService } from '../../core/notifications/group-message-notification.service';
 import { LongPressDirective } from '../../shared/long-press/long-press.directive';
 import { MessageActions } from '../../shared/message-actions/message-actions';
 
@@ -44,6 +45,7 @@ export class ChatPage {
   private readonly groupsService = inject(GroupsService);
   private readonly chatService = inject(ChatService);
   private readonly realtime = inject(ChatRealtimeService);
+  private readonly groupNotifications = inject(GroupMessageNotificationService);
   readonly auth = inject(AuthStore);
   readonly groups = signal<GroupSummary[]>([]);
   readonly selectedGroup = signal<GroupSummary | null>(null);
@@ -73,7 +75,10 @@ export class ChatPage {
   });
 
   constructor() {
-    this.destroyRef.onDestroy(() => void this.realtime.stop());
+    this.destroyRef.onDestroy(() => {
+      this.groupNotifications.setActiveGroup(undefined);
+      void this.realtime.stop();
+    });
     this.loadGroups();
   }
 
@@ -81,6 +86,7 @@ export class ChatPage {
     const group = this.groups().find((candidate) => candidate.id === groupId);
     if (!group || group.id === this.selectedGroup()?.id) return;
     this.selectedGroup.set(group);
+    this.groupNotifications.setActiveGroup(group.id);
     this.messages.set([]);
     this.olderCursor.set(null);
     this.latestCursor.set(null);
@@ -238,8 +244,10 @@ export class ChatPage {
       .subscribe({
         next: (groups) => {
           this.groups.set(groups);
+          this.groupNotifications.syncGroups(groups.map((group) => group.id));
           if (groups[0]) {
             this.selectedGroup.set(groups[0]);
+            this.groupNotifications.setActiveGroup(groups[0].id);
             this.loadInitial(groups[0].id);
           } else this.loading.set(false);
         },
@@ -364,6 +372,8 @@ export class ChatPage {
     if (this.isNearBottom()) {
       this.showLatestButton.set(false);
       this.unseenCount.set(0);
+      const groupId = this.selectedGroup()?.id;
+      if (groupId) this.groupNotifications.markRead(groupId);
     }
   }
 
@@ -380,6 +390,8 @@ export class ChatPage {
   private scrollToLatest(): void {
     this.showLatestButton.set(false);
     this.unseenCount.set(0);
+    const groupId = this.selectedGroup()?.id;
+    if (groupId) this.groupNotifications.markRead(groupId);
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         const viewport = this.messageViewport?.nativeElement;
