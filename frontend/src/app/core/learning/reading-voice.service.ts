@@ -16,6 +16,7 @@ export class ReadingVoiceService {
   private queue: string[] = [];
   private voiceName = '';
   private rate = 0.9;
+  private currentUtterance: SpeechSynthesisUtterance | null = null;
 
   constructor() {
     if (!this.supported) return;
@@ -28,7 +29,7 @@ export class ReadingVoiceService {
   }
 
   speak(text: string, voiceName: string, rate: number): void {
-    this.stop();
+    if (this.speaking() || this.paused()) this.stop();
     this.error.set('');
     if (!this.supported) {
       this.error.set(
@@ -61,6 +62,7 @@ export class ReadingVoiceService {
   stop(): void {
     if (this.supported) window.speechSynthesis.cancel();
     this.queue = [];
+    this.currentUtterance = null;
     this.speaking.set(false);
     this.paused.set(false);
   }
@@ -73,20 +75,32 @@ export class ReadingVoiceService {
       return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
-    const selected = window.speechSynthesis
-      .getVoices()
-      .find((voice) => voice.name === this.voiceName);
+    const availableVoices = window.speechSynthesis.getVoices();
+    const selected = this.voiceName
+      ? availableVoices.find((voice) => voice.name === this.voiceName)
+      : (availableVoices.find((voice) => /^zh-CN$/i.test(voice.lang)) ??
+        availableVoices.find((voice) => /^zh([_-]|$)/i.test(voice.lang)));
     if (selected) utterance.voice = selected;
     utterance.lang = selected?.lang ?? 'zh-CN';
     utterance.rate = this.rate;
     this.activeVoice.set(selected?.name ?? 'Giọng mặc định của trình duyệt (zh-CN)');
-    utterance.onend = () => this.speakNext();
+    utterance.onstart = () => {
+      this.speaking.set(true);
+      this.paused.set(false);
+    };
+    utterance.onend = () => {
+      this.currentUtterance = null;
+      this.speakNext();
+    };
     utterance.onerror = () => {
       this.queue = [];
+      this.currentUtterance = null;
       this.speaking.set(false);
       this.paused.set(false);
       this.error.set('Không thể phát giọng đọc trên thiết bị này.');
     };
+    this.currentUtterance = utterance;
+    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
   }
 

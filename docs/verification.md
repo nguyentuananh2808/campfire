@@ -278,4 +278,5 @@ The integration suite additionally requires a working Docker engine because it i
 - Passed: frontend Prettier lint, Vitest 28/28 and Angular production build; Learning remains a lazy chunk.
 - Partial: solution-wide `dotnet format --verify-no-changes` still reports the repository's pre-existing whitespace/encoding/import-order debt across Learning, StrangerChat, migrations and earlier Chat changes. The new source builds successfully; broad mechanical formatting was intentionally not applied over unrelated user changes.
 - Not run: real-device voice quality/availability checks. Web Speech synthesis voices come from the browser and operating system, so Campfire reports the selected voice instead of promising a cloud AI voice or identical quality on every device.
+- Follow-up passed: frontend Prettier lint, Vitest 28/28 and Angular production build after separating API preparation from the direct playback gesture and fixing long unbroken Mandarin text overflow. Physical audio output still requires verification on the target phone because the automation environment cannot hear device audio.
 

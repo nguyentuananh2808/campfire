@@ -6,6 +6,8 @@
   gap: 22px;
   max-width: 1320px;
   margin: auto;
+  min-width: 0;
+  width: 100%;
 }
 .hero {
   align-items: center;
@@ -144,6 +146,8 @@ p {
 .reader-panel {
   display: grid;
   gap: 20px;
+  min-width: 0;
+  overflow: hidden;
 }
 .reader-panel > header {
   display: grid;
@@ -163,6 +167,7 @@ p {
   display: grid;
   gap: 8px;
   font-weight: 700;
+  min-width: 0;
 }
 .reader-input textarea,
 .reader-tools select {
@@ -176,8 +181,13 @@ p {
 }
 .reader-input textarea {
   line-height: 1.8;
+  max-width: 100%;
   min-height: 220px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   resize: vertical;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .reader-input textarea:focus,
 .reader-tools select:focus,
@@ -195,6 +205,10 @@ p {
   display: grid;
   gap: 14px;
   grid-template-columns: auto minmax(220px, 1fr) minmax(180px, 0.7fr);
+  min-width: 0;
+}
+.reader-tools select {
+  min-width: 0;
 }
 .reader-tools .file-button {
   align-items: center;
@@ -819,7 +833,7 @@ p {
     grid-template-columns: 1fr 1fr;
   }
   .reader-actions .primary {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
   .learning-grid {
     gap: 14px;

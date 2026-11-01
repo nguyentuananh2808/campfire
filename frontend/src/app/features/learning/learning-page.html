@@ -36,11 +36,17 @@
       <p>Đang chuẩn bị góc học của bạn…</p>
     </div>
   }
-  @if (error()) {
+  @if (loadError() && mode() !== 'reader') {
     <div class="state-card error" role="alert">
       <strong>Chưa thể tải nội dung</strong>
-      <p>{{ error() }}</p>
+      <p>{{ loadError() }}</p>
       <button type="button" (click)="ngOnInit()">Thử lại</button>
+    </div>
+  }
+  @if (error()) {
+    <div class="state-card error" role="alert">
+      <strong>Chưa thể thực hiện</strong>
+      <p>{{ error() }}</p>
     </div>
   }
   @if (notice()) {
@@ -379,7 +385,9 @@
           id="reading-text"
           maxlength="10000"
           rows="10"
+          wrap="soft"
           [(ngModel)]="readingText"
+          (ngModelChange)="readingTextChanged($event)"
           placeholder="例如：你好，欢迎来到篝火中文学习。"
           lang="zh-CN"
         ></textarea>
@@ -420,15 +428,17 @@
           type="button"
           class="primary"
           [disabled]="pending() === 'reader' || !reader.supported"
-          (click)="prepareAndSpeak()"
+          (click)="prepareReading()"
         >
-          {{
-            pending() === 'reader'
-              ? 'Đang chuẩn bị…'
-              : reader.speaking()
-                ? 'Phát lại từ đầu'
-                : 'Phát giọng đọc'
-          }}
+          {{ pending() === 'reader' ? 'Đang chuẩn bị…' : 'Chuẩn bị văn bản' }}
+        </button>
+        <button
+          type="button"
+          class="primary"
+          [disabled]="!preparedReadingText() || !reader.supported"
+          (click)="playPreparedReading()"
+        >
+          {{ reader.speaking() ? 'Phát lại từ đầu' : 'Phát giọng đọc' }}
         </button>
         <button
           type="button"

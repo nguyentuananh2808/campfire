@@ -30,6 +30,7 @@ export class LearningPage implements OnInit {
   readonly loading = signal(true);
   readonly pending = signal<string | null>(null);
   readonly error = signal('');
+  readonly loadError = signal('');
   readonly notice = signal('');
   readonly path = signal<LearningPath | null>(null);
   readonly day = signal<LearningDayDetail | null>(null);
@@ -43,6 +44,7 @@ export class LearningPage implements OnInit {
   readingRate = 0.9;
   readonly preparedCharacterCount = signal(0);
   readonly preparedChineseCount = signal(0);
+  readonly preparedReadingText = signal('');
 
   ngOnInit(): void {
     this.load();
@@ -51,7 +53,7 @@ export class LearningPage implements OnInit {
     this.mode.set(mode);
     this.error.set('');
   }
-  prepareAndSpeak(): void {
+  prepareReading(): void {
     const text = this.readingText.trim();
     if (!text) {
       this.error.set('Hãy nhập hoặc tải lên văn bản tiếng Trung.');
@@ -65,12 +67,28 @@ export class LearningPage implements OnInit {
       .subscribe({
         next: (prepared) => {
           this.readingText = prepared.text;
+          this.preparedReadingText.set(prepared.text);
           this.preparedCharacterCount.set(prepared.characterCount);
           this.preparedChineseCount.set(prepared.chineseCharacterCount);
-          this.reader.speak(prepared.text, this.selectedVoice, this.readingRate);
+          this.notice.set('Văn bản đã sẵn sàng. Bấm “Phát giọng đọc” để nghe.');
         },
         error: (e) => this.error.set(getApiErrorMessage(e)),
       });
+  }
+  playPreparedReading(): void {
+    const text = this.preparedReadingText();
+    if (!text) {
+      this.error.set('Hãy chuẩn bị văn bản trước khi phát.');
+      return;
+    }
+    this.reader.speak(text, this.selectedVoice, this.readingRate);
+  }
+  readingTextChanged(value: string): void {
+    this.readingText = value;
+    this.preparedReadingText.set('');
+    this.preparedCharacterCount.set(0);
+    this.preparedChineseCount.set(0);
+    this.reader.stop();
   }
   async selectTextFile(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
@@ -92,6 +110,10 @@ export class LearningPage implements OnInit {
         return;
       }
       this.readingText = text.slice(0, 10_000);
+      this.preparedReadingText.set('');
+      this.preparedCharacterCount.set(0);
+      this.preparedChineseCount.set(0);
+      this.reader.stop();
       this.error.set(text.length > 10_000 ? 'Đã lấy 10.000 ký tự đầu tiên của file.' : '');
     } catch {
       this.error.set('Không thể đọc file này. Hãy lưu file ở định dạng UTF-8.');
@@ -182,6 +204,7 @@ export class LearningPage implements OnInit {
 
   private load(): void {
     this.loading.set(true);
+    this.loadError.set('');
     forkJoin({
       path: this.api.path(),
       today: this.api.today(),
@@ -194,7 +217,7 @@ export class LearningPage implements OnInit {
           this.day.set(today.currentDay);
           this.capabilities.set(capabilities);
         },
-        error: (e) => this.error.set(getApiErrorMessage(e)),
+        error: (e) => this.loadError.set(getApiErrorMessage(e)),
       });
   }
   private applyCompletion(day: LearningDayDetail, xp: number): void {
