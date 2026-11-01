@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddDbContext<LearningDbContext>(options => options.UseNpgsql(connection, x => x.MigrationsHistoryTable("__EFMigrationsHistory", LearningDbContext.Schema)));
         services.AddScoped<ILearningService, EfLearningService>();
+        services.AddScoped<ILearningTextService, LearningTextService>();
         services.AddHealthChecks().AddDbContextCheck<LearningDbContext>("learning-database");
         return services;
     }

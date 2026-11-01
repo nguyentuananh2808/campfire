@@ -1,5 +1,17 @@
 # Verification evidence
 
+## 2026-11-01 — Group Chat image upload
+
+- `dotnet build backend/src/Host/Campfire.Api/Campfire.Api.csproj --no-restore -m:1`: passed, 0 warnings/errors.
+- `dotnet test backend/tests/Campfire.UnitTests/Campfire.UnitTests.csproj --no-restore`: passed, 35/35.
+- `dotnet test backend/tests/Campfire.ArchitectureTests/Campfire.ArchitectureTests.csproj --no-restore`: passed, 4/4.
+- `npm test -- --watch=false`: passed, 12 files / 27 tests.
+- `npm run build`: passed.
+- `npm run lint`: passed after Prettier formatting.
+- Migration reviewed: only replaces `CK_Messages_Kind` with `Text|Sticker|Image`; rollback restores the prior constraint.
+- `dotnet ef migrations has-pending-model-changes ... --context ChatDbContext`: passed, no pending changes.
+- Real PostgreSQL migration/integration and browser mobile QA: not run in this environment.
+
 All times use Asia/Saigon. A check is marked passed only when it was actually executed successfully.
 
 ## Learning Clean Architecture refactor — 2026-10-27
@@ -244,4 +256,26 @@ The integration suite additionally requires a working Docker engine because it i
 - Passed: frontend Prettier lint, Vitest 27/27 and Angular production build. The emitted CSS contains Vietnamese/Latin `@font-face` rules and same-origin hashed WOFF2 assets; no Google Fonts URL is present.
 - Audit note: `npm audit --omit=dev` reports one high advisory in transitive `zod@4.6.5`, selected by the pinned Angular 22.2 toolchain and Angular Forms. It is unrelated to the font package and was not force-upgraded outside the pinned compatibility range.
 - Pending: visual typography review at 360/390/430px and desktop after rebuilding the production web container.
+
+# Professional UI refresh — 2026-11-01
+
+- Changed: added `design-system/campfire/MASTER.md` as the repository UI baseline. It keeps Campfire's ember palette and self-hosted Be Vietnam Pro while standardizing radius, elevation, density, typography, interaction and accessibility rules.
+- Changed: simplified the global background, application shell, mobile/desktop navigation, authentication, shared heroes, Groups, Events, Learning, Group Chat and Stranger Chat. Repeated gradients, blur, glow and floating-card motion were replaced with semantic surfaces, restrained borders and one primary action color.
+- Passed: `npm run lint`.
+- Passed: Vitest 27/27 across 12 files.
+- Passed: Angular production build with no budget warning; initial bundle is 318.18 kB raw and 91.46 kB estimated transfer.
+- Passed: local browser visual check at 390 x 844 for the shell and login in both light/dark themes, plus 1440 x 900 for registration. No horizontal overflow was observed and theme toggling changed the computed palette.
+- Passed: `git diff --check`; only expected LF-to-CRLF conversion notices were emitted.
+- Pending: physical-device acceptance at 360/430px, authenticated feature-state walkthroughs that require a running API/database, and deployed-origin verification after the web container is rebuilt.
+
+# Learning Mandarin text reader — 2026-11-01
+
+- Changed: added authenticated `POST /api/v1/learning/reading/prepare` with antiforgery, FluentValidation and the required `endpoint -> ISender -> handler -> ILearningTextService -> Infrastructure` boundary. Input is capped at 10,000 characters, whitespace-only content is rejected and the normalized text is not persisted.
+- Changed: added the third Learning tab “Luyện nghe”. It accepts direct text or a local UTF-8 `.txt` up to 100 KiB, lists Mandarin voices exposed by the device, and provides rate, replay, pause/resume and stop controls with accessible unsupported/error states.
+- Privacy review: the browser reads `.txt` locally and sends only its text through the authenticated same-origin API. Neither binary files nor reading content are placed in PostgreSQL, localStorage or application logs.
+- Passed: Debug API build with 0 warnings/errors.
+- Passed: ArchitectureTests 4/4 and UnitTests 35/35.
+- Passed: frontend Prettier lint, Vitest 28/28 and Angular production build; Learning remains a lazy chunk.
+- Partial: solution-wide `dotnet format --verify-no-changes` still reports the repository's pre-existing whitespace/encoding/import-order debt across Learning, StrangerChat, migrations and earlier Chat changes. The new source builds successfully; broad mechanical formatting was intentionally not applied over unrelated user changes.
+- Not run: real-device voice quality/availability checks. Web Speech synthesis voices come from the browser and operating system, so Campfire reports the selected voice instead of promising a cloud AI voice or identical quality on every device.
 

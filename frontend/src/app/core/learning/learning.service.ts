@@ -9,6 +9,7 @@ import {
   LearningPath,
   LearningToday,
   VocabularyMindMap,
+  PreparedReadingText,
 } from './learning.models';
 
 @Injectable({ providedIn: 'root' })
@@ -46,6 +47,11 @@ export class LearningService {
       this.http.post<ExerciseResult>(`/api/v1/learning/activities/${activityId}/submit`, {
         answers,
       }),
+    );
+  }
+  prepareReadingText(text: string): Observable<PreparedReadingText> {
+    return this.mutation(() =>
+      this.http.post<PreparedReadingText>('/api/v1/learning/reading/prepare', { text }),
     );
   }
   private mutation<T>(request: () => Observable<T>): Observable<T> {

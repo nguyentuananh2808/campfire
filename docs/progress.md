@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-11-01 — Ảnh tiết kiệm dung lượng cho Group Chat
+
+- Đã thêm upload ảnh Group Chat theo đúng MediatR vertical slice; membership được kiểm tra cho cả upload và download.
+- Browser resize cạnh dài 1280 px, mã hóa WebP quality 0.78, giới hạn 1 MiB và có optimistic/pending/failed retry.
+- PostgreSQL chỉ lưu SHA-256 key; binary nằm trong private `chat-media` Docker volume, không public static folder.
+- Migration `AddImageMessages` mở rộng kind constraint. StrangerChat image còn là bước kế tiếp; không bật endpoint giả.
+
 Updated: 2026-10-25 (Asia/Saigon)
 
 ## 2026-10-27 — Learning Clean Architecture refactor
@@ -52,6 +59,9 @@ Updated: 2026-10-25 (Asia/Saigon)
 - M17 browser message notifications are implemented. Authenticated Group Chat maintains a separate lazy-loaded SignalR subscription across routes, Stranger Chat detects new peer messages in its active guest session, and both use the same memory-only unread/title/sound service. The Trò chuyện navigation item shows the Group Chat unread total; active visible conversations clear their own scope without discarding unread messages from other groups.
 - M18 message editing is code-complete for Group Chat and Stranger Chat. Only the current sender can edit text, each edit uses an application-managed UUID concurrency version, `EditedAtUtc` is shown in both UIs, stale requests return 409, and post-commit `MessageChanged` reconciliation updates other clients. Mobile long-press exposes an icon-only edit action and the composer provides explicit edit/cancel state.
 - The frontend typography is standardized on self-hosted `Be Vietnam Pro` for Vietnamese readability. Four deliberate weights are bundled from the same origin, while controls inherit the global font and retain a system fallback.
+- M18 professional UI refresh establishes a restrained warm-editorial design system for Campfire. The shell, authentication, shared pages, Groups, Events, Learning, Group Chat and Stranger Chat now use flatter semantic surfaces, one ember accent, tighter type scale, quieter elevation and consistent radii instead of repeated gradients, glass effects and decorative glow.
+- M19 Learning text reader is code-complete. Authenticated users can paste Mandarin text or load a local UTF-8 `.txt`, normalize it through the required MediatR/Application/Infrastructure path and play it with an available `zh-CN` browser voice. Playback supports voice selection, rate, replay, pause/resume and stop; text/file contents are not persisted or logged.
+- The refreshed light/dark token system was visually exercised on the local Angular app at a 390 x 844 mobile viewport and a 1440 x 900 desktop viewport. Theme state changes update the computed background palette; the responsive shell and authentication forms remain readable without horizontal overflow.
 
 ## Verification status
 

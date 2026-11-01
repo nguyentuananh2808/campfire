@@ -8,9 +8,9 @@
 }
 
 button {
-  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  background: var(--primary);
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   color: var(--on-primary);
   font: inherit;
   font-weight: 750;
@@ -33,7 +33,7 @@ button:disabled {
 .error-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   margin-bottom: var(--space-6);
   padding: var(--space-5);
   box-shadow: var(--shadow-sm);
@@ -54,7 +54,7 @@ button:disabled {
 input {
   background: var(--input-surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   color: var(--ink);
   flex: 1;
   font: inherit;
@@ -86,21 +86,21 @@ input {
   align-items: center;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   color: var(--ink);
   display: flex;
   gap: var(--space-4);
   min-height: 80px;
   padding: var(--space-4);
   text-decoration: none;
-  box-shadow: 0 5px 18px color-mix(in srgb, var(--shadow-color) 60%, transparent);
+  box-shadow: var(--shadow-sm);
 }
 
 .group-mark {
   align-items: center;
   background: var(--primary-soft);
   border: 1px solid color-mix(in srgb, var(--primary) 16%, transparent);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   color: var(--primary-strong);
   display: flex;
   font-size: 1.3rem;
@@ -112,8 +112,7 @@ input {
 @media (hover: hover) {
   .group-list a:hover {
     border-color: var(--border-strong);
-    box-shadow: var(--shadow);
-    transform: translateY(-2px);
+    background: var(--surface-muted);
   }
 }
 

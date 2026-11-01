@@ -1,5 +1,43 @@
 # Implementation plan
 
+## M19 — Luyện nghe văn bản tiếng Trung
+
+- [x] Thêm tab Luyện nghe trong Learning, nhận văn bản nhập trực tiếp hoặc file UTF-8 `.txt` tối đa 100 KiB.
+- [x] Chuẩn hóa văn bản qua `endpoint -> ISender -> command handler -> ILearningTextService -> Infrastructure` và không lưu nội dung.
+- [x] Phát trực tiếp bằng Web Speech API `zh-CN`, cho chọn voice Quan thoại sẵn có, tốc độ, tạm dừng/tiếp tục/dừng và hiển thị khả năng thực tế của trình duyệt.
+- [x] Hoàn thiện validation, typed API, trạng thái loading/error/unsupported, mobile 360–430px, unit test và quality gates.
+
+Acceptance criteria:
+
+- Chỉ user đăng nhập được dùng API; mutation giữ antiforgery và giới hạn 10.000 ký tự sau chuẩn hóa.
+- File không được gửi/lưu như binary; client chỉ đọc `.txt` UTF-8, từ chối file sai loại hoặc quá 100 KiB rồi gửi text đã đọc.
+- Không tuyên bố voice AI/provider cloud nếu trình duyệt chỉ có voice hệ thống; UI hiển thị đúng tên và ngôn ngữ voice đang phát.
+- Nội dung hiển thị và phát như plain text, không dùng `innerHTML`, không ghi log nội dung và không lưu vào PostgreSQL/localStorage.
+
+## M18 — Professional UI refresh
+
+- [x] Chuẩn hóa design tokens, shell, navigation và typography theo `design-system/campfire/MASTER.md`.
+- [x] Loại bỏ decoration/gradient/glass dư thừa ở hero, card, button và chat surface.
+- [x] Đồng bộ trạng thái hover/focus/disabled, radius, shadow và density trên các feature chính.
+- [ ] Kiểm tra light/dark, 360/390/430px, keyboard, reduced motion và frontend regression suite.
+
+## M17 — Ảnh trong Chat và Stranger Chat, tối ưu dung lượng
+
+- [ ] Client resize cạnh dài tối đa 1280 px, chuyển WebP chất lượng 0.78 và từ chối ảnh sau nén lớn hơn 1 MiB.
+- [ ] Group Chat và Stranger Chat có endpoint multipart riêng nhưng vẫn đi qua `ISender -> handler -> Application port -> Infrastructure`.
+- [ ] Backend chỉ nhận WebP hợp lệ, giới hạn request 1 MiB, lưu file ngoài PostgreSQL trong persistent volume; bảng message chỉ lưu opaque storage key và `Kind = Image`.
+- [ ] Endpoint đọc ảnh kiểm tra membership/session theo message trước khi trả file, không public static folder và không lộ đường dẫn vật lý.
+- [ ] UI dùng chung bộ xử lý ảnh, preview/pending/failed/retry, nút chọn ảnh 44 px và thông báo rõ lỗi định dạng/kích thước.
+- [ ] Migration riêng cho schema `chat` và `stranger_chat`, cập nhật Docker volume/config, test domain/API/service và tài liệu vận hành.
+
+Acceptance criteria:
+
+- JPEG/PNG/WebP từ điện thoại được xoay/render qua browser canvas, resize và gửi dưới dạng WebP; ảnh GIF chỉ lấy frame đầu, không giữ animation.
+- API từ chối file rỗng, sai MIME/magic bytes hoặc quá 1 MiB; mutation vẫn có antiforgery/rate limit.
+- Chỉ thành viên nhóm hoặc đúng guest session thuộc conversation mới tải được ảnh.
+- Retry cùng `clientMessageId` không tạo message/file thứ hai; realtime chỉ phát sau khi file và message đã lưu thành công.
+- PostgreSQL không chứa binary/base64; Docker production mount volume ảnh riêng và backup volume được ghi rõ.
+
 Updated: 2026-10-25 (Asia/Saigon)
 
 ## M15.1 — Chuẩn hóa cấu trúc Clean Architecture của Learning

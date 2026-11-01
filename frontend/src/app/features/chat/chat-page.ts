@@ -22,6 +22,7 @@ import { ChatService } from '../../core/chat/chat.service';
 import { ChatSticker } from '../../core/chat/chat-sticker';
 import { CHAT_STICKERS } from '../../core/chat/chat-stickers';
 import { ChatViewMessage } from '../../core/chat/chat-view-message';
+import { optimizeChatImage } from '../../core/chat/chat-image-processor';
 import { GroupSummary } from '../../core/groups/group-summary';
 import { GroupsService } from '../../core/groups/groups.service';
 import { createClientUuid } from '../../core/ids/client-uuid';
@@ -71,6 +72,7 @@ export class ChatPage {
     { code: 'Sad', emoji: '😢', label: 'Buồn' },
   ];
   private readonly latestCursor = signal<string | null>(null);
+  private readonly pendingImages = new Map<string, File>();
   readonly form = this.formBuilder.nonNullable.group({
     content: ['', [Validators.required, Validators.maxLength(2000), Validators.pattern(/\S/)]],
   });
@@ -118,6 +120,54 @@ export class ChatPage {
     if (!this.stickers.some((sticker) => sticker.code === code)) return;
     this.queueMessage('Sticker', code);
     this.openPicker.set(null);
+  }
+
+  async chooseImage(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || this.editingMessage()) return;
+    try {
+      const image = await optimizeChatImage(file);
+      this.queueImage(image);
+    } catch (error) {
+      this.error.set(error instanceof Error ? error.message : 'Không thể xử lý ảnh.');
+    }
+  }
+
+  private queueImage(image: File): void {
+    const group = this.selectedGroup();
+    if (!group) return;
+    const replyTarget = this.replyingTo();
+    const clientMessageId = createClientUuid();
+    const previewUrl = URL.createObjectURL(image);
+    const optimistic: ChatViewMessage = {
+      id: clientMessageId,
+      groupId: group.id,
+      senderUserId: this.auth.user()?.id ?? '',
+      senderDisplayName: this.auth.user()?.displayName ?? 'Bạn',
+      clientMessageId,
+      kind: 'Image',
+      content: previewUrl,
+      sentAtUtc: new Date().toISOString(),
+      editedAtUtc: null,
+      version: createClientUuid(),
+      replyTo: replyTarget
+        ? {
+            messageId: replyTarget.id,
+            senderDisplayName: replyTarget.senderDisplayName,
+            kind: replyTarget.kind,
+            content: replyTarget.kind === 'Image' ? 'Ảnh' : replyTarget.content.slice(0, 160),
+          }
+        : null,
+      reactions: [],
+      myReaction: null,
+      deliveryState: 'pending',
+    };
+    this.pendingImages.set(clientMessageId, image);
+    this.upsert(optimistic, true);
+    this.deliver(optimistic);
+    this.replyingTo.set(null);
   }
 
   reply(message: ChatViewMessage): void {
@@ -348,6 +398,27 @@ export class ChatPage {
   }
 
   private deliver(message: ChatViewMessage): void {
+    if (message.kind === 'Image') {
+      const image = this.pendingImages.get(message.clientMessageId);
+      if (!image) return;
+      this.chatService
+        .sendImage(
+          message.groupId,
+          message.clientMessageId,
+          image,
+          message.replyTo?.messageId ?? null,
+        )
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (saved) => {
+            if (message.content.startsWith('blob:')) URL.revokeObjectURL(message.content);
+            this.pendingImages.delete(message.clientMessageId);
+            this.upsert({ ...saved, deliveryState: 'sent' });
+          },
+          error: () => this.upsert({ ...message, deliveryState: 'failed' }),
+        });
+      return;
+    }
     this.chatService
       .send(
         message.groupId,

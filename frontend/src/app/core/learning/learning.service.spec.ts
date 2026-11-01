@@ -49,4 +49,19 @@ describe('LearningService', () => {
     expect(request.request.method).toBe('GET');
     request.flush({});
   });
+
+  it('prepares reading text through an antiforgery protected mutation', () => {
+    service.prepareReadingText('你好。').subscribe();
+    http.expectOne('/api/v1/auth/antiforgery').flush(null);
+    const request = http.expectOne('/api/v1/learning/reading/prepare');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('learning-test-token');
+    expect(request.request.body).toEqual({ text: '你好。' });
+    request.flush({
+      text: '你好。',
+      characterCount: 3,
+      chineseCharacterCount: 2,
+      language: 'zh-CN',
+    });
+  });
 });

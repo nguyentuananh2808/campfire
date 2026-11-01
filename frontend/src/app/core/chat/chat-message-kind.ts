@@ -1,1 +1,1 @@
-export type ChatMessageKind = 'Text' | 'Sticker';
+export type ChatMessageKind = 'Text' | 'Sticker' | 'Image';

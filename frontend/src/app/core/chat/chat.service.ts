@@ -36,6 +36,24 @@ export class ChatService {
       ),
     );
   }
+  sendImage(
+    groupId: string,
+    clientMessageId: string,
+    image: File,
+    replyToMessageId: string | null,
+  ): Observable<ChatMessage> {
+    const body = new FormData();
+    body.append('clientMessageId', clientMessageId);
+    body.append('image', image);
+    if (replyToMessageId) body.append('replyToMessageId', replyToMessageId);
+    return this.http
+      .get<void>('/api/v1/auth/antiforgery')
+      .pipe(
+        switchMap(() =>
+          this.http.post<ChatMessage>(`/api/v1/groups/${groupId}/messages/image`, body),
+        ),
+      );
+  }
 
   setReaction(
     groupId: string,

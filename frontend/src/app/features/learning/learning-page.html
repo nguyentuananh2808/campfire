@@ -24,6 +24,10 @@
       <span aria-hidden="true">图</span
       ><span><strong>Bản đồ từ vựng</strong><small>Khám phá liên kết</small></span>
     </button>
+    <button type="button" [class.active]="mode() === 'reader'" (click)="setMode('reader')">
+      <span aria-hidden="true">声</span
+      ><span><strong>Luyện nghe</strong><small>Văn bản thành giọng đọc</small></span>
+    </button>
   </nav>
 
   @if (loading()) {
@@ -357,6 +361,110 @@
           <span aria-hidden="true">🧠</span><strong>Bắt đầu với “学生”</strong>
           <p>Bản đồ sẽ hiện từ gốc, pinyin, nghĩa và các nhánh liên quan.</p>
         </div>
+      }
+    </section>
+  }
+
+  @if (!loading() && mode() === 'reader') {
+    <section class="reader-panel">
+      <header>
+        <span class="eyebrow">NGHE TIẾNG TRUNG THEO NỘI DUNG CỦA BẠN</span>
+        <h2>Văn bản thành giọng đọc Quan thoại</h2>
+        <p>Dán nội dung hoặc tải file .txt. Campfire không lưu văn bản hay file của bạn.</p>
+      </header>
+
+      <label class="reader-input" for="reading-text">
+        <span>Văn bản tiếng Trung</span>
+        <textarea
+          id="reading-text"
+          maxlength="10000"
+          rows="10"
+          [(ngModel)]="readingText"
+          placeholder="例如：你好，欢迎来到篝火中文学习。"
+          lang="zh-CN"
+        ></textarea>
+        <small>{{ readingText.length }}/10.000 ký tự</small>
+      </label>
+
+      <div class="reader-tools">
+        <label class="file-button">
+          <input type="file" accept=".txt,text/plain" (change)="selectTextFile($event)" />
+          <span aria-hidden="true">↑</span> Tải file .txt
+        </label>
+        <label>
+          <span>Giọng đọc</span>
+          <select [(ngModel)]="selectedVoice">
+            <option value="">Tự chọn giọng zh-CN tốt nhất</option>
+            @for (voice of reader.voices(); track voice.name) {
+              <option [value]="voice.name">{{ voice.name }} · {{ voice.lang }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>Tốc độ · {{ readingRate }}x</span>
+          <input type="range" min="0.6" max="1.3" step="0.1" [(ngModel)]="readingRate" />
+        </label>
+      </div>
+
+      @if (!reader.supported) {
+        <div class="reader-warning" role="alert">Trình duyệt này không hỗ trợ Web Speech API.</div>
+      } @else if (reader.voices().length === 0) {
+        <div class="reader-warning" role="status">
+          Thiết bị chưa liệt kê voice tiếng Trung. Trình duyệt sẽ thử giọng zh-CN mặc định; chất
+          lượng tùy hệ điều hành.
+        </div>
+      }
+
+      <div class="reader-actions">
+        <button
+          type="button"
+          class="primary"
+          [disabled]="pending() === 'reader' || !reader.supported"
+          (click)="prepareAndSpeak()"
+        >
+          {{
+            pending() === 'reader'
+              ? 'Đang chuẩn bị…'
+              : reader.speaking()
+                ? 'Phát lại từ đầu'
+                : 'Phát giọng đọc'
+          }}
+        </button>
+        <button
+          type="button"
+          class="secondary"
+          [disabled]="!reader.speaking()"
+          (click)="reader.togglePause()"
+        >
+          {{ reader.paused() ? 'Tiếp tục' : 'Tạm dừng' }}
+        </button>
+        <button
+          type="button"
+          class="secondary"
+          [disabled]="!reader.speaking()"
+          (click)="reader.stop()"
+        >
+          Dừng
+        </button>
+      </div>
+
+      @if (reader.speaking() || preparedCharacterCount()) {
+        <div class="reader-status" aria-live="polite">
+          <strong>{{
+            reader.speaking()
+              ? reader.paused()
+                ? 'Đang tạm dừng'
+                : 'Đang phát giọng đọc'
+              : 'Sẵn sàng'
+          }}</strong>
+          <span>{{ preparedCharacterCount() }} ký tự · {{ preparedChineseCount() }} chữ Hán</span>
+          @if (reader.activeVoice()) {
+            <small>Voice: {{ reader.activeVoice() }}</small>
+          }
+        </div>
+      }
+      @if (reader.error()) {
+        <div class="reader-warning" role="alert">{{ reader.error() }}</div>
       }
     </section>
   }

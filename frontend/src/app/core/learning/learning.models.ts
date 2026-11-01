@@ -84,6 +84,12 @@ export interface LearningCapabilities {
   vocabularyAi: boolean;
   message: string;
 }
+export interface PreparedReadingText {
+  text: string;
+  characterCount: number;
+  chineseCharacterCount: number;
+  language: string;
+}
 export interface VocabularyItem {
   chinese: string;
   pinyin: string;

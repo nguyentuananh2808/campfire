@@ -18,6 +18,8 @@ Chat is implemented by `ChatDbContext`, `InitialChat`, `AddChatMessageKinds` and
 
 `AddMessageEditing` adds nullable `EditedAtUtc` and application-managed UUID `Version` to every Chat message. Existing rows receive random versions during migration; edits compare the submitted version through EF concurrency handling and rotate it on success.
 
+`AddImageMessages` extends the Chat kind constraint with `Image`. PostgreSQL stores only a 64-character SHA-256 storage key; compressed WebP bytes live in the private media volume and are returned only through a membership-authorized API endpoint. The content-addressed key deduplicates identical images.
+
 Events is implemented by `EventsDbContext` and migration `InitialEvents`. It owns `events.Events`, `EventRsvps` and `EventAuditRecords`; group/user UUIDs have no cross-schema foreign keys.
 
 - Event text is bounded to 120 characters for title, 2,000 for description and 200 for location. Absolute times use `timestamptz`.

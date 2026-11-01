@@ -89,7 +89,7 @@ public sealed class EfLearningService(LearningDbContext dbContext, TimeProvider 
         return LearningResult<LearningModels.MindMap>.Success(new(ToNode(root, "Root"), children, "CuratedCurriculum", false));
     }
 
-    public LearningModels.Capabilities GetCapabilities() => new(false, false, false, false, "TTS, chấm phát âm và AI expansion sẽ được bật khi có provider thật; bản base không mô phỏng kết quả AI.");
+    public LearningModels.Capabilities GetCapabilities() => new(true, false, false, false, "Đọc văn bản dùng Web Speech API và voice tiếng Trung có sẵn trên thiết bị; chất lượng phụ thuộc trình duyệt/hệ điều hành. Chấm phát âm và AI expansion chưa có provider cloud.");
 
     private async Task<LearningResult<LearningModels.CoursePath>> BuildPathAsync(Guid userId, string slug, CancellationToken cancellationToken)
     {

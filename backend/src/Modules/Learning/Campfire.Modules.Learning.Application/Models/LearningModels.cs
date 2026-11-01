@@ -15,4 +15,5 @@ public static class LearningModels
     public sealed record MindMapNode(Guid Id, string Chinese, string Pinyin, string MeaningVi, int HskLevel, string ExampleChinese, string ExamplePinyin, string ExampleTranslationVi, string RelationType, int MasteryScore);
     public sealed record MindMap(MindMapNode Root, IReadOnlyList<MindMapNode> Children, string Source, bool AiExpansionAvailable);
     public sealed record Capabilities(bool TextToSpeech, bool PronunciationAssessment, bool ConversationAi, bool VocabularyAi, string Message);
+    public sealed record PreparedReadingText(string Text, int CharacterCount, int ChineseCharacterCount, string Language);
 }

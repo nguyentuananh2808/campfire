@@ -13,6 +13,7 @@ import {
 } from '../../core/learning/learning.models';
 import { LearningService } from '../../core/learning/learning.service';
 import { SpeechService } from '../../core/learning/speech.service';
+import { ReadingVoiceService } from '../../core/learning/reading-voice.service';
 
 @Component({
   selector: 'app-learning-page',
@@ -24,7 +25,8 @@ import { SpeechService } from '../../core/learning/speech.service';
 export class LearningPage implements OnInit {
   private readonly api = inject(LearningService);
   readonly speech = inject(SpeechService);
-  readonly mode = signal<'path' | 'mindmap'>('path');
+  readonly reader = inject(ReadingVoiceService);
+  readonly mode = signal<'path' | 'mindmap' | 'reader'>('path');
   readonly loading = signal(true);
   readonly pending = signal<string | null>(null);
   readonly error = signal('');
@@ -36,13 +38,64 @@ export class LearningPage implements OnInit {
   readonly selectedNode = signal<string | null>(null);
   readonly answers = signal<Record<string, string>>({});
   word = '学生';
+  readingText = '';
+  selectedVoice = '';
+  readingRate = 0.9;
+  readonly preparedCharacterCount = signal(0);
+  readonly preparedChineseCount = signal(0);
 
   ngOnInit(): void {
     this.load();
   }
-  setMode(mode: 'path' | 'mindmap'): void {
+  setMode(mode: 'path' | 'mindmap' | 'reader'): void {
     this.mode.set(mode);
     this.error.set('');
+  }
+  prepareAndSpeak(): void {
+    const text = this.readingText.trim();
+    if (!text) {
+      this.error.set('Hãy nhập hoặc tải lên văn bản tiếng Trung.');
+      return;
+    }
+    this.pending.set('reader');
+    this.error.set('');
+    this.api
+      .prepareReadingText(text)
+      .pipe(finalize(() => this.pending.set(null)))
+      .subscribe({
+        next: (prepared) => {
+          this.readingText = prepared.text;
+          this.preparedCharacterCount.set(prepared.characterCount);
+          this.preparedChineseCount.set(prepared.chineseCharacterCount);
+          this.reader.speak(prepared.text, this.selectedVoice, this.readingRate);
+        },
+        error: (e) => this.error.set(getApiErrorMessage(e)),
+      });
+  }
+  async selectTextFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+      this.error.set('Chỉ hỗ trợ file văn bản .txt.');
+      return;
+    }
+    if (file.size > 100 * 1024) {
+      this.error.set('File .txt tối đa 100 KiB.');
+      return;
+    }
+    try {
+      const text = await file.text();
+      if (text.includes('\uFFFD')) {
+        this.error.set('File có ký tự không đọc được. Hãy lưu lại ở định dạng UTF-8.');
+        return;
+      }
+      this.readingText = text.slice(0, 10_000);
+      this.error.set(text.length > 10_000 ? 'Đã lấy 10.000 ký tự đầu tiên của file.' : '');
+    } catch {
+      this.error.set('Không thể đọc file này. Hãy lưu file ở định dạng UTF-8.');
+    }
   }
   openDay(id: string): void {
     this.pending.set(id);

@@ -89,13 +89,22 @@
                 <button class="reply-preview" type="button" (click)="reply(message)">
                   <strong>Trả lời {{ replyPreview.senderDisplayName }}</strong>
                   <span>{{
-                    replyPreview.kind === 'Sticker'
-                      ? 'Sticker · ' + replyPreview.content
-                      : replyPreview.content
+                    replyPreview.kind === 'Image'
+                      ? 'Ảnh'
+                      : replyPreview.kind === 'Sticker'
+                        ? 'Sticker · ' + replyPreview.content
+                        : replyPreview.content
                   }}</span>
                 </button>
               }
-              @if (message.kind === 'Sticker') {
+              @if (message.kind === 'Image') {
+                <img
+                  class="chat-image"
+                  [src]="message.content"
+                  alt="Ảnh được gửi trong cuộc trò chuyện"
+                  loading="lazy"
+                />
+              } @else if (message.kind === 'Sticker') {
                 @if (stickerFor(message.content); as sticker) {
                   <div
                     class="sticker"
@@ -203,6 +212,14 @@
       }
       <div class="composer-row">
         <div class="composer-tools" aria-label="Công cụ tin nhắn">
+          <label class="image-tool" aria-label="Gửi ảnh">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              (change)="chooseImage($event)"
+            />
+            <span aria-hidden="true">▧</span>
+          </label>
           <button
             class="tool-button"
             type="button"
