@@ -9,7 +9,8 @@ import {
   LearningPath,
   LearningToday,
   VocabularyMindMap,
-  PreparedReadingText,
+  ReadingDocument,
+  ReadingDocumentSummary,
 } from './learning.models';
 
 @Injectable({ providedIn: 'root' })
@@ -49,10 +50,19 @@ export class LearningService {
       }),
     );
   }
-  prepareReadingText(text: string): Observable<PreparedReadingText> {
+  readingDocuments(): Observable<ReadingDocumentSummary[]> {
+    return this.http.get<ReadingDocumentSummary[]>('/api/v1/learning/reading/documents');
+  }
+  readingDocument(id: string): Observable<ReadingDocument> {
+    return this.http.get<ReadingDocument>(`/api/v1/learning/reading/documents/${id}`);
+  }
+  saveReadingDocument(title: string, text: string): Observable<ReadingDocument> {
     return this.mutation(() =>
-      this.http.post<PreparedReadingText>('/api/v1/learning/reading/prepare', { text }),
+      this.http.post<ReadingDocument>('/api/v1/learning/reading/documents', { title, text }),
     );
+  }
+  deleteReadingDocument(id: string): Observable<void> {
+    return this.mutation(() => this.http.delete<void>(`/api/v1/learning/reading/documents/${id}`));
   }
   private mutation<T>(request: () => Observable<T>): Observable<T> {
     return this.http.get<void>('/api/v1/auth/antiforgery').pipe(switchMap(request));

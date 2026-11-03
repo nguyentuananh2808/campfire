@@ -376,8 +376,27 @@
       <header>
         <span class="eyebrow">NGHE TIẾNG TRUNG THEO NỘI DUNG CỦA BẠN</span>
         <h2>Văn bản thành giọng đọc Quan thoại</h2>
-        <p>Dán nội dung hoặc tải file .txt. Campfire không lưu văn bản hay file của bạn.</p>
+        <p>Dán nội dung hoặc tải file .txt, đặt tên rồi lưu vào thư viện riêng để nghe lại.</p>
       </header>
+
+      <app-reading-library
+        [documents]="readingDocuments()"
+        [loading]="readingLibraryLoading()"
+        [pendingId]="pending()"
+        [selectedId]="selectedReadingDocumentId()"
+        (openDocument)="openReadingDocument($event)"
+        (deleteDocument)="deleteReadingDocument($event)"
+      />
+
+      <label class="reader-input" for="reading-title">
+        <span>Tiêu đề</span>
+        <input
+          id="reading-title"
+          maxlength="120"
+          [(ngModel)]="readingTitle"
+          placeholder="Ví dụ: Hội thoại bài 1"
+        />
+      </label>
 
       <label class="reader-input" for="reading-text">
         <span>Văn bản tiếng Trung</span>
@@ -427,10 +446,15 @@
         <button
           type="button"
           class="primary"
-          [disabled]="pending() === 'reader' || !reader.supported || !readingText.trim()"
+          [disabled]="
+            pending() === 'reader' ||
+            !reader.supported ||
+            !readingText.trim() ||
+            !readingTitle.trim()
+          "
           (click)="prepareReading()"
         >
-          {{ pending() === 'reader' ? 'Đang chuẩn bị…' : 'Chuẩn bị văn bản' }}
+          {{ pending() === 'reader' ? 'Đang lưu…' : 'Lưu và chuẩn bị' }}
         </button>
         <button
           type="button"
@@ -460,7 +484,7 @@
 
       @if (!preparedReadingText()) {
         <p class="reader-instruction" role="status">
-          1. Nhập văn bản · 2. Bấm “Chuẩn bị văn bản” · 3. Bấm “Phát giọng đọc”.
+          1. Nhập tiêu đề và văn bản · 2. Bấm “Lưu và chuẩn bị” · 3. Bấm “Phát giọng đọc”.
         </p>
       }
 

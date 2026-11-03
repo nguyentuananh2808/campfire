@@ -170,6 +170,7 @@ p {
   min-width: 0;
 }
 .reader-input textarea,
+.reader-input input,
 .reader-tools select {
   background: var(--input-surface);
   border: 1px solid var(--border);
@@ -190,6 +191,7 @@ p {
   word-break: break-word;
 }
 .reader-input textarea:focus,
+.reader-input input:focus,
 .reader-tools select:focus,
 .reader-tools input:focus-visible,
 .file-button:focus-within {

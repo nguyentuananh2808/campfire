@@ -10,14 +10,16 @@ import {
   LearningDayDetail,
   LearningPath,
   VocabularyMindMap,
+  ReadingDocumentSummary,
 } from '../../core/learning/learning.models';
 import { LearningService } from '../../core/learning/learning.service';
 import { SpeechService } from '../../core/learning/speech.service';
 import { ReadingVoiceService } from '../../core/learning/reading-voice.service';
+import { ReadingLibrary } from './reading-library';
 
 @Component({
   selector: 'app-learning-page',
-  imports: [FormsModule],
+  imports: [FormsModule, ReadingLibrary],
   templateUrl: './learning-page.html',
   styleUrl: './learning-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,11 +42,15 @@ export class LearningPage implements OnInit {
   readonly answers = signal<Record<string, string>>({});
   word = '学生';
   readingText = '';
+  readingTitle = '';
   selectedVoice = '';
   readingRate = 0.9;
   readonly preparedCharacterCount = signal(0);
   readonly preparedChineseCount = signal(0);
   readonly preparedReadingText = signal('');
+  readonly readingDocuments = signal<ReadingDocumentSummary[]>([]);
+  readonly selectedReadingDocumentId = signal<string | null>(null);
+  readonly readingLibraryLoading = signal(false);
 
   ngOnInit(): void {
     this.load();
@@ -52,6 +58,9 @@ export class LearningPage implements OnInit {
   setMode(mode: 'path' | 'mindmap' | 'reader'): void {
     this.mode.set(mode);
     this.error.set('');
+    if (mode === 'reader' && this.readingDocuments().length === 0) {
+      this.loadReadingDocuments();
+    }
   }
   prepareReading(): void {
     const text = this.readingText.trim();
@@ -59,18 +68,26 @@ export class LearningPage implements OnInit {
       this.error.set('Hãy nhập hoặc tải lên văn bản tiếng Trung.');
       return;
     }
+    const title = this.readingTitle.trim();
+    if (!title) {
+      this.error.set('Hãy nhập tiêu đề để lưu và nghe lại văn bản.');
+      return;
+    }
     this.pending.set('reader');
     this.error.set('');
     this.api
-      .prepareReadingText(text)
+      .saveReadingDocument(title, text)
       .pipe(finalize(() => this.pending.set(null)))
       .subscribe({
         next: (prepared) => {
           this.readingText = prepared.text;
+          this.readingTitle = prepared.title;
+          this.selectedReadingDocumentId.set(prepared.id);
           this.preparedReadingText.set(prepared.text);
           this.preparedCharacterCount.set(prepared.characterCount);
           this.preparedChineseCount.set(prepared.chineseCharacterCount);
-          this.notice.set('Văn bản đã sẵn sàng. Bấm “Phát giọng đọc” để nghe.');
+          this.notice.set('Đã lưu văn bản. Bạn có thể mở lại từ thư viện để nghe.');
+          this.loadReadingDocuments();
         },
         error: (e) => this.error.set(getApiErrorMessage(e)),
       });
@@ -85,10 +102,56 @@ export class LearningPage implements OnInit {
   }
   readingTextChanged(value: string): void {
     this.readingText = value;
+    this.selectedReadingDocumentId.set(null);
     this.preparedReadingText.set('');
     this.preparedCharacterCount.set(0);
     this.preparedChineseCount.set(0);
     this.reader.stop();
+  }
+  openReadingDocument(id: string): void {
+    this.pending.set(id);
+    this.error.set('');
+    this.api
+      .readingDocument(id)
+      .pipe(finalize(() => this.pending.set(null)))
+      .subscribe({
+        next: (document) => {
+          this.readingTitle = document.title;
+          this.readingText = document.text;
+          this.preparedReadingText.set(document.text);
+          this.preparedCharacterCount.set(document.characterCount);
+          this.preparedChineseCount.set(document.chineseCharacterCount);
+          this.selectedReadingDocumentId.set(document.id);
+          this.reader.stop();
+          this.notice.set('Đã mở văn bản. Bấm “Phát giọng đọc” để nghe lại.');
+        },
+        error: (e) => this.error.set(getApiErrorMessage(e)),
+      });
+  }
+  deleteReadingDocument(id: string): void {
+    this.pending.set(id);
+    this.error.set('');
+    this.api
+      .deleteReadingDocument(id)
+      .pipe(finalize(() => this.pending.set(null)))
+      .subscribe({
+        next: () => {
+          this.readingDocuments.update((documents) =>
+            documents.filter((document) => document.id !== id),
+          );
+          if (this.selectedReadingDocumentId() === id) {
+            this.selectedReadingDocumentId.set(null);
+            this.readingTitle = '';
+            this.readingText = '';
+            this.preparedReadingText.set('');
+            this.preparedCharacterCount.set(0);
+            this.preparedChineseCount.set(0);
+            this.reader.stop();
+          }
+          this.notice.set('Đã xóa văn bản luyện nghe.');
+        },
+        error: (e) => this.error.set(getApiErrorMessage(e)),
+      });
   }
   async selectTextFile(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
@@ -110,6 +173,12 @@ export class LearningPage implements OnInit {
         return;
       }
       this.readingText = text.slice(0, 10_000);
+      this.readingTitle =
+        file.name
+          .replace(/\.txt$/i, '')
+          .trim()
+          .slice(0, 120) || 'Văn bản mới';
+      this.selectedReadingDocumentId.set(null);
       this.preparedReadingText.set('');
       this.preparedCharacterCount.set(0);
       this.preparedChineseCount.set(0);
@@ -218,6 +287,16 @@ export class LearningPage implements OnInit {
           this.capabilities.set(capabilities);
         },
         error: (e) => this.loadError.set(getApiErrorMessage(e)),
+      });
+  }
+  private loadReadingDocuments(): void {
+    this.readingLibraryLoading.set(true);
+    this.api
+      .readingDocuments()
+      .pipe(finalize(() => this.readingLibraryLoading.set(false)))
+      .subscribe({
+        next: (documents) => this.readingDocuments.set(documents),
+        error: (e) => this.error.set(getApiErrorMessage(e)),
       });
   }
   private applyCompletion(day: LearningDayDetail, xp: number): void {

@@ -1,0 +1,42 @@
+<section aria-labelledby="reading-library-title">
+  <div class="heading">
+    <div>
+      <span>ĐÃ LƯU</span>
+      <h3 id="reading-library-title">Thư viện luyện nghe</h3>
+    </div>
+    <small>{{ documents().length }}/50 văn bản</small>
+  </div>
+  @if (loading()) {
+    <p role="status">Đang tải thư viện…</p>
+  } @else if (documents().length === 0) {
+    <p>Chưa có văn bản. Tải file hoặc nhập nội dung để lưu.</p>
+  } @else {
+    <div class="documents">
+      @for (document of documents(); track document.id) {
+        <article [class.selected]="selectedId() === document.id">
+          <button
+            type="button"
+            class="open"
+            [disabled]="pendingId() === document.id"
+            (click)="openDocument.emit(document.id)"
+          >
+            <strong>{{ document.title }}</strong>
+            <small
+              >{{ document.characterCount }} ký tự · {{ document.chineseCharacterCount }} chữ
+              Hán</small
+            >
+          </button>
+          <button
+            type="button"
+            class="delete"
+            [disabled]="pendingId() === document.id"
+            [attr.aria-label]="'Xóa ' + document.title"
+            (click)="deleteDocument.emit(document.id)"
+          >
+            Xóa
+          </button>
+        </article>
+      }
+    </div>
+  }
+</section>

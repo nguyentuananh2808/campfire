@@ -281,3 +281,12 @@ The integration suite additionally requires a working Docker engine because it i
 - Follow-up passed: frontend Prettier lint, Vitest 28/28 and Angular production build after separating API preparation from the direct playback gesture and fixing long unbroken Mandarin text overflow. Physical audio output still requires verification on the target phone because the automation environment cannot hear device audio.
 - Mobile playback follow-up passed on 2026-11-03: frontend Prettier lint, Vitest 30/30 and Angular production build. A focused service test proves initial playback calls `speechSynthesis.speak()` directly without resuming an idle queue and verifies the missing-Mandarin-voice error. Audible output on the user's physical phone remains not run because browser/OS Web Speech voices cannot be heard by this automation environment.
 
+# Private Learning reading library — 2026-11-03
+
+- Passed: full API build with 0 warnings/errors; UnitTests 37/37 and ArchitectureTests 4/4.
+- Passed: Learning EF `has-pending-model-changes`; generated SQL creates only `learning.reading_documents`, its owner/time index and bounded count constraints inside one transaction.
+- Passed: frontend Prettier lint, Vitest 31/31 and Angular production build without a component-style budget warning after extracting the reading library component.
+- Security review: all list/get/delete/save paths derive `UserId` from the authenticated cookie principal; Infrastructure filters by owner; antiforgery protects save/delete; list responses exclude text; no document title/content is logged.
+- Optimization: content is loaded only when opened, list is bounded to 50, text is capped at 10,000 characters and concurrent saves use a PostgreSQL advisory transaction lock before quota enforcement.
+- Blocked: live PostgreSQL migration/runtime integration was not run because Docker Desktop's Linux engine pipe is unavailable. The migration SQL and model-drift check passed; EC2 must run `Campfire.DbMigrator` before the new endpoints are used.
+

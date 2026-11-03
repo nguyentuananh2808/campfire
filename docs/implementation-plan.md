@@ -1,5 +1,20 @@
 # Implementation plan
 
+## M20 — Thư viện văn bản luyện nghe
+
+- [x] Thêm `ReadingDocument` thuộc schema `learning`, giới hạn nội dung 10.000 ký tự và lập chỉ mục theo user/thời gian.
+- [x] Thêm vertical slices lưu, liệt kê, mở và xóa qua MediatR cùng Application port được Infrastructure triển khai.
+- [x] Chỉ chủ sở hữu được đọc/xóa; nội dung không xuất hiện trong log hoặc response danh sách.
+- [x] Nâng UI Luyện nghe để lấy tên file làm tiêu đề, hiển thị nội dung `.txt`, lưu vào thư viện và mở lại để phát.
+- [x] Tạo migration, chạy build/test frontend/backend và cập nhật tài liệu kiểm chứng.
+
+Acceptance criteria:
+
+- Upload `.txt` hoặc nhập trực tiếp đều hiển thị plain text trước khi lưu.
+- Sau khi lưu và tải lại trang, tài liệu vẫn xuất hiện trong thư viện của đúng tài khoản.
+- Mở tài liệu tải nội dung thật từ API rồi có thể phát bằng Web Speech API; xóa cần thao tác rõ ràng và không ảnh hưởng user khác.
+- API mutations giữ antiforgery; mọi truy vấn lọc bằng `UserId`; danh sách tối đa 50 tài liệu gần nhất.
+
 ## M19 — Luyện nghe văn bản tiếng Trung
 
 - [x] Thêm tab Luyện nghe trong Learning, nhận văn bản nhập trực tiếp hoặc file UTF-8 `.txt` tối đa 100 KiB.

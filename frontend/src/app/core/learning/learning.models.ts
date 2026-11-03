@@ -84,10 +84,16 @@ export interface LearningCapabilities {
   vocabularyAi: boolean;
   message: string;
 }
-export interface PreparedReadingText {
-  text: string;
+export interface ReadingDocumentSummary {
+  id: string;
+  title: string;
   characterCount: number;
   chineseCharacterCount: number;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+}
+export interface ReadingDocument extends ReadingDocumentSummary {
+  text: string;
   language: string;
 }
 export interface VocabularyItem {
