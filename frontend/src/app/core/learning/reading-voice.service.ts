@@ -39,6 +39,7 @@ export class ReadingVoiceService {
     }
     this.voiceName = voiceName;
     this.rate = Math.min(1.3, Math.max(0.6, rate));
+    this.activeVoice.set('');
     this.queue = this.split(text);
     if (!this.queue.length) {
       this.error.set('Hãy nhập văn bản tiếng Trung trước khi phát.');
@@ -83,6 +84,8 @@ export class ReadingVoiceService {
     if (selected) utterance.voice = selected;
     utterance.lang = selected?.lang ?? 'zh-CN';
     utterance.rate = this.rate;
+    utterance.pitch = 1;
+    utterance.volume = 1;
     this.activeVoice.set(selected?.name ?? 'Giọng mặc định của trình duyệt (zh-CN)');
     utterance.onstart = () => {
       this.speaking.set(true);
@@ -92,16 +95,28 @@ export class ReadingVoiceService {
       this.currentUtterance = null;
       this.speakNext();
     };
-    utterance.onerror = () => {
+    utterance.onerror = (event) => {
       this.queue = [];
       this.currentUtterance = null;
       this.speaking.set(false);
       this.paused.set(false);
-      this.error.set('Không thể phát giọng đọc trên thiết bị này.');
+      this.error.set(this.playbackError(event.error));
     };
     this.currentUtterance = utterance;
-    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
+  }
+
+  private playbackError(error: string): string {
+    if (error === 'not-allowed') {
+      return 'Trình duyệt đã chặn phát giọng đọc. Hãy chạm lại “Phát giọng đọc” và kiểm tra âm lượng media.';
+    }
+    if (error === 'voice-unavailable' || error === 'language-unavailable') {
+      return 'Thiết bị chưa cài giọng tiếng Trung. Hãy cài voice Quan thoại trong cài đặt ngôn ngữ của máy.';
+    }
+    if (error === 'network') {
+      return 'Voice đang chọn cần mạng nhưng hiện không tải được. Hãy thử voice khác hoặc kiểm tra kết nối.';
+    }
+    return 'Không thể phát giọng đọc trên thiết bị này. Hãy thử Chrome/Edge mới và kiểm tra âm lượng media.';
   }
 
   private refreshVoices(): void {

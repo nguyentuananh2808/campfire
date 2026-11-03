@@ -427,7 +427,7 @@
         <button
           type="button"
           class="primary"
-          [disabled]="pending() === 'reader' || !reader.supported"
+          [disabled]="pending() === 'reader' || !reader.supported || !readingText.trim()"
           (click)="prepareReading()"
         >
           {{ pending() === 'reader' ? 'Đang chuẩn bị…' : 'Chuẩn bị văn bản' }}
@@ -457,6 +457,12 @@
           Dừng
         </button>
       </div>
+
+      @if (!preparedReadingText()) {
+        <p class="reader-instruction" role="status">
+          1. Nhập văn bản · 2. Bấm “Chuẩn bị văn bản” · 3. Bấm “Phát giọng đọc”.
+        </p>
+      }
 
       @if (reader.speaking() || preparedCharacterCount()) {
         <div class="reader-status" aria-live="polite">
