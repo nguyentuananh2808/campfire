@@ -69,4 +69,21 @@ describe('ChatService', () => {
     expect(request.request.method).toBe('GET');
     request.flush({ items: [], olderCursor: null, latestCursor: 'cursor', hasMore: false });
   });
+
+  it('loads the persisted group inbox summary', () => {
+    service.getInbox().subscribe();
+    const request = http.expectOne('/api/v1/chat/inbox');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
+  it('marks a visible group message as read through an antiforgery protected mutation', () => {
+    service.markRead('group-1', 'message-1').subscribe();
+    http.expectOne('/api/v1/auth/antiforgery').flush(null);
+    const request = http.expectOne('/api/v1/groups/group-1/messages/read');
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({ messageId: 'message-1' });
+    expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('chat-test-token');
+    request.flush({ lastReadAtUtc: '2026-11-06T00:00:00Z' });
+  });
 });

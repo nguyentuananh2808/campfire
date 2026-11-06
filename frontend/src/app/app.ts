@@ -4,6 +4,7 @@ import { AuthStore } from './core/auth/auth.store';
 import { GroupMessageNotificationService } from './core/notifications/group-message-notification.service';
 import { TabNotificationService } from './core/notifications/tab-notification.service';
 import { ThemeToggle } from './shared/theme-toggle/theme-toggle';
+import { AppUpdateService } from './core/updates/app-update.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,6 +16,7 @@ import { ThemeToggle } from './shared/theme-toggle/theme-toggle';
 export class App {
   readonly auth = inject(AuthStore);
   readonly notifications = inject(TabNotificationService);
+  readonly appUpdate = inject(AppUpdateService);
   private readonly groupNotifications = inject(GroupMessageNotificationService);
 
   constructor() {

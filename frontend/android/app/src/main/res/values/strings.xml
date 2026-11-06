@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Campfire</string>
+    <string name="title_activity_main">Campfire</string>
+    <string name="package_name">cloud.tamsuvoinhau.campfire</string>
+    <string name="custom_url_scheme">cloud.tamsuvoinhau.campfire</string>
+</resources>

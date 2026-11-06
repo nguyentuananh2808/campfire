@@ -88,3 +88,32 @@ Updated: 2026-10-25 (Asia/Saigon)
 ## Next action
 
 Start Docker Desktop and rerun the focused Chat/StrangerChat PostgreSQL integration tests, then apply both `AddMessageEditing` migrations through `Campfire.DbMigrator`. Rebuild the API and frontend containers on `tamsuvoinhau.cloud`, then verify long-press edit/cancel/save, conflict refresh, realtime reconciliation and light/dark rendering on a physical 360–430px phone. Continue cookie/antiforgery, SignalR and LiveKit acceptance before treating the single-host pilot as production-ready. Keep registration and Stranger Chat controlled until recovery, rollout gating, moderation, privacy and support requirements are staffed and verified.
+# Android APK shell — 2026-11-04
+
+- Added a Capacitor 8 Android project with package ID `cloud.tamsuvoinhau.campfire`, Campfire launcher/splash assets and a production HTTPS shell for the existing Angular application.
+- Preserved same-origin Identity cookies, antiforgery and SignalR by loading the canonical production origin; no token storage or CORS relaxation was introduced.
+- Added Android safe-area layout, a branded offline fallback, disabled cleartext traffic/backup and declared camera/microphone permissions for existing chat/learning flows.
+- Added repeatable sync/APK scripts and `docs/android.md` with build, signing and security guidance.
+- Frontend lint, 31 unit tests, production build and Capacitor sync passed. APK assembly remains blocked in this automation environment because Windows loopback sockets are disabled; Gradle and even `Selector.open()` fail before project compilation. Run `npm run android:apk` from a normal Android Studio terminal to produce the debug APK.
+
+# Android message notifications — 2026-11-05
+
+- Added native message notifications for authenticated Group Chat and active Stranger Chat through Capacitor Local Notifications. Android 13+ permission, the plugin's default system-sound channel, a Campfire status icon, unread badge and chat deep links are configured.
+- Native payloads remain privacy-preserving: they contain only a generic unread summary and route; no message body, sender/group name, account ID or guest credential is exposed. Reading a scope clears its tracked notifications and logout clears the native tray.
+- Browser behavior is unchanged: the existing page-title count, navigation badge and in-app sound remain active and non-native browsers no-op at the native adapter boundary.
+- This increment does not claim killed-app push delivery. FCM requires Firebase credentials plus a backend device-token/delivery slice and remains the next step if full system push is required.
+
+# Two-player Games and Android version updates — 2026-11-06
+
+- Added the standalone Games module with Clean Architecture projects and its own `games` schema/migration. “Ba ô quanh lửa” supports exactly two current members of one group, server-authoritative X/O turns, win/draw detection and UUID optimistic concurrency for simultaneous devices.
+- Added authenticated Games REST endpoints through `ISender`, an Angular lazy `/games` hub, member/opponent selection, mobile 3x3 board, personal game history and 2.5-second bounded polling. Ma Sói remains available from the same Trò chơi hub while primary navigation stays at five destinations.
+- Added native Android update checks using Capacitor App/Browser. A strictly validated same-origin manifest compares native version codes, shows release notes and opens only an HTTPS APK URL on `tamsuvoinhau.cloud`; no silent installation or foreign download URL is allowed.
+- The committed update manifest intentionally has no APK URL and does not announce a nonexistent release. A signed release APK and production manifest update remain deployment operations.
+
+# Group chat inbox and persistent unread state — 2026-11-07
+
+- Replaced the native group selector with a real conversation inbox: a persistent desktop rail and a mobile bottom sheet with group avatar, latest sender/preview/time, selected state and a bounded `99+` unread badge.
+- Added the Chat-owned `ReadStates` cursor plus authenticated inbox and mark-read APIs through the required MediatR/Application/Infrastructure boundary. Current Groups membership is obtained through Contracts only; Chat never reads another module's tables.
+- Realtime messages update conversation ordering, preview and counters immediately. The server cursor is cleared only after the latest persisted message is shown, and it cannot move backwards under concurrent requests.
+- Added migration, unit/API integration/frontend service coverage and deployment documentation. Production must run `Campfire.DbMigrator` before serving the new frontend.
+- Next: rerun the focused PostgreSQL integration test when Docker Desktop is available, then perform physical 360/390/430px bottom-sheet and soft-keyboard acceptance.

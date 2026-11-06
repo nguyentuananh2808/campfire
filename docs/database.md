@@ -1,6 +1,8 @@
 # Database
 
-One PostgreSQL 18 database is divided into `identity`, `groups`, `chat`, `events`, `werewolf`, `stranger_chat` and `learning` schemas. Each module owns one DbContext and a schema-local `__EFMigrationsHistory` table. No cross-schema foreign key, navigation or direct table query is allowed.
+One PostgreSQL 18 database is divided into `identity`, `groups`, `chat`, `events`, `games`, `werewolf`, `stranger_chat` and `learning` schemas. Each module owns one DbContext and a schema-local `__EFMigrationsHistory` table. No cross-schema foreign key, navigation or direct table query is allowed.
+
+Games is implemented by `GamesDbContext` and `InitialGames`. It owns `games.CaroGames`; group and player UUIDs have no cross-schema foreign keys. The fixed nine-character board accepts only `X`, `O` and `-`; different X/O players are enforced by a check constraint. Player/time indexes support the bounded personal game list. `Version` is an application-managed UUID concurrency token so simultaneous moves produce one winner and a 409 response for stale clients.
 
 Learning is implemented by `LearningDbContext` and `InitialLearning`. It owns curriculum, lesson activities, vocabulary relations and user progress. Foreign keys exist only inside `learning`; Identity user IDs are UUID values without a cross-schema FK. Composite progress keys make completion idempotent, while score/progress/status/HSK check constraints protect direct writes. Seeded HSK content uses deterministic IDs and a content version.
 
@@ -21,6 +23,8 @@ Chat is implemented by `ChatDbContext`, `InitialChat`, `AddChatMessageKinds` and
 `AddMessageEditing` adds nullable `EditedAtUtc` and application-managed UUID `Version` to every Chat message. Existing rows receive random versions during migration; edits compare the submitted version through EF concurrency handling and rotate it on success.
 
 `AddImageMessages` extends the Chat kind constraint with `Image`. PostgreSQL stores only a 64-character SHA-256 storage key; compressed WebP bytes live in the private media volume and are returned only through a membership-authorized API endpoint. The content-addressed key deduplicates identical images.
+
+`AddChatReadStates` adds `chat.ReadStates` with composite key `(GroupId, UserId)`, `LastReadAtUtc timestamptz` and an index on `UserId`. It deliberately has no cross-schema foreign key. The cursor only advances; messages from the same user are excluded from unread counts. No backfill is required, so existing messages from other members remain unread until the conversation is opened.
 
 Events is implemented by `EventsDbContext` and migration `InitialEvents`. It owns `events.Events`, `EventRsvps` and `EventAuditRecords`; group/user UUIDs have no cross-schema foreign keys.
 

@@ -37,7 +37,9 @@ Chat exposes member-only routes. Non-members receive hidden 404 responses. Send 
 | Method | Route | Permission | Purpose |
 |---|---|---|---|
 | `GET` | `/api/v1/groups/{groupId}/messages?before=&after=&limit=` | Member | Reads the implicit group conversation. `before` and `after` are mutually exclusive opaque cursors; limit defaults to 50 and is capped at 100. Results are chronological. |
+| `GET` | `/api/v1/chat/inbox` | Authenticated | Lists current groups with latest safe preview/time and the persisted unread count. |
 | `POST` | `/api/v1/groups/{groupId}/messages` | Member + XSRF | Persists `{ clientMessageId, kind, content, replyToMessageId? }`. `kind` defaults to `Text` and accepts `Text|Sticker`. Reply targets must belong to this group. First creation returns 201, an identical retry returns 200, and reuse of the key with a different kind/content/reply returns 409. |
+| `PUT` | `/api/v1/groups/{groupId}/messages/read` | Member + XSRF | Advances the caller's read cursor to `{ messageId }`; it cannot move backwards. |
 | `PUT` | `/api/v1/groups/{groupId}/messages/{messageId}` | Sender + XSRF | Edits the caller's own text message with `{ content, expectedVersion }`. Sticker/other-sender edits return 403; a stale version returns 409. The response includes `editedAtUtc` and the next `version`. |
 | `PUT` | `/api/v1/groups/{groupId}/messages/{messageId}/reaction` | Member + XSRF | Sets the caller's single basic reaction with `{ reaction }`; `null` removes it. Repeating the same value is idempotent. |
 

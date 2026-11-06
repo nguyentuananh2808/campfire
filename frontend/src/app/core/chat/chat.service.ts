@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, switchMap } from 'rxjs';
 import { ChatMessage } from './chat-message';
+import { ChatInboxItem } from './chat-inbox-item';
 import { ChatMessageKind } from './chat-message-kind';
 import { ChatMessagePage } from './chat-message-page';
 import { ChatReaction } from './chat-reaction-summary';
@@ -9,6 +10,21 @@ import { ChatReaction } from './chat-reaction-summary';
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private readonly http = inject(HttpClient);
+
+  getInbox(): Observable<ChatInboxItem[]> {
+    return this.http.get<ChatInboxItem[]>('/api/v1/chat/inbox');
+  }
+
+  markRead(groupId: string, messageId: string): Observable<{ lastReadAtUtc: string }> {
+    return this.http.get<void>('/api/v1/auth/antiforgery').pipe(
+      switchMap(() =>
+        this.http.put<{ lastReadAtUtc: string }>(`/api/v1/groups/${groupId}/messages/read`, {
+          messageId,
+        }),
+      ),
+    );
+  }
+
   getMessages(
     groupId: string,
     options: { before?: string; after?: string; limit?: number } = {},

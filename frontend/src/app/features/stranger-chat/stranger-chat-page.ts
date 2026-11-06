@@ -17,6 +17,7 @@ import { StrangerChatService } from '../../core/stranger-chat/stranger-chat.serv
 import { StrangerChatRealtimeService } from '../../core/stranger-chat/stranger-chat-realtime.service';
 import { createClientUuid } from '../../core/ids/client-uuid';
 import { TabNotificationService } from '../../core/notifications/tab-notification.service';
+import { NativeMessageNotificationService } from '../../core/notifications/native-message-notification.service';
 import {
   GuestSession,
   GuestGender,
@@ -44,6 +45,7 @@ export class StrangerChatPage {
   private readonly realtime = inject(StrangerChatRealtimeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly notifications = inject(TabNotificationService);
+  private readonly nativeNotifications = inject(NativeMessageNotificationService);
   readonly session = signal<GuestSession | null>(null);
   readonly conversation = signal<StrangerConversation | null>(null);
   readonly messages = signal<StrangerMessage[]>([]);
@@ -360,11 +362,15 @@ export class StrangerChatPage {
             ? p.items.slice(previousIndex + 1).filter((item) => !item.isMine).length
             : 0;
           if (incomingCount > 0) {
-            this.notifications.announce(
-              'stranger-chat',
-              incomingCount,
-              !shouldFollow || !this.notifications.isPageVisible(),
-            );
+            const shouldNotify = !shouldFollow || !this.notifications.isPageVisible();
+            this.notifications.announce('stranger-chat', incomingCount, shouldNotify);
+            if (shouldNotify) {
+              void this.nativeNotifications.notifyMessage(
+                'stranger-chat',
+                '/stranger',
+                this.notifications.unreadCount(),
+              );
+            }
           }
           if (shouldFollow) this.scrollToLatest();
           else {
@@ -391,6 +397,7 @@ export class StrangerChatPage {
       this.showLatestButton.set(false);
       this.unseenCount.set(0);
       this.notifications.clear('stranger-chat');
+      void this.nativeNotifications.clear('stranger-chat');
     }
   }
 
@@ -408,6 +415,7 @@ export class StrangerChatPage {
     this.showLatestButton.set(false);
     this.unseenCount.set(0);
     this.notifications.clear('stranger-chat');
+    void this.nativeNotifications.clear('stranger-chat');
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         const viewport = this.messageViewport?.nativeElement;
@@ -430,7 +438,10 @@ export class StrangerChatPage {
           this.messages.set([]);
         },
       )
-      .then(() => this.realtimeConnected.set(true))
+      .then(() => {
+        this.realtimeConnected.set(true);
+        void this.nativeNotifications.enable();
+      })
       .catch(() => this.realtimeConnected.set(false));
   }
   private fail(e: unknown) {

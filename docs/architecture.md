@@ -1,6 +1,8 @@
 # Architecture
 
-Campfire is a single-deployment modular monolith: one ASP.NET Core host, one Angular SPA and one PostgreSQL database. Identity, Groups, Chat, Events, Werewolf and StrangerChat each own Domain, Application, Infrastructure, Presentation and Contracts projects plus a private schema/DbContext. Cross-module calls use Contracts only; IDs may cross boundaries but EF entities, tables and navigation properties do not.
+Campfire is a single-deployment modular monolith: one ASP.NET Core host, one Angular SPA and one PostgreSQL database. Identity, Groups, Chat, Events, Games, Werewolf and StrangerChat each own Domain, Application, Infrastructure, Presentation and Contracts projects plus a private schema/DbContext. Cross-module calls use Contracts only; IDs may cross boundaries but EF entities, tables and navigation properties do not.
+
+Games owns the `games` schema and the two-player Caro rules. REST mutations follow the standard MediatR boundary; PostgreSQL plus an application-managed UUID concurrency token is authoritative for turns, occupied cells and results. The mobile client polls a bounded personal game list every 2.5 seconds rather than introducing another realtime channel for this small game.
 
 Learning follows the same boundary and owns schema `learning`. Its generic engine models course/unit/day/activity plus user progress; HSK curricula are versioned data. The base vocabulary mind map reads curated relations from PostgreSQL. Reading-text preparation follows `endpoint -> ISender -> handler -> ILearningTextService -> Infrastructure`; users may explicitly persist a normalized text in their private `reading_documents` library through `IReadingDocumentService`. List responses contain metadata only and content is loaded on demand. The Angular client uses the browser Web Speech API and labels the actual device voice. Future cloud AI, speech or TTS providers must remain Infrastructure adapters behind Application ports and stay disabled until a real provider is configured.
 
@@ -9,3 +11,8 @@ The host contains composition only. Every module uses the same request path: `Pr
 Werewolf follows the same REST/MediatR boundary for commands. Its authenticated SignalR hub carries only room/version invalidation messages; clients fetch a caller-filtered snapshot from REST. LiveKit is a separate self-hosted SFU adapter owned by Werewolf Infrastructure. Browser voice tokens are short-lived and phase/channel scoped; API secrets never cross the server boundary.
 
 The host owns cross-cutting transport defenses only: trusted forwarded headers, production HTTPS/HSTS and configuration validation, uniform ProblemDetails/antiforgery handling, rate limiting and security/cache headers. It does not authorize module resources or contain product rules. OpenAPI is Development-only. Production static hosting for Angular remains responsible for equivalent browser-facing CSP/frame/referrer headers.
+
+Chat owns a per-user/per-group read cursor in `chat.ReadStates`. Its inbox obtains only the authenticated user's current group IDs through the Groups `IGroupMembershipService` contract, then aggregates previews and unread counts inside the Chat schema. It never reads the Groups DbContext or tables. Mark-read follows the standard endpoint/MediatR/Application/Infrastructure path, rechecks membership and advances the cursor monotonically.
+# Android delivery shell
+
+The Android application uses Capacitor 8 and keeps `https://tamsuvoinhau.cloud` as its canonical origin. This preserves the existing same-origin Identity cookie, antiforgery and SignalR model instead of introducing cross-origin credentials or JavaScript tokens. The native project lives under `frontend/android`; see `docs/android.md` for build and security details.

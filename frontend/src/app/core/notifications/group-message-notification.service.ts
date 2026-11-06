@@ -2,20 +2,25 @@ import { DOCUMENT } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import type { HubConnection } from '@microsoft/signalr';
 import { firstValueFrom } from 'rxjs';
+import { Subject } from 'rxjs';
 import { ChatMessage } from '../chat/chat-message';
 import { GroupsService } from '../groups/groups.service';
 import { TabNotificationService } from './tab-notification.service';
+import { NativeMessageNotificationService } from './native-message-notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class GroupMessageNotificationService {
   private readonly groupsService = inject(GroupsService);
   private readonly notifications = inject(TabNotificationService);
+  private readonly nativeNotifications = inject(NativeMessageNotificationService);
   private readonly document = inject(DOCUMENT);
   private connection?: HubConnection;
   private groupIds: string[] = [];
   private currentUserId?: string;
   private activeGroupId?: string;
   private generation = 0;
+  private readonly messageEvents = new Subject<ChatMessage>();
+  readonly messages$ = this.messageEvents.asObservable();
 
   constructor() {
     this.document.addEventListener('visibilitychange', () => {
@@ -27,6 +32,7 @@ export class GroupMessageNotificationService {
 
   async start(userId: string): Promise<void> {
     if (this.currentUserId === userId && this.connection) return;
+    void this.nativeNotifications.enable();
     await this.stop(false);
     const generation = ++this.generation;
     this.currentUserId = userId;
@@ -66,13 +72,17 @@ export class GroupMessageNotificationService {
         /* connection already stopped */
       }
     }
-    if (clearUnread) this.notifications.clearGroups();
+    if (clearUnread) {
+      this.notifications.clearGroups();
+      void this.nativeNotifications.clearAll();
+    }
   }
 
   setActiveGroup(groupId?: string): void {
     this.activeGroupId = groupId;
     if (groupId && this.document.visibilityState === 'visible') {
       this.notifications.clear(`group:${groupId}`);
+      void this.nativeNotifications.clear(`group:${groupId}`);
     }
   }
 
@@ -90,6 +100,7 @@ export class GroupMessageNotificationService {
 
   markRead(groupId: string): void {
     this.notifications.clear(`group:${groupId}`);
+    void this.nativeNotifications.clear(`group:${groupId}`);
   }
 
   private async subscribeAll(connection: HubConnection): Promise<void> {
@@ -97,9 +108,14 @@ export class GroupMessageNotificationService {
   }
 
   private onMessage(message: ChatMessage): void {
+    this.messageEvents.next(message);
     if (message.senderUserId === this.currentUserId) return;
     const isReadingActiveGroup =
       message.groupId === this.activeGroupId && this.document.visibilityState === 'visible';
-    this.notifications.announce(`group:${message.groupId}`, 1, !isReadingActiveGroup);
+    const scope = `group:${message.groupId}`;
+    this.notifications.announce(scope, 1, !isReadingActiveGroup);
+    if (!isReadingActiveGroup) {
+      void this.nativeNotifications.notifyMessage(scope, '/chat', this.notifications.unreadCount());
+    }
   }
 }

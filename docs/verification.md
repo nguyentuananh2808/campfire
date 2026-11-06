@@ -290,3 +290,47 @@ The integration suite additionally requires a working Docker engine because it i
 - Optimization: content is loaded only when opened, list is bounded to 50, text is capped at 10,000 characters and concurrent saves use a PostgreSQL advisory transaction lock before quota enforcement.
 - Blocked: live PostgreSQL migration/runtime integration was not run because Docker Desktop's Linux engine pipe is unavailable. The migration SQL and model-drift check passed; EC2 must run `Campfire.DbMigrator` before the new endpoints are used.
 
+# Android APK shell — 2026-11-04
+
+- Passed: `npm run lint`.
+- Passed: `npm test -- --watch=false`, 31/31 tests across 13 files.
+- Passed: `npm run android:sync`; Angular production build completed and Capacitor copied/synchronized the Android project.
+- Passed: `npm audit --omit=dev` after pinning the compatible transitive Zod security fix to 4.6.7; production dependency audit reports zero vulnerabilities. The remaining npm summary is development-only tooling.
+- Passed: Android SDK command-line package checksum matched Google's published SHA-256 `90ae805d20434428bffcb699c290860f19bb5f66a67e6b330067e3de801fb04a`.
+- Passed source review: cleartext traffic and Android backup are disabled; the shell loads only the HTTPS production origin and retains server-side authorization/cookie/antiforgery behavior.
+- Blocked: `gradlew.bat assembleDebug` cannot start in this automation environment because Java NIO cannot establish its required loopback pipe (`Selector.open()` reproduces `SocketException: Invalid argument: connect`). No APK was claimed as built. Re-run `npm run android:apk` in a normal Android Studio terminal.
+- Not run: physical-device checks for login persistence, SignalR reconnect, image capture, microphone permission, Web Speech support, safe areas and keyboard behavior at 360/390/430 px.
+
+# Android message notifications — 2026-11-05
+
+- Passed: frontend Prettier lint.
+- Passed: Vitest 31/31 across 13 files.
+- Passed: Angular production build and `npm run android:sync`; Capacitor detected and synchronized `@capacitor/local-notifications@8.3.1`.
+- Passed source inspection: the plugin contributes `POST_NOTIFICATIONS`; runtime permission is requested only on native Android, the notification route is allow-listed, and native payloads exclude private chat content and identity data.
+- Passed: `git diff --check` with only the repository's expected LF-to-CRLF notices.
+- Not run: physical Android acceptance for permission allow/deny, foreground/background sound and vibration, notification tap routing, badge behavior and OEM battery restrictions.
+- Blocked as previously recorded: APK assembly cannot start in this automation environment because Java loopback sockets are disabled. Full notifications after process termination are also not implemented because FCM credentials and a server device-token/delivery contract are absent.
+
+# Two-player Games and Android version updates — 2026-11-06
+
+- Passed: NuGet force-evaluated lock generation followed by solution-wide `dotnet restore backend/Campfire.slnx --locked-mode --disable-parallel`.
+- Passed: full Debug solution build with 0 warnings and 0 errors.
+- Passed: UnitTests 40/40, including turn, occupied-cell, win, draw and version-rotation rules; ArchitectureTests 4/4 include the new Games projects automatically.
+- Passed: Games EF `has-pending-model-changes`; `InitialGames` creates only the module-owned `games.CaroGames` table, constraints and player/time indexes.
+- Passed: frontend Prettier lint, Vitest 32/32 across 14 files, Angular production build and Capacitor Android sync. App, Browser and Local Notifications plugins were detected; production dependency audit reports 0 vulnerabilities.
+- Source security review: create validates both users against current group membership; list/get/move recheck actor membership; every mutation is antiforgery protected; stale moves return 409; update URLs require HTTPS plus the exact production hostname.
+- Passed: the focused Games integration project and end-to-end test compile against the real API host and module migration.
+- Blocked: the focused PostgreSQL integration test was attempted but its Testcontainers fixture could not connect to `npipe://./pipe/docker_engine` because Docker Desktop is not running; no runtime database pass is claimed.
+- Not run: two physical-device polling/concurrency acceptance, Android update download/install with a real release-signed APK and visual checks at 360/390/430 px.
+
+# Group chat inbox and persistent unread state — 2026-11-07
+
+- Passed: full Debug solution build with 0 warnings and 0 errors (`dotnet build backend/Campfire.slnx --no-restore --disable-build-servers -m:1`).
+- Passed outside the restricted named-pipe sandbox: focused `dotnet format whitespace --verify-no-changes` for all new and modified Chat/Groups/test C# files.
+- Passed outside the restricted loopback sandbox: UnitTests 41/41 and ArchitectureTests 4/4.
+- Passed: Chat EF `has-pending-model-changes`; reviewed generated PostgreSQL SQL confirms `AddChatReadStates` creates only `chat.ReadStates`, its composite primary key and `UserId` index inside one transaction.
+- Passed: frontend Prettier lint, Vitest 35/35 across 15 files and Angular production build. Chat remains a lazy chunk; the focused component test covers preview, selected state, `99+` badge and group selection output.
+- Passed source security review: inbox group IDs come from the Groups contract for the authenticated user; mark-read rechecks membership and target message; mutations retain antiforgery; previews remain plain text and no chat body is logged.
+- Blocked: the focused PostgreSQL integration test could not run because Docker Desktop's Linux engine pipe is absent. The integration project and new end-to-end test compile in the full solution build.
+- Not run: physical browser/device visual and keyboard acceptance at 360/390/430px. The mobile bottom sheet still needs a real touch/soft-keyboard walkthrough.
+

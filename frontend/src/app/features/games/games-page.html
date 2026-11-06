@@ -1,0 +1,110 @@
+<section class="games-page">
+  <header class="page-hero">
+    <span class="eyebrow">CHƠI CÙNG NHAU</span>
+    <h1>Trò chơi quanh lửa</h1>
+    <p>Mời một người bạn trong nhóm và chơi ngay trên hai thiết bị.</p>
+  </header>
+
+  <a class="werewolf-card" routerLink="/werewolf">
+    <span class="game-symbol" aria-hidden="true">🐺</span>
+    <span><strong>Ma Sói</strong><small>Dành cho buổi tụ họp đông người</small></span>
+    <span aria-hidden="true">›</span>
+  </a>
+
+  <section class="create-card" aria-labelledby="create-game-title">
+    <div>
+      <span class="eyebrow">2 NGƯỜI</span>
+      <h2 id="create-game-title">Ba ô quanh lửa</h2>
+    </div>
+    <label
+      >Nhóm
+      <select [(ngModel)]="selectedGroupId" (ngModelChange)="selectGroup()">
+        <option value="">Chọn nhóm</option>
+        @for (group of groups(); track group.id) {
+          <option [value]="group.id">{{ group.name }}</option>
+        }
+      </select>
+    </label>
+    <label
+      >Đối thủ
+      <select [(ngModel)]="selectedOpponentId" [disabled]="!selectedGroupId">
+        <option value="">Chọn một người bạn</option>
+        @for (member of members(); track member.userId) {
+          <option [value]="member.userId">{{ member.displayName }}</option>
+        }
+      </select>
+    </label>
+    <button
+      type="button"
+      class="primary"
+      [disabled]="!selectedOpponentId || busy()"
+      (click)="createGame()"
+    >
+      {{ busy() ? 'Đang tạo…' : 'Tạo ván mới' }}
+    </button>
+  </section>
+
+  @if (error()) {
+    <div class="error-state" role="alert">{{ error() }}</div>
+  }
+  @if (loading()) {
+    <div class="loading-state" aria-live="polite">Đang nhóm lửa…</div>
+  } @else if (activeGame(); as game) {
+    <section class="board-card" aria-labelledby="board-title">
+      <div class="board-heading">
+        <div>
+          <span class="eyebrow">VÁN HIỆN TẠI</span>
+          <h2 id="board-title">Bạn và {{ opponent(game) }}</h2>
+        </div>
+        <strong>{{ status(game) }}</strong>
+      </div>
+      <div class="players" aria-label="Người chơi">
+        <span><b>X</b> {{ game.xPlayerDisplayName }}</span
+        ><span><b>O</b> {{ game.oPlayerDisplayName }}</span>
+      </div>
+      <div class="board" role="grid" aria-label="Bàn cờ ba ô">
+        @for (cell of [0, 1, 2, 3, 4, 5, 6, 7, 8]; track cell) {
+          <button
+            type="button"
+            role="gridcell"
+            [class.x]="mark(game, cell) === 'X'"
+            [class.o]="mark(game, cell) === 'O'"
+            [disabled]="!canPlay(game, cell) || busy()"
+            [attr.aria-label]="
+              mark(game, cell)
+                ? 'Ô ' + (cell + 1) + ': ' + mark(game, cell)
+                : 'Đánh ô ' + (cell + 1)
+            "
+            (click)="play(cell)"
+          >
+            {{ mark(game, cell) }}
+          </button>
+        }
+      </div>
+      <p class="sync-note">
+        Tự đồng bộ mỗi vài giây. Nếu hai thiết bị đi cùng lúc, server sẽ yêu cầu tải lại trạng thái
+        mới.
+      </p>
+    </section>
+  }
+
+  <section class="history" aria-labelledby="history-title">
+    <h2 id="history-title">Các ván của bạn</h2>
+    @if (!loading() && games().length === 0) {
+      <p class="empty-state">Chưa có ván nào. Chọn một người bạn để bắt đầu.</p>
+    }
+    @for (game of games(); track game.id) {
+      <button
+        type="button"
+        class="game-row"
+        [class.active]="activeGame()?.id === game.id"
+        (click)="open(game)"
+      >
+        <span
+          ><strong>{{ opponent(game) }}</strong
+          ><small>{{ game.status === 'Active' ? 'Đang chơi' : status(game) }}</small></span
+        ><span aria-hidden="true">›</span>
+      </button>
+    }
+  </section>
+</section>

@@ -1,5 +1,24 @@
 # Implementation plan
 
+## M23 — Caro hai người và cập nhật APK
+
+Acceptance criteria:
+
+- Thành viên đã đăng nhập chọn một nhóm và một thành viên khác để tạo ván Ba ô quanh lửa; đúng hai người trong cùng nhóm được xem và đánh.
+- Server là nguồn sự thật cho bàn 3x3, lượt X/O, thắng/hòa; nước đi dùng `expectedVersion` và trả 409 khi hai thiết bị thao tác trên trạng thái cũ.
+- Luồng giữ đúng `endpoint -> ISender -> handler -> IGameService -> EF Core/PostgreSQL`, schema/migration `games` độc lập và không có khóa ngoại xuyên module.
+- Angular có route lazy `/games`, mobile-first, trạng thái tải/rỗng/lỗi/chờ lượt/kết thúc và polling nhẹ để đồng bộ hai thiết bị.
+- Android kiểm tra manifest phiên bản cùng origin bằng version code native; khi có bản mới, UI hiển thị ghi chú và mở URL HTTPS cố định để người dùng tải APK. Không tự cài hoặc bỏ qua cơ chế xác nhận của Android.
+- Build/test/migration checks được ghi trong `docs/verification.md`; APK và chơi hai thiết bị thật chỉ được đánh dấu passed sau khi chạy thực tế.
+
+Delivery steps:
+
+1. Tạo module Games đầy đủ Domain/Application/Infrastructure/Presentation/Contracts, domain tests và migration riêng.
+2. Đăng ký module vào Host, DbMigrator và solution; refresh NuGet lock files mà không tắt locked restore.
+3. Thêm typed Angular API, màn game mobile và mục điều hướng; đồng bộ ván bằng polling có teardown.
+4. Thêm manifest/version-check native, thông báo cập nhật có thể bỏ qua và đường dẫn phát hành HTTPS.
+5. Chạy backend/frontend/Capacitor verification và cập nhật tài liệu vận hành.
+
 ## M20 — Thư viện văn bản luyện nghe
 
 - [x] Thêm `ReadingDocument` thuộc schema `learning`, giới hạn nội dung 10.000 ký tự và lập chỉ mục theo user/thời gian.
@@ -391,3 +410,25 @@ Each milestone is complete only after its recorded checks pass. Optional CodeGra
 - [x] Broadcast post-commit changes through the existing SignalR `MessageChanged` event.
 - [x] Add mobile-first edit actions and composer state for both chat experiences.
 - [x] Add focused authorization/concurrency tests and run backend/frontend verification.
+# Android APK shell — M21
+
+- [x] Add Capacitor 8 Android shell around the production Campfire origin without weakening same-origin cookies, antiforgery or SignalR authorization.
+- [x] Apply Campfire branding, Android-safe viewport/system-bar behavior and mobile touch/accessibility polish.
+- [x] Add repeatable debug/release APK scripts and Android build documentation.
+- [ ] Run frontend lint/tests/build, Capacitor sync and Gradle APK build when the Android toolchain is available. Frontend and sync passed; APK assembly is blocked by loopback sockets being disabled in the automation environment.
+
+## M22 Android message notifications
+
+- [x] Add Android 13+ runtime permission flow, the Capacitor system-sound channel, a private notification payload and branded monochrome status icon.
+- [x] Notify for unread Group Chat and Stranger Chat peer messages, deep-link to the correct chat area and clear delivered notifications when read/logout occurs.
+- [x] Preserve the existing memory-only unread/title/sound behavior on web and avoid exposing chat content or identities on the lock screen.
+- [x] Run frontend lint/tests/build and Capacitor Android synchronization.
+- [ ] Add FCM token registration and server-side post-commit delivery when Firebase credentials and killed-app push are explicitly in scope.
+# M24 — Group chat inbox and persistent unread state
+
+- [x] Add a Chat-owned per-user/per-group read state and migration without cross-schema foreign keys.
+- [x] Add inbox and mark-read vertical slices through MediatR and the existing Chat application abstraction.
+- [x] Extend the Groups contract only with the current user's group identifiers so Chat can authorize/aggregate without reading Groups tables.
+- [x] Replace the group `<select>` with a desktop conversation rail and an accessible mobile bottom sheet containing preview, time and unread badge.
+- [x] Reconcile server unread counts with realtime message events and clear a group only after its latest message is actually shown.
+- [x] Add focused backend/frontend tests, run proportional verification, then update progress and verification evidence.

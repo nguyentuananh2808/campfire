@@ -38,6 +38,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/learning/learning-page').then((m) => m.LearningPage),
   },
   {
+    path: 'games',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/games/games-page').then((m) => m.GamesPage),
+  },
+  {
     path: 'werewolf',
     canActivate: [authGuard],
     loadComponent: () => import('./features/werewolf/werewolf-page').then((m) => m.WerewolfPage),

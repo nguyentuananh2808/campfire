@@ -41,7 +41,7 @@ describe('App', () => {
       'Trò chuyện',
       'Kèo',
       'Học quanh lửa',
-      'Ma Sói',
+      'Trò chơi',
       'Nhóm',
     ]);
   });

@@ -2,8 +2,10 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
+  HostListener,
   inject,
   signal,
   ViewChild,
@@ -11,10 +13,11 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { getApiErrorMessage } from '../../core/auth/api-error';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ChatConnectionState, ChatRealtimeService } from '../../core/chat/chat-realtime.service';
+import { ChatInboxItem } from '../../core/chat/chat-inbox-item';
 import { ChatMessage } from '../../core/chat/chat-message';
 import { ChatMessageKind } from '../../core/chat/chat-message-kind';
 import { ChatReaction } from '../../core/chat/chat-reaction-summary';
@@ -29,10 +32,19 @@ import { createClientUuid } from '../../core/ids/client-uuid';
 import { GroupMessageNotificationService } from '../../core/notifications/group-message-notification.service';
 import { LongPressDirective } from '../../shared/long-press/long-press.directive';
 import { MessageActions } from '../../shared/message-actions/message-actions';
+import { ChatGroupConversation } from './chat-group-conversation';
+import { ChatGroupList } from './chat-group-list';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, LongPressDirective, MessageActions, ReactiveFormsModule, RouterLink],
+  imports: [
+    ChatGroupList,
+    DatePipe,
+    LongPressDirective,
+    MessageActions,
+    ReactiveFormsModule,
+    RouterLink,
+  ],
   selector: 'app-chat-page',
   templateUrl: './chat-page.html',
   styleUrl: './chat-page.scss',
@@ -49,6 +61,20 @@ export class ChatPage {
   private readonly groupNotifications = inject(GroupMessageNotificationService);
   readonly auth = inject(AuthStore);
   readonly groups = signal<GroupSummary[]>([]);
+  readonly inboxByGroup = signal<Record<string, ChatInboxItem>>({});
+  readonly conversations = computed<ChatGroupConversation[]>(() =>
+    this.groups()
+      .map((group) => ({ group, inbox: this.inboxFor(group.id) }))
+      .sort((left, right) => {
+        const byActivity = (right.inbox.lastMessageAtUtc ?? '').localeCompare(
+          left.inbox.lastMessageAtUtc ?? '',
+        );
+        return byActivity || left.group.name.localeCompare(right.group.name, 'vi');
+      }),
+  );
+  readonly totalUnread = computed(() =>
+    this.conversations().reduce((total, conversation) => total + conversation.inbox.unreadCount, 0),
+  );
   readonly selectedGroup = signal<GroupSummary | null>(null);
   readonly messages = signal<ChatViewMessage[]>([]);
   readonly loading = signal(true);
@@ -62,6 +88,7 @@ export class ChatPage {
   readonly openActionsFor = signal<string | null>(null);
   readonly showLatestButton = signal(false);
   readonly unseenCount = signal(0);
+  readonly groupListOpen = signal(false);
   readonly emojis = ['😀', '😂', '🥰', '😎', '🥳', '😭', '😡', '👍', '❤️', '🔥', '🎉', '✨'];
   readonly stickers = CHAT_STICKERS;
   readonly reactions: ReadonlyArray<{ code: ChatReaction; emoji: string; label: string }> = [
@@ -73,6 +100,7 @@ export class ChatPage {
   ];
   private readonly latestCursor = signal<string | null>(null);
   private readonly pendingImages = new Map<string, File>();
+  private readonly lastMarkedMessageIds = new Map<string, string>();
   readonly form = this.formBuilder.nonNullable.group({
     content: ['', [Validators.required, Validators.maxLength(2000), Validators.pattern(/\S/)]],
   });
@@ -82,11 +110,24 @@ export class ChatPage {
       this.groupNotifications.setActiveGroup(undefined);
       void this.realtime.stop();
     });
+    this.groupNotifications.messages$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((message) => this.updateInboxFromRealtime(message));
     this.loadGroups();
+  }
+
+  @HostListener('document:keydown.escape')
+  closeGroupList(): void {
+    this.groupListOpen.set(false);
+  }
+
+  toggleGroupList(): void {
+    this.groupListOpen.update((open) => !open);
   }
 
   selectGroup(groupId: string): void {
     const group = this.groups().find((candidate) => candidate.id === groupId);
+    this.groupListOpen.set(false);
     if (!group || group.id === this.selectedGroup()?.id) return;
     this.selectedGroup.set(group);
     this.groupNotifications.setActiveGroup(group.id);
@@ -323,17 +364,21 @@ export class ChatPage {
   }
 
   private loadGroups(): void {
-    this.groupsService
-      .getMine()
+    forkJoin({
+      groups: this.groupsService.getMine(),
+      inbox: this.chatService.getInbox().pipe(catchError(() => of([] as ChatInboxItem[]))),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (groups) => {
+        next: ({ groups, inbox }) => {
           this.groups.set(groups);
+          this.inboxByGroup.set(Object.fromEntries(inbox.map((item) => [item.groupId, item])));
           this.groupNotifications.syncGroups(groups.map((group) => group.id));
-          if (groups[0]) {
-            this.selectedGroup.set(groups[0]);
-            this.groupNotifications.setActiveGroup(groups[0].id);
-            this.loadInitial(groups[0].id);
+          const first = this.conversations()[0]?.group;
+          if (first) {
+            this.selectedGroup.set(first);
+            this.groupNotifications.setActiveGroup(first.id);
+            this.loadInitial(first.id);
           } else this.loading.set(false);
         },
         error: (error: unknown) => {
@@ -480,8 +525,10 @@ export class ChatPage {
           left.sentAtUtc.localeCompare(right.sentAtUtc) || left.id.localeCompare(right.id),
       );
     });
-    if (shouldFollow) this.scrollToLatest();
-    else if (scroll) {
+    if (shouldFollow) {
+      this.scrollToLatest();
+      if (message.deliveryState === 'sent') this.markRead(message.groupId, message.id);
+    } else if (scroll) {
       this.unseenCount.update((count) => count + 1);
       this.showLatestButton.set(true);
     }
@@ -493,7 +540,7 @@ export class ChatPage {
       this.showLatestButton.set(false);
       this.unseenCount.set(0);
       const groupId = this.selectedGroup()?.id;
-      if (groupId) this.groupNotifications.markRead(groupId);
+      if (groupId) this.markVisibleLatest(groupId);
     }
   }
 
@@ -511,12 +558,101 @@ export class ChatPage {
     this.showLatestButton.set(false);
     this.unseenCount.set(0);
     const groupId = this.selectedGroup()?.id;
-    if (groupId) this.groupNotifications.markRead(groupId);
+    if (groupId) this.markVisibleLatest(groupId);
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         const viewport = this.messageViewport?.nativeElement;
         if (viewport) viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
       }),
     );
+  }
+
+  private inboxFor(groupId: string): ChatInboxItem {
+    return (
+      this.inboxByGroup()[groupId] ?? {
+        groupId,
+        lastMessageId: null,
+        lastMessageSenderDisplayName: null,
+        lastMessageKind: null,
+        lastMessagePreview: null,
+        lastMessageAtUtc: null,
+        unreadCount: 0,
+      }
+    );
+  }
+
+  private updateInboxFromRealtime(message: ChatMessage): void {
+    const current = this.inboxFor(message.groupId);
+    const isNewer =
+      !current.lastMessageAtUtc ||
+      message.sentAtUtc > current.lastMessageAtUtc ||
+      (message.sentAtUtc === current.lastMessageAtUtc &&
+        message.id > (current.lastMessageId ?? ''));
+    if (!isNewer) return;
+
+    const isReading = this.selectedGroup()?.id === message.groupId && this.isNearBottom();
+    const unreadCount =
+      message.senderUserId === this.auth.user()?.id || isReading
+        ? current.unreadCount
+        : current.unreadCount + 1;
+    const lastMessagePreview =
+      message.kind === 'Image'
+        ? 'Đã gửi một ảnh'
+        : message.kind === 'Sticker'
+          ? 'Đã gửi một sticker'
+          : message.content.length <= 80
+            ? message.content
+            : `${message.content.slice(0, 77)}...`;
+    this.inboxByGroup.update((items) => ({
+      ...items,
+      [message.groupId]: {
+        groupId: message.groupId,
+        lastMessageId: message.id,
+        lastMessageSenderDisplayName: message.senderDisplayName,
+        lastMessageKind: message.kind,
+        lastMessagePreview,
+        lastMessageAtUtc: message.sentAtUtc,
+        unreadCount,
+      },
+    }));
+  }
+
+  private markVisibleLatest(groupId: string): void {
+    this.groupNotifications.markRead(groupId);
+    const latest = [...this.messages()]
+      .reverse()
+      .find((message) => message.groupId === groupId && message.deliveryState === 'sent');
+    if (latest) this.markRead(groupId, latest.id);
+  }
+
+  private markRead(groupId: string, messageId: string): void {
+    if (this.lastMarkedMessageIds.get(groupId) === messageId) return;
+    const previousUnreadCount = this.inboxFor(groupId).unreadCount;
+    this.lastMarkedMessageIds.set(groupId, messageId);
+    this.inboxByGroup.update((items) => {
+      const current = items[groupId];
+      return current ? { ...items, [groupId]: { ...current, unreadCount: 0 } } : items;
+    });
+    this.chatService
+      .markRead(groupId, messageId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: () => {
+          if (this.lastMarkedMessageIds.get(groupId) !== messageId) return;
+          this.lastMarkedMessageIds.delete(groupId);
+          this.inboxByGroup.update((items) => {
+            const current = items[groupId];
+            return current
+              ? {
+                  ...items,
+                  [groupId]: {
+                    ...current,
+                    unreadCount: current.unreadCount + previousUnreadCount,
+                  },
+                }
+              : items;
+          });
+        },
+      });
   }
 }

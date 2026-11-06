@@ -1,0 +1,59 @@
+<header class="list-header">
+  <div>
+    <p>HỘI CỦA BẠN</p>
+    <h2>Tin nhắn</h2>
+  </div>
+  <button
+    type="button"
+    class="close-button"
+    (click)="closeRequested.emit()"
+    aria-label="Đóng danh sách nhóm"
+  >
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+  </button>
+</header>
+
+<nav aria-label="Danh sách trò chuyện nhóm">
+  <ul>
+    @for (conversation of conversations(); track conversation.group.id) {
+      <li>
+        <button
+          type="button"
+          class="conversation-item"
+          [class.active]="selectedGroupId() === conversation.group.id"
+          [attr.aria-current]="selectedGroupId() === conversation.group.id ? 'page' : null"
+          (click)="select(conversation.group.id)"
+        >
+          <span class="avatar" aria-hidden="true">{{ conversation.group.name.charAt(0) }}</span>
+          <span class="summary">
+            <span class="summary-top">
+              <strong>{{ conversation.group.name }}</strong>
+              @if (conversation.inbox.lastMessageAtUtc) {
+                <time [dateTime]="conversation.inbox.lastMessageAtUtc">{{
+                  conversation.inbox.lastMessageAtUtc | date: 'shortTime'
+                }}</time>
+              }
+            </span>
+            <span class="summary-bottom">
+              <span class="preview">
+                @if (conversation.inbox.lastMessagePreview) {
+                  <b>{{ conversation.inbox.lastMessageSenderDisplayName }}:</b>
+                  {{ conversation.inbox.lastMessagePreview }}
+                } @else {
+                  Chưa có tin nhắn
+                }
+              </span>
+              @if (conversation.inbox.unreadCount > 0) {
+                <span
+                  class="unread-badge"
+                  [attr.aria-label]="conversation.inbox.unreadCount + ' tin nhắn chưa đọc'"
+                  >{{ unreadLabel(conversation.inbox.unreadCount) }}</span
+                >
+              }
+            </span>
+          </span>
+        </button>
+      </li>
+    }
+  </ul>
+</nav>
