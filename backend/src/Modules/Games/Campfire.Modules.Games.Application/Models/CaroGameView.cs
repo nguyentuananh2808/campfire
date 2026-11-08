@@ -9,6 +9,8 @@ public sealed record CaroGameView(
     string OPlayerDisplayName,
     Guid CurrentPlayerUserId,
     Guid? WinnerUserId,
+    int BoardSize,
+    int WinLength,
     string Board,
     string Status,
     Guid Version,

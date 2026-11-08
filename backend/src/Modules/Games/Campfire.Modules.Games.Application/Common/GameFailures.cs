@@ -7,5 +7,6 @@ public static class GameFailures
     public static GameFailure Conflict() => new("game_concurrency_conflict", "Ván chơi vừa thay đổi. Hãy tải lại.", 409);
     public static GameFailure NotYourTurn() => new("game_not_your_turn", "Chưa tới lượt của bạn.", 409);
     public static GameFailure CellOccupied() => new("game_cell_occupied", "Ô này đã được đánh.", 409);
+    public static GameFailure InvalidCell() => new("game_cell_invalid", "Ô cờ không hợp lệ.", 400);
     public static GameFailure Finished() => new("game_finished", "Ván chơi đã kết thúc.", 409);
 }

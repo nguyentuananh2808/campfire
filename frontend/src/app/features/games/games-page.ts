@@ -104,6 +104,17 @@ export class GamesPage {
     return game.board[cell] === '-' ? '' : game.board[cell];
   }
 
+  cells(game: CaroGame): number[] {
+    return Array.from({ length: game.boardSize * game.boardSize }, (_, index) => index);
+  }
+
+  cellLabel(game: CaroGame, cell: number): string {
+    const row = Math.floor(cell / game.boardSize) + 1;
+    const column = (cell % game.boardSize) + 1;
+    const mark = this.mark(game, cell);
+    return mark ? `Hàng ${row}, cột ${column}: ${mark}` : `Đánh hàng ${row}, cột ${column}`;
+  }
+
   status(game: CaroGame): string {
     const userId = this.auth.user()?.id;
     if (game.status === 'Draw') return 'Hòa — một ván rất cân sức.';

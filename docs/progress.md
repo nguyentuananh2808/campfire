@@ -1,5 +1,13 @@
 # Progress
 
+## 2026-11-08 — High-contrast replies and expanded Caro board
+
+- Group Chat and Stranger Chat reply previews now use explicit semantic surface/border/text tokens in both themes. The obsolete global opacity/current-color overrides were removed so optimized production CSS cannot wash out quoted text.
+- New two-player Caro games use a 15 × 15 board and win on five consecutive marks horizontally, vertically or diagonally. Existing 3 × 3 games keep their original board and rules after migration.
+- Games API projections now include `boardSize` and `winLength`; Angular renders a focusable two-axis scroll surface with 44px cells and row/column accessible labels.
+- `ExpandCaroBoard` backfills legacy rows before enforcing dynamic board constraints. Its rollback fails safely when a 15 × 15 game exists instead of truncating or deleting data.
+- Backend solution build, focused C# format verification, Unit Tests 42/42, Architecture Tests 4/4, EF model-drift check, migration SQL review, frontend lint, 35/35 frontend tests and production build passed. Docker/PostgreSQL runtime migration remains blocked because Docker Desktop is not running.
+
 ## 2026-11-01 — Ảnh tiết kiệm dung lượng cho Group Chat
 
 - Đã thêm upload ảnh Group Chat theo đúng MediatR vertical slice; membership được kiểm tra cho cả upload và download.

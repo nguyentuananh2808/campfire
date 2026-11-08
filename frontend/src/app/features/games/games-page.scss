@@ -36,7 +36,7 @@ h2 {
 .page-hero p,
 small,
 .sync-note {
-  color: var(--text-muted);
+  color: var(--muted);
 }
 .page-hero p {
   margin-top: 10px;
@@ -75,6 +75,12 @@ small,
   gap: 13px;
   padding: 18px;
 }
+.create-card > div p {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin-top: 5px;
+}
 label {
   display: grid;
   gap: 7px;
@@ -91,7 +97,7 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
-  color: var(--text);
+  color: var(--ink);
 }
 .primary {
   min-height: 48px;
@@ -138,22 +144,49 @@ button:disabled {
 .players b {
   color: var(--primary-strong);
 }
+.board-rule {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.board-scroll {
+  max-height: min(64dvh, 680px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  scrollbar-gutter: stable;
+  touch-action: pan-x pan-y;
+}
+.board-scroll:focus-visible {
+  border-radius: var(--radius-md);
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
 .board {
+  --cell-size: 44px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  width: min(100%, 390px);
+  grid-template-columns: repeat(var(--board-size), var(--cell-size));
+  gap: 3px;
+  width: max-content;
   margin: 0 auto;
 }
+.board.compact {
+  --cell-size: clamp(86px, 25vw, 118px);
+  gap: 8px;
+}
 .board button {
-  aspect-ratio: 1;
-  min-width: 0;
+  width: var(--cell-size);
+  height: var(--cell-size);
   border: 1px solid var(--border-strong);
-  border-radius: 14px;
+  border-radius: 7px;
   background: var(--surface-muted);
-  color: var(--text);
-  font-size: clamp(2rem, 16vw, 3.7rem);
+  color: var(--ink);
+  font-size: 1.15rem;
   font-weight: 800;
+  padding: 0;
+}
+.board.compact button {
+  border-radius: 14px;
+  font-size: clamp(2rem, 12vw, 3.7rem);
 }
 .board button:not(:disabled):hover {
   border-color: var(--primary);
@@ -183,7 +216,7 @@ button:disabled {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
-  color: var(--text);
+  color: var(--ink);
   text-align: left;
 }
 .game-row span:first-child {

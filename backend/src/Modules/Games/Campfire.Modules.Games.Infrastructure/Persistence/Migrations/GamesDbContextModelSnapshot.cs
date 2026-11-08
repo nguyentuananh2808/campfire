@@ -30,9 +30,11 @@ namespace Campfire.Modules.Games.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Board")
                         .IsRequired()
-                        .HasMaxLength(9)
-                        .HasColumnType("character(9)")
-                        .IsFixedLength();
+                        .HasMaxLength(225)
+                        .HasColumnType("character varying(225)");
+
+                    b.Property<int>("BoardSize")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -58,6 +60,9 @@ namespace Campfire.Modules.Games.Infrastructure.Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("WinLength")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("WinnerUserId")
                         .HasColumnType("uuid");
 
@@ -74,7 +79,9 @@ namespace Campfire.Modules.Games.Infrastructure.Persistence.Migrations
 
                     b.ToTable("CaroGames", "games", t =>
                         {
-                            t.HasCheckConstraint("CK_CaroGames_Board", "length(\"Board\") = 9 AND \"Board\" ~ '^[XO-]{9}$'");
+                            t.HasCheckConstraint("CK_CaroGames_Board", "length(\"Board\") = \"BoardSize\" * \"BoardSize\" AND \"Board\" ~ '^[XO-]+$'");
+
+                            t.HasCheckConstraint("CK_CaroGames_BoardRules", "(\"BoardSize\" = 3 AND \"WinLength\" = 3) OR (\"BoardSize\" = 15 AND \"WinLength\" = 5)");
 
                             t.HasCheckConstraint("CK_CaroGames_Players", "\"XPlayerUserId\" <> \"OPlayerUserId\"");
                         });

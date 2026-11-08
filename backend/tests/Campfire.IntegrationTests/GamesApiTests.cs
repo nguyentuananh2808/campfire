@@ -29,6 +29,9 @@ public sealed class GamesApiTests(CampfireApiFactory factory) : IClassFixture<Ca
         var gameId = GetGuid(createdJson, "id");
         var version = GetGuid(createdJson, "version");
         Assert.Equal(ownerId, GetGuid(createdJson, "currentPlayerUserId"));
+        Assert.Equal(15, GetInt32(createdJson, "boardSize"));
+        Assert.Equal(5, GetInt32(createdJson, "winLength"));
+        Assert.Equal(225, GetString(createdJson, "board").Length);
         Assert.Equal(HttpStatusCode.NotFound, (await outsider.GetAsync($"/api/v1/games/{gameId}")).StatusCode);
 
         var firstMove = owner.PostAsJsonAsync($"/api/v1/games/{gameId}/moves", new { cell = 0, expectedVersion = version });
@@ -80,5 +83,11 @@ public sealed class GamesApiTests(CampfireApiFactory factory) : IClassFixture<Ca
     {
         using var document = JsonDocument.Parse(json);
         return document.RootElement.GetProperty(propertyName).GetString()!;
+    }
+
+    private static int GetInt32(string json, string propertyName)
+    {
+        using var document = JsonDocument.Parse(json);
+        return document.RootElement.GetProperty(propertyName).GetInt32();
     }
 }

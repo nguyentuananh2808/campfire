@@ -68,6 +68,7 @@ public sealed class EfGameService(
         if (game.Version != expectedVersion) return GameResult<CaroGameView>.Failed(GameFailures.Conflict());
         if (game.Status != CaroGameStatus.Active) return GameResult<CaroGameView>.Failed(GameFailures.Finished());
         if (game.CurrentPlayerUserId != userId) return GameResult<CaroGameView>.Failed(GameFailures.NotYourTurn());
+        if (cell < 0 || cell >= game.Board.Length) return GameResult<CaroGameView>.Failed(GameFailures.InvalidCell());
         if (game.Board[cell] != '-') return GameResult<CaroGameView>.Failed(GameFailures.CellOccupied());
 
         game.Play(userId, cell, timeProvider.GetUtcNow());
@@ -94,7 +95,8 @@ public sealed class EfGameService(
 
     private static CaroGameView ToView(CaroGame game, IReadOnlyDictionary<Guid, UserProfile> profiles) => new(
         game.Id, game.GroupId, game.XPlayerUserId, Name(game.XPlayerUserId, profiles), game.OPlayerUserId,
-        Name(game.OPlayerUserId, profiles), game.CurrentPlayerUserId, game.WinnerUserId, game.Board,
+        Name(game.OPlayerUserId, profiles), game.CurrentPlayerUserId, game.WinnerUserId, game.BoardSize,
+        game.WinLength, game.Board,
         game.Status.ToString(), game.Version, game.CreatedAtUtc, game.UpdatedAtUtc);
 
     private static string Name(Guid id, IReadOnlyDictionary<Guid, UserProfile> profiles) =>

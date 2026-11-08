@@ -7,6 +7,8 @@ export interface CaroGame {
   oPlayerDisplayName: string;
   currentPlayerUserId: string;
   winnerUserId: string | null;
+  boardSize: number;
+  winLength: number;
   board: string;
   status: 'Active' | 'Won' | 'Draw';
   version: string;

@@ -432,3 +432,10 @@ Each milestone is complete only after its recorded checks pass. Optional CodeGra
 - [x] Replace the group `<select>` with a desktop conversation rail and an accessible mobile bottom sheet containing preview, time and unread badge.
 - [x] Reconcile server unread counts with realtime message events and clear a group only after its latest message is actually shown.
 - [x] Add focused backend/frontend tests, run proportional verification, then update progress and verification evidence.
+
+# M25 — Accessible replies and expanded Caro board
+
+- [x] Replace opacity-based reply previews with semantic high-contrast tokens for incoming/outgoing bubbles in light and dark themes.
+- [x] Keep existing 3 × 3 games playable while new games use a server-authoritative 15 × 15 board and five-in-a-row rule.
+- [x] Add board dimensions to the API projection and render a keyboard-focusable, two-axis scrollable board with 44px cells on mobile.
+- [x] Generate/review the Games migration and run backend/frontend verification.

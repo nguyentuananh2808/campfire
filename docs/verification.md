@@ -334,3 +334,14 @@ The integration suite additionally requires a working Docker engine because it i
 - Blocked: the focused PostgreSQL integration test could not run because Docker Desktop's Linux engine pipe is absent. The integration project and new end-to-end test compile in the full solution build.
 - Not run: physical browser/device visual and keyboard acceptance at 360/390/430px. The mobile bottom sheet still needs a real touch/soft-keyboard walkthrough.
 
+# High-contrast replies and expanded Caro board — 2026-11-08
+
+- Passed: full Debug solution build with 0 warnings and 0 errors (`dotnet build backend/Campfire.slnx --no-restore -m:1 --verbosity minimal`).
+- Passed outside the restricted named-pipe sandbox: focused C# whitespace verification, UnitTests 42/42 and ArchitectureTests 4/4.
+- Passed: Games EF `has-pending-model-changes`; generated SQL expands `Board` to 225 characters, backfills existing rows to `BoardSize=3`/`WinLength=3`, then adds board/rule constraints in one transaction.
+- Passed: frontend Prettier lint, Vitest 35/35 across 15 files and Angular production build without component-style budget warnings.
+- Passed source review: new games use 15 × 15/five-in-a-row, legacy games remain valid, move bounds are checked before board indexing, and the existing UUID concurrency token still protects simultaneous moves.
+- Passed contrast calculation: normal reply text/muted text measure 14.58:1/7.43:1 in light mode and 13.04:1/9.82:1 in dark mode. On the darkest outgoing overlay, primary/muted reply text measure 6.67:1/4.87:1.
+- Blocked: Docker Desktop's Linux engine pipe is unavailable, so the migration was not applied to a real local PostgreSQL instance and Games integration tests were not run.
+- Not run: physical browser/device visual and pan/keyboard acceptance at 360/390/430px plus desktop. Production deployment must run the module migrator before serving the new frontend.
+

@@ -128,13 +128,27 @@ app-stranger-chat-page {
     text-align: right;
   }
   .reply-preview {
-    border-left: 3px solid currentColor !important;
+    background: var(--reply-surface);
+    border: 0;
+    border-left: 3px solid var(--reply-border) !important;
+    border-radius: 8px;
+    color: var(--reply-ink);
     display: grid;
     margin-bottom: 6px;
     max-width: 100%;
-    opacity: 0.82;
     padding: 4px 8px !important;
     text-align: left;
+  }
+  .reply-preview span {
+    color: var(--reply-muted);
+  }
+  .bubble.mine .reply-preview {
+    background: var(--reply-on-primary-surface);
+    border-left-color: var(--reply-on-primary-border) !important;
+    color: var(--reply-on-primary-ink);
+  }
+  .bubble.mine .reply-preview span {
+    color: var(--reply-on-primary-muted);
   }
   .reply-preview span,
   .replying-banner small {
@@ -239,11 +253,11 @@ app-stranger-chat-page {
 
 app-chat-page {
   .reply-preview {
-    background: color-mix(in srgb, var(--surface-muted) 82%, transparent);
+    background: var(--reply-surface);
     border: 0;
-    border-left: 3px solid var(--primary);
+    border-left: 3px solid var(--reply-border);
     border-radius: 8px;
-    color: var(--ink);
+    color: var(--reply-ink);
     display: grid;
     gap: 2px;
     margin: 8px 0;
@@ -253,10 +267,18 @@ app-chat-page {
   }
   .reply-preview span,
   .replying-banner small {
-    color: var(--muted);
+    color: var(--reply-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .message.mine .reply-preview {
+    background: var(--reply-on-primary-surface);
+    border-left-color: var(--reply-on-primary-border);
+    color: var(--reply-on-primary-ink);
+  }
+  .message.mine .reply-preview span {
+    color: var(--reply-on-primary-muted);
   }
   .reaction-summary {
     align-items: center;

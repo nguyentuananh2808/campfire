@@ -14,7 +14,8 @@
   <section class="create-card" aria-labelledby="create-game-title">
     <div>
       <span class="eyebrow">2 NGƯỜI</span>
-      <h2 id="create-game-title">Ba ô quanh lửa</h2>
+      <h2 id="create-game-title">Caro quanh lửa</h2>
+      <p>Bàn 15 × 15, nối đủ 5 quân theo hàng ngang, dọc hoặc chéo để thắng.</p>
     </div>
     <label
       >Nhóm
@@ -62,24 +63,31 @@
         <span><b>X</b> {{ game.xPlayerDisplayName }}</span
         ><span><b>O</b> {{ game.oPlayerDisplayName }}</span>
       </div>
-      <div class="board" role="grid" aria-label="Bàn cờ ba ô">
-        @for (cell of [0, 1, 2, 3, 4, 5, 6, 7, 8]; track cell) {
-          <button
-            type="button"
-            role="gridcell"
-            [class.x]="mark(game, cell) === 'X'"
-            [class.o]="mark(game, cell) === 'O'"
-            [disabled]="!canPlay(game, cell) || busy()"
-            [attr.aria-label]="
-              mark(game, cell)
-                ? 'Ô ' + (cell + 1) + ': ' + mark(game, cell)
-                : 'Đánh ô ' + (cell + 1)
-            "
-            (click)="play(cell)"
-          >
-            {{ mark(game, cell) }}
-          </button>
-        }
+      <p class="board-rule">
+        Bàn {{ game.boardSize }} × {{ game.boardSize }} · Nối {{ game.winLength }} quân để thắng
+      </p>
+      <div class="board-scroll" tabindex="0" aria-label="Khu vực bàn cờ có thể cuộn theo hai chiều">
+        <div
+          class="board"
+          [class.compact]="game.boardSize === 3"
+          [style.--board-size]="game.boardSize"
+          role="grid"
+          [attr.aria-label]="'Bàn cờ Caro ' + game.boardSize + ' nhân ' + game.boardSize"
+        >
+          @for (cell of cells(game); track cell) {
+            <button
+              type="button"
+              role="gridcell"
+              [class.x]="mark(game, cell) === 'X'"
+              [class.o]="mark(game, cell) === 'O'"
+              [disabled]="!canPlay(game, cell) || busy()"
+              [attr.aria-label]="cellLabel(game, cell)"
+              (click)="play(cell)"
+            >
+              {{ mark(game, cell) }}
+            </button>
+          }
+        </div>
       </div>
       <p class="sync-note">
         Tự đồng bộ mỗi vài giây. Nếu hai thiết bị đi cùng lúc, server sẽ yêu cầu tải lại trạng thái

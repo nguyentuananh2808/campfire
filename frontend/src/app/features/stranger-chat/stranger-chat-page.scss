@@ -478,6 +478,16 @@ button,
   min-height: 32px;
   padding: 4px 0;
 }
+.reply-preview strong,
+.reply-preview span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reply-preview span {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
 .empty {
   align-items: center;
   align-self: center;
@@ -586,9 +596,10 @@ button,
 }
 .replying-banner {
   align-items: center;
-  background: var(--primary-soft);
-  border-left: 3px solid var(--primary);
+  background: var(--reply-surface);
+  border-left: 3px solid var(--reply-border);
   border-radius: 10px;
+  color: var(--reply-ink);
   display: flex;
   gap: 8px;
   justify-content: space-between;
@@ -607,7 +618,7 @@ button,
   white-space: nowrap;
 }
 .replying-banner small {
-  color: var(--muted);
+  color: var(--reply-muted);
 }
 .replying-banner button {
   background: transparent;

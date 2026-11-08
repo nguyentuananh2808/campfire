@@ -559,19 +559,6 @@ button:disabled {
 .message-meta strong {
   font-size: 0.74rem;
 }
-.reply-preview {
-  background: color-mix(in srgb, currentColor 9%, transparent);
-  border-left: 3px solid currentColor;
-  border-radius: 8px;
-  color: inherit;
-  display: grid;
-  margin: 2px 0 7px;
-  min-height: 0;
-  opacity: 0.82;
-  padding: 6px 8px;
-  text-align: left;
-  width: 100%;
-}
 .reply-preview strong,
 .reply-preview span {
   overflow: hidden;
@@ -580,7 +567,7 @@ button:disabled {
 }
 .reply-preview span {
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 .reaction-summary {
   display: flex;
@@ -687,9 +674,10 @@ button:disabled {
 }
 .replying-banner {
   align-items: center;
-  background: var(--primary-soft);
-  border-left: 3px solid var(--primary);
+  background: var(--reply-surface);
+  border-left: 3px solid var(--reply-border);
   border-radius: 10px;
+  color: var(--reply-ink);
   display: flex;
   justify-content: space-between;
   padding: 7px 10px;
@@ -703,6 +691,9 @@ button:disabled {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.replying-banner small {
+  color: var(--reply-muted);
 }
 .replying-banner button {
   background: transparent;

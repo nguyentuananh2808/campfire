@@ -10,11 +10,14 @@ public sealed class CaroGameConfiguration : IEntityTypeConfiguration<CaroGame>
     {
         builder.ToTable("CaroGames", GamesDbContext.Schema, table =>
         {
-            table.HasCheckConstraint("CK_CaroGames_Board", "length(\"Board\") = 9 AND \"Board\" ~ '^[XO-]{9}$'");
+            table.HasCheckConstraint("CK_CaroGames_Board", "length(\"Board\") = \"BoardSize\" * \"BoardSize\" AND \"Board\" ~ '^[XO-]+$'");
+            table.HasCheckConstraint("CK_CaroGames_BoardRules", "(\"BoardSize\" = 3 AND \"WinLength\" = 3) OR (\"BoardSize\" = 15 AND \"WinLength\" = 5)");
             table.HasCheckConstraint("CK_CaroGames_Players", "\"XPlayerUserId\" <> \"OPlayerUserId\"");
         });
         builder.HasKey(game => game.Id);
-        builder.Property(game => game.Board).HasMaxLength(9).IsFixedLength().IsRequired();
+        builder.Property(game => game.Board).HasMaxLength(CaroGame.MaximumBoardSize * CaroGame.MaximumBoardSize).IsRequired();
+        builder.Property(game => game.BoardSize).IsRequired();
+        builder.Property(game => game.WinLength).IsRequired();
         builder.Property(game => game.Status).HasConversion<string>().HasMaxLength(8).IsRequired();
         builder.Property(game => game.Version).IsConcurrencyToken();
         builder.Property(game => game.CreatedAtUtc).HasColumnType("timestamp with time zone");
