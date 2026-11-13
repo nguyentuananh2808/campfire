@@ -122,3 +122,36 @@ export interface ActivityContent {
   examples?: string[];
   questions?: ExerciseQuestion[];
 }
+export interface VocabularyGameWord {
+  id: string;
+  chinese: string;
+  pinyin: string;
+  meaningVi: string;
+}
+export interface VocabularyGameLevel {
+  level: number;
+  title: string;
+  theme: string;
+  spawnIntervalMs: number;
+  fallDurationMs: number;
+  maxActiveWords: number;
+  requiredHits: number;
+  isUnlocked: boolean;
+  isCompleted: boolean;
+  bestScore: number;
+  bestAccuracy: number;
+  words: VocabularyGameWord[];
+}
+export interface VocabularyGameOverview {
+  highestUnlockedLevel: number;
+  totalCompletedLevels: number;
+  levels: VocabularyGameLevel[];
+}
+export interface VocabularyGameResult {
+  level: number;
+  completed: boolean;
+  newlyCompleted: boolean;
+  bestScore: number;
+  bestAccuracy: number;
+  highestUnlockedLevel: number;
+}

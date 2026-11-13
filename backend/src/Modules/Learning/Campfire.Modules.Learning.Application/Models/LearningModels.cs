@@ -18,4 +18,8 @@ public static class LearningModels
     public sealed record PreparedReadingText(string Text, int CharacterCount, int ChineseCharacterCount, string Language);
     public sealed record ReadingDocumentSummary(Guid Id, string Title, int CharacterCount, int ChineseCharacterCount, DateTimeOffset CreatedAtUtc, DateTimeOffset UpdatedAtUtc);
     public sealed record ReadingDocumentDetail(Guid Id, string Title, string Text, int CharacterCount, int ChineseCharacterCount, string Language, DateTimeOffset CreatedAtUtc, DateTimeOffset UpdatedAtUtc);
+    public sealed record VocabularyGameWord(Guid Id, string Chinese, string Pinyin, string MeaningVi);
+    public sealed record VocabularyGameLevel(int Level, string Title, string Theme, int SpawnIntervalMs, int FallDurationMs, int MaxActiveWords, int RequiredHits, bool IsUnlocked, bool IsCompleted, int BestScore, int BestAccuracy, IReadOnlyList<VocabularyGameWord> Words);
+    public sealed record VocabularyGameOverview(int HighestUnlockedLevel, int TotalCompletedLevels, IReadOnlyList<VocabularyGameLevel> Levels);
+    public sealed record VocabularyGameResult(int Level, bool Completed, bool NewlyCompleted, int BestScore, int BestAccuracy, int HighestUnlockedLevel);
 }

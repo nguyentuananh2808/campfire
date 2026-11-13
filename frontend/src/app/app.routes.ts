@@ -33,6 +33,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/events/events-page').then((m) => m.EventsPage),
   },
   {
+    path: 'learning/game',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/learning/vocabulary-game/vocabulary-game-page').then(
+        (m) => m.VocabularyGamePage,
+      ),
+  },
+  {
     path: 'learning',
     canActivate: [authGuard],
     loadComponent: () => import('./features/learning/learning-page').then((m) => m.LearningPage),

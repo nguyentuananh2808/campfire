@@ -5,7 +5,9 @@ using Campfire.Modules.Learning.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace Campfire.Modules.Learning.Infrastructure;
+
 public static class DependencyInjection
 {
     public static IServiceCollection AddLearningModule(this IServiceCollection services, IConfiguration configuration)
@@ -17,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ILearningService, EfLearningService>();
         services.AddScoped<ILearningTextService, LearningTextService>();
         services.AddScoped<IReadingDocumentService, EfReadingDocumentService>();
+        services.AddScoped<IVocabularyGameService, EfVocabularyGameService>();
         services.AddHealthChecks().AddDbContextCheck<LearningDbContext>("learning-database");
         return services;
     }

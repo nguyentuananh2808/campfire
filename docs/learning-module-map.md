@@ -1,6 +1,6 @@
 # Học quanh lửa — bản đồ triển khai
 
-Ngày cập nhật: 27/10/2026
+Ngày cập nhật: 12/11/2026
 
 ## Kiến trúc đã triển khai
 
@@ -14,8 +14,10 @@ flowchart LR
     EF --> DB[(PostgreSQL schema learning)]
     UI --> Path[Lộ trình HSK1]
     UI --> Map[Bản đồ từ vựng]
+    UI --> Game[Luyện gõ 10 cấp độ]
     Path --> Curriculum[Curriculum version 1.0]
     Map --> Graph[Vocabulary relation graph]
+    Game --> Progress[Tiến độ game theo user]
 ```
 
 HSK1 là dữ liệu seed có version. Learning Engine là code dùng chung, vì vậy thêm HSK2, HSK3 hoặc khóa giao tiếp không cần tạo controller/component riêng cho từng ngày.
@@ -35,6 +37,10 @@ HSK1 là dữ liệu seed có version. Learning Engine là code dùng chung, vì
 | Không dựng nút AI giả | Capability API công bố provider đang tắt; UI giải thích giới hạn | `GetCapabilitiesQuery*`, `learning-page.html` |
 | Bảo vệ mutation | Identity authorization, antiforgery, FluentValidation và ProblemDetails có traceId | `Presentation/LearningEndpoints.cs`, `Presentation/Endpoints/AntiforgeryEndpointFilter.cs`, `Application/<UseCase>/*Validator.cs` |
 | Mobile/dark mode | Semantic design tokens, layout một cột dưới 900px, touch target 44px | `frontend/src/app/features/learning/learning-page.scss` |
+| Game từ rơi 10 cấp | `requestAnimationFrame` cập nhật vị trí, input pinyin không bắt buộc dấu, pause khi mất focus và ba lượt chơi | `frontend/src/app/features/learning/vocabulary-game/*` |
+| Độ khó tăng có giới hạn | Server trả cadence, thời gian rơi, số từ đồng thời và mục tiêu theo level; từ vựng khó dần theo chủ đề | `EfVocabularyGameService.Settings`, `LearningSeed.GameWords` |
+| Lưu tiến độ game | Endpoint → ISender → handler → `IVocabularyGameService` → EF; transaction advisory lock theo user/level | `Application/GetVocabularyGame`, `Application/SubmitVocabularyGame`, `Infrastructure/Services/EfVocabularyGameService.cs` |
+| Không lộ level khóa | Server suy ra level mở từ completion của user; level khóa trả mảng words rỗng | `EfVocabularyGameService.BuildOverview` |
 
 ## Mô hình dữ liệu
 
@@ -49,6 +55,14 @@ erDiagram
     LESSON_ACTIVITY ||--o{ USER_ACTIVITY_PROGRESS : tracks
     VOCABULARY ||--o{ VOCABULARY_RELATION : source
     VOCABULARY ||--o{ VOCABULARY_RELATION : target
+    VOCABULARY_GAME_WORD {
+        int Level
+        int OrderIndex
+    }
+    USER_VOCABULARY_GAME_PROGRESS {
+        uuid UserId
+        int Level
+    }
 ```
 
 - Unique: course slug, `(CourseId, DayNumber)`, `(LearningDayId, OrderIndex)`, progress composite keys, `(Chinese, HskLevel)`.

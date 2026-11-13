@@ -86,3 +86,12 @@ Stranger Chat uses an opaque HttpOnly `Campfire.Guest` cookie and XSRF for every
 - Body: `{ "text": "..." }`; maximum 10,000 characters and whitespace-only text is rejected.
 - The response returns normalized plain text, total character count, Han character count and `zh-CN` language metadata.
 - The endpoint does not persist or log text. `.txt` file selection and Web Speech playback are browser responsibilities; binary files are never uploaded to this endpoint.
+
+# Learning vocabulary game
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/learning/vocabulary-game` | Authenticated | Returns ten level summaries, the caller's best progress and words only for currently unlocked levels. |
+| `POST` | `/api/v1/learning/vocabulary-game/results` | Authenticated + XSRF | Records `{ level, score, correct, total, remainingLives }`; the server rechecks previous-level completion before unlocking progress. |
+
+Levels are 1–10, lives are 0–3, totals are bounded to 100 and scores are bounded to 1,000,000. Completing a level requires its server-defined hit target and at least one remaining life. The game grants no currency or authorization-relevant reward; scores are personal learning feedback.

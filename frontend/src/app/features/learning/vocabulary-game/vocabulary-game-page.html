@@ -1,0 +1,227 @@
+<section class="typing-game-shell">
+  <header class="game-header">
+    <a routerLink="/learning" class="back-link" aria-label="Quay lại Học quanh lửa">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+    </a>
+    <div class="game-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3v18M5.6 6.7 12 10l6.4-3.3M5.6 17.3 12 14l6.4 3.3" />
+      </svg>
+    </div>
+    <div>
+      <span class="eyebrow">TRÒ CHƠI TỪ VỰNG</span>
+      <h1>Luyện gõ quanh lửa</h1>
+      <p>Gõ pinyin của từ đang rơi để giữ ngọn lửa học tập.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="game-state" role="status"><span class="loader"></span>Đang tải 10 cấp độ…</div>
+  } @else if (error() && !overview()) {
+    <div class="game-state error" role="alert">
+      <strong>Chưa thể mở trò chơi</strong><span>{{ error() }}</span>
+      <button type="button" (click)="ngOnInit()">Thử lại</button>
+    </div>
+  } @else if (overview(); as game) {
+    <div class="game-layout">
+      <aside class="level-panel" aria-label="Danh sách cấp độ">
+        <div class="level-panel-heading">
+          <div>
+            <span>Tiến độ</span><strong>{{ game.totalCompletedLevels }}/10 cấp</strong>
+          </div>
+          <span class="level-total">{{ game.totalCompletedLevels * 10 }}%</span>
+        </div>
+        <div class="level-progress" aria-hidden="true">
+          <span [style.width.%]="game.totalCompletedLevels * 10"></span>
+        </div>
+        <div class="level-list">
+          @for (level of game.levels; track level.level) {
+            <button
+              type="button"
+              class="level-item"
+              [class.selected]="selectedLevel()?.level === level.level"
+              [class.completed]="level.isCompleted"
+              [disabled]="!level.isUnlocked || status() === 'playing'"
+              [attr.aria-pressed]="selectedLevel()?.level === level.level"
+              (click)="selectLevel(level)"
+            >
+              <span class="level-number">{{ level.level }}</span>
+              <span
+                ><strong>{{ level.title }}</strong
+                ><small>{{ level.theme }}</small></span
+              >
+              @if (level.isCompleted) {
+                <svg class="level-status" viewBox="0 0 24 24" aria-label="Đã hoàn thành">
+                  <path d="m5 12 4 4L19 6" />
+                </svg>
+              } @else if (!level.isUnlocked) {
+                <svg class="level-status" viewBox="0 0 24 24" aria-label="Đang khóa">
+                  <rect x="5" y="10" width="14" height="10" rx="2" />
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                </svg>
+              } @else {
+                <span class="best-score">{{ level.bestScore || 'Mới' }}</span>
+              }
+            </button>
+          }
+        </div>
+      </aside>
+
+      @if (selectedLevel(); as level) {
+        <main class="game-card">
+          <div class="game-toolbar">
+            <div class="score-chip" aria-label="Điểm hiện tại">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z" />
+                <path d="M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4" />
+              </svg>
+              <strong>{{ score() }}</strong>
+            </div>
+            <div class="round-info">
+              <span>Cấp {{ level.level }}/10</span>
+              <strong>{{ level.theme }}</strong>
+            </div>
+            <div class="lives" [attr.aria-label]="'Còn ' + lives() + ' lượt'">
+              @for (life of [1, 2, 3]; track life) {
+                <svg viewBox="0 0 24 24" [class.empty]="life > lives()" aria-hidden="true">
+                  <path
+                    d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.7-7.5 1.1-1.1a5.5 5.5 0 0 0 0-7.8Z"
+                  />
+                </svg>
+              }
+            </div>
+          </div>
+
+          <div class="target-progress">
+            <span
+              ><strong>{{ correct() }}</strong
+              >/{{ level.requiredHits }} từ</span
+            >
+            <div aria-label="Tiến độ lượt chơi"><span [style.width.%]="progress()"></span></div>
+            <small>Chuỗi {{ combo() }}</small>
+          </div>
+
+          <section
+            class="arena"
+            [class.paused]="status() === 'paused'"
+            aria-label="Khu vực từ vựng rơi"
+          >
+            <div class="ember ember-one" aria-hidden="true"></div>
+            <div class="ember ember-two" aria-hidden="true"></div>
+            @for (item of falling(); track item.instanceId) {
+              <div class="falling-word" [style.top.%]="item.top" [style.left.%]="item.left">
+                <strong lang="zh">{{ item.word.chinese }}</strong>
+                <span>{{ item.word.meaningVi }}</span>
+              </div>
+            }
+            <div class="campfire" aria-hidden="true">
+              <svg viewBox="0 0 64 64">
+                <path
+                  class="flame-outer"
+                  d="M35 5c2 13-7 14-4 26 3-5 7-8 9-14 8 9 12 18 7 28-5 11-25 15-34 3C3 34 15 21 24 12c0 7 2 11 5 13C27 15 34 11 35 5Z"
+                />
+                <path
+                  class="flame-inner"
+                  d="M31 32c2 5 1 8-1 11 4-2 7-6 8-11 5 7 4 16-2 19-7 4-15 0-15-7 0-6 5-10 8-15 0 4 1 5 2 3Z"
+                />
+                <path class="log" d="m14 54 36 6M50 54l-36 6" />
+              </svg>
+            </div>
+
+            @if (status() === 'idle') {
+              <div class="arena-overlay">
+                <span class="level-kicker">CẤP {{ level.level }}</span>
+                <h2>{{ level.title }}</h2>
+                <p>
+                  Hoàn thành {{ level.requiredHits }} từ · tối đa {{ level.maxActiveWords }} từ cùng
+                  lúc
+                </p>
+                <button type="button" class="primary-action" (click)="start()">
+                  Bắt đầu
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                </button>
+              </div>
+            } @else if (status() === 'paused') {
+              <div class="arena-overlay">
+                <span class="level-kicker">ĐÃ TẠM DỪNG</span>
+                <h2>Giữ nguyên nhịp học</h2>
+                <button type="button" class="primary-action" (click)="togglePause()">
+                  Tiếp tục
+                </button>
+              </div>
+            } @else if (status() === 'won' || status() === 'lost') {
+              <div class="arena-overlay result">
+                <span class="result-mark" [class.lost]="status() === 'lost'" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 3v18M5.6 6.7 12 10l6.4-3.3M5.6 17.3 12 14l6.4 3.3" />
+                  </svg>
+                </span>
+                <span class="level-kicker">{{
+                  status() === 'won' ? 'HOÀN THÀNH' : 'CHƯA ĐẠT'
+                }}</span>
+                <h2>{{ status() === 'won' ? 'Ngọn lửa vẫn sáng!' : 'Thử lại một nhịp nhé' }}</h2>
+                <p>{{ correct() }} từ đúng · {{ score() }} điểm · còn {{ lives() }} lượt</p>
+                <div class="result-actions">
+                  <button type="button" class="secondary-action" (click)="start()">Chơi lại</button>
+                  @if (error()) {
+                    <button
+                      type="button"
+                      class="primary-action"
+                      [disabled]="saving()"
+                      (click)="retrySave()"
+                    >
+                      Lưu lại
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (status() === 'playing') {
+              <button
+                type="button"
+                class="pause-button"
+                (click)="togglePause()"
+                aria-label="Tạm dừng trò chơi"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+              </button>
+            }
+          </section>
+
+          <form class="answer-bar" [class.wrong]="wrongAnswer()" (ngSubmit)="submitAnswer()">
+            <label for="pinyin-answer">Nhập pinyin</label>
+            <div>
+              <input
+                #answerInput
+                id="pinyin-answer"
+                name="answer"
+                [(ngModel)]="answer"
+                [disabled]="status() !== 'playing'"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="Ví dụ: ni hao"
+              />
+              <button
+                type="submit"
+                [disabled]="status() !== 'playing' || !answer.trim()"
+                aria-label="Bắn từ đã nhập"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" /></svg>
+              </button>
+            </div>
+            <small>Không bắt buộc dấu thanh · Enter để bắn</small>
+          </form>
+
+          @if (notice()) {
+            <div class="inline-notice" role="status">{{ notice() }}</div>
+          }
+          @if (error() && overview()) {
+            <div class="inline-error" role="alert">{{ error() }}</div>
+          }
+        </main>
+      }
+    </div>
+  }
+</section>

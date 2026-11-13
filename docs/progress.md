@@ -96,6 +96,22 @@ Updated: 2026-10-25 (Asia/Saigon)
 ## Next action
 
 Start Docker Desktop and rerun the focused Chat/StrangerChat PostgreSQL integration tests, then apply both `AddMessageEditing` migrations through `Campfire.DbMigrator`. Rebuild the API and frontend containers on `tamsuvoinhau.cloud`, then verify long-press edit/cancel/save, conflict refresh, realtime reconciliation and light/dark rendering on a physical 360–430px phone. Continue cookie/antiforgery, SignalR and LiveKit acceptance before treating the single-host pilot as production-ready. Keep registration and Stranger Chat controlled until recovery, rollout gating, moderation, privacy and support requirements are staffed and verified.
+
+# Android lock-screen vocabulary review — 2026-11-11
+
+- Added an Android-only, explicit opt-in card to Học quanh lửa. Opening a lesson remembers up to 100 vocabulary items already encountered; no answers, identity data or credentials are stored for review.
+- Added a silent, low-priority, public ongoing notification containing Chinese text, pinyin and Vietnamese meaning. Tapping it returns to `/learning`; disabling the feature removes it.
+- Added a Capacitor `DeviceUnlock` runtime plugin for `ACTION_USER_PRESENT`. It rotates the review word on unlock while the app process remains alive, with app resume as a second trigger and a debounce to prevent duplicate rotation.
+- Increased the native shell to version `1.1` / code `2`. This feature requires rebuilding and installing the APK in addition to deploying the hosted Angular bundle.
+- Android process/OEM restrictions remain explicit: if Android kills Campfire, the current notification remains but every-unlock rotation cannot be guaranteed without a foreground service or push mechanism. Neither was added because this feature should remain quiet and battery-conscious.
+
+# Luyện gõ từ vựng 10 cấp độ — 2026-11-12
+
+- Added a Learning-owned vocabulary typing game at `/learning/game`: Chinese words fall toward the campfire and the learner types pinyin (tone marks optional) to clear them. The UI includes score, combo, three lives, pause/resume, restart, result retry and a compact mobile level carousel.
+- Added 50 curated words across ten progressively harder themes. Difficulty increases through bounded spawn cadence, fall duration, simultaneous word count and required hits; reduced-motion users receive a slower fall rate and app focus loss pauses the round.
+- Added private per-user best score/accuracy/completion in PostgreSQL. Server-derived sequential unlocks, antiforgery, FluentValidation and a per-user/level PostgreSQL advisory lock protect result writes; locked levels do not return word content.
+- Added `AddVocabularyGame`, the two authenticated Learning endpoints and the required MediatR/Application port/Infrastructure adapter path. The game grants no currency or authorization-sensitive reward.
+- Next: start Docker Desktop and run `LearningVocabularyGameApiTests` against Testcontainers PostgreSQL, apply the Learning migration in deployment, then perform physical 360/390/430px touch/keyboard/light/dark acceptance.
 # Android APK shell — 2026-11-04
 
 - Added a Capacitor 8 Android project with package ID `cloud.tamsuvoinhau.campfire`, Campfire launcher/splash assets and a production HTTPS shell for the existing Angular application.

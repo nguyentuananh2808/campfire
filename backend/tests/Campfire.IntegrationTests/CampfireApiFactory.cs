@@ -3,6 +3,7 @@ using Campfire.Modules.Events.Infrastructure.Persistence;
 using Campfire.Modules.Groups.Infrastructure.Persistence;
 using Campfire.Modules.Games.Infrastructure.Persistence;
 using Campfire.Modules.Identity.Infrastructure.Persistence;
+using Campfire.Modules.Learning.Infrastructure.Persistence;
 using Campfire.Modules.StrangerChat.Infrastructure.Persistence;
 using Campfire.Modules.Werewolf.Application.Abstractions;
 using Campfire.Modules.Werewolf.Infrastructure.Persistence;
@@ -44,6 +45,8 @@ public sealed class CampfireApiFactory : WebApplicationFactory<Program>, IAsyncL
         await werewolfDbContext.Database.MigrateAsync();
         var strangerChatDbContext = scope.ServiceProvider.GetRequiredService<StrangerChatDbContext>();
         await strangerChatDbContext.Database.MigrateAsync();
+        var learningDbContext = scope.ServiceProvider.GetRequiredService<LearningDbContext>();
+        await learningDbContext.Database.MigrateAsync();
     }
 
     async Task IAsyncLifetime.DisposeAsync()

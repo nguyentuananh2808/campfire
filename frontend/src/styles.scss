@@ -28,6 +28,86 @@
     sans-serif;
   font-family: var(--font-sans);
 }
+
+/* Native Android learning review: global to keep the lazy Learning style budget bounded. */
+.learning-shell .lock-screen-review {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 16px 18px;
+}
+.learning-shell .lock-screen-review h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+.learning-shell .lock-screen-review p {
+  color: var(--ink);
+  font-size: 0.9rem;
+  margin: 3px 0 0;
+}
+.learning-shell .lock-screen-review small {
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+.learning-shell .lock-screen-icon {
+  align-items: center;
+  background: var(--primary-soft);
+  border-radius: 14px;
+  color: var(--primary);
+  display: flex;
+  font-size: 1.3rem;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+.learning-shell .review-toggle {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  min-height: 44px;
+  padding: 0 18px;
+}
+.learning-shell .review-toggle.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+.learning-shell .review-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+@media (max-width: 560px) {
+  .learning-shell .lock-screen-review {
+    align-items: start;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 14px;
+  }
+  .learning-shell .review-toggle {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+.learning-shell .mode-tabs svg {
+  fill: none;
+  height: 24px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 24px;
+}
+.learning-shell .mode-tabs .game-tab {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
 * {
   box-sizing: border-box;
 }

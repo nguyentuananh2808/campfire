@@ -439,3 +439,20 @@ Each milestone is complete only after its recorded checks pass. Optional CodeGra
 - [x] Keep existing 3 × 3 games playable while new games use a server-authoritative 15 × 15 board and five-in-a-row rule.
 - [x] Add board dimensions to the API projection and render a keyboard-focusable, two-axis scrollable board with 44px cells on mobile.
 - [x] Generate/review the Games migration and run backend/frontend verification.
+
+# M26 — Android lock-screen vocabulary review
+
+- [x] Add an explicit Android-only opt-in control to Learning and retain only a bounded list of course vocabulary on the device.
+- [x] Show one silent, public, low-priority vocabulary notification on the lock screen and deep-link it back to Learning.
+- [x] Rotate the review word when Android reports an unlock while the Campfire process is alive, and when the app resumes.
+- [x] Explain notification permission/OS limitations in the UI and docs; do not add a foreground service, wallpaper mutation or misleading always-on guarantee.
+- [x] Run frontend formatting/tests/build, Capacitor sync and the available Android compilation checks.
+
+# M27 — Luyện gõ từ vựng 10 cấp độ
+
+- [x] Add a Learning-owned curated 10-level vocabulary catalog and per-user best progress in PostgreSQL, without cross-schema access or client-trusted unlock state.
+- [x] Expose authenticated read/submit use cases through `endpoint -> ISender -> handler -> IVocabularyGameService -> EF Core/PostgreSQL`; protect result submission with antiforgery and validation.
+- [x] Build a lazy `/learning/game` Angular screen with falling Chinese words, pinyin input, score/lives/pause/restart controls and server-backed level selection.
+- [x] Increase difficulty through bounded spawn cadence, fall duration, simultaneous words and progressively harder curated vocabulary while keeping level 1 accessible.
+- [x] Support touch, physical keyboard, reduced motion, light/dark themes and 360/390/430px plus desktop layouts; use SVG controls rather than structural emoji.
+- [x] Add focused domain/API-client tests, generate/review the Learning migration, run backend/frontend checks and record physical-device limitations.

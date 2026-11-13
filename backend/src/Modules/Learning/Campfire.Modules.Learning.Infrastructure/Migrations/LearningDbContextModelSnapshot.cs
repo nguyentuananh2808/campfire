@@ -303,6 +303,534 @@ namespace Campfire.Modules.Learning.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Campfire.Modules.Learning.Domain.Games.UserVocabularyGameProgress", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BestAccuracy")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BestScore")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "Level");
+
+                    b.HasIndex("UserId", "CompletedAtUtc");
+
+                    b.ToTable("user_vocabulary_game_progress", "learning", t =>
+                        {
+                            t.HasCheckConstraint("CK_user_vocabulary_game_progress_Attempts", "\"Attempts\" >= 0");
+
+                            t.HasCheckConstraint("CK_user_vocabulary_game_progress_BestAccuracy", "\"BestAccuracy\" BETWEEN 0 AND 100");
+
+                            t.HasCheckConstraint("CK_user_vocabulary_game_progress_BestScore", "\"BestScore\" >= 0");
+
+                            t.HasCheckConstraint("CK_user_vocabulary_game_progress_Level", "\"Level\" BETWEEN 1 AND 10");
+                        });
+                });
+
+            modelBuilder.Entity("Campfire.Modules.Learning.Domain.Games.VocabularyGameWord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Chinese")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("MeaningVi")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Pinyin")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Level", "OrderIndex")
+                        .IsUnique();
+
+                    b.ToTable("vocabulary_game_words", "learning", t =>
+                        {
+                            t.HasCheckConstraint("CK_vocabulary_game_words_Level", "\"Level\" BETWEEN 1 AND 10");
+
+                            t.HasCheckConstraint("CK_vocabulary_game_words_OrderIndex", "\"OrderIndex\" BETWEEN 1 AND 20");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002001"),
+                            Chinese = "你好",
+                            Level = 1,
+                            MeaningVi = "xin chào",
+                            OrderIndex = 1,
+                            Pinyin = "nǐ hǎo"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002002"),
+                            Chinese = "谢谢",
+                            Level = 1,
+                            MeaningVi = "cảm ơn",
+                            OrderIndex = 2,
+                            Pinyin = "xièxie"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002003"),
+                            Chinese = "再见",
+                            Level = 1,
+                            MeaningVi = "tạm biệt",
+                            OrderIndex = 3,
+                            Pinyin = "zàijiàn"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002004"),
+                            Chinese = "是",
+                            Level = 1,
+                            MeaningVi = "là",
+                            OrderIndex = 4,
+                            Pinyin = "shì"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002005"),
+                            Chinese = "不",
+                            Level = 1,
+                            MeaningVi = "không",
+                            OrderIndex = 5,
+                            Pinyin = "bù"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002006"),
+                            Chinese = "我",
+                            Level = 2,
+                            MeaningVi = "tôi",
+                            OrderIndex = 1,
+                            Pinyin = "wǒ"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002007"),
+                            Chinese = "你",
+                            Level = 2,
+                            MeaningVi = "bạn",
+                            OrderIndex = 2,
+                            Pinyin = "nǐ"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002008"),
+                            Chinese = "他",
+                            Level = 2,
+                            MeaningVi = "anh ấy",
+                            OrderIndex = 3,
+                            Pinyin = "tā"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002009"),
+                            Chinese = "她",
+                            Level = 2,
+                            MeaningVi = "cô ấy",
+                            OrderIndex = 4,
+                            Pinyin = "tā"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002010"),
+                            Chinese = "我们",
+                            Level = 2,
+                            MeaningVi = "chúng tôi",
+                            OrderIndex = 5,
+                            Pinyin = "wǒmen"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002011"),
+                            Chinese = "一",
+                            Level = 3,
+                            MeaningVi = "một",
+                            OrderIndex = 1,
+                            Pinyin = "yī"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002012"),
+                            Chinese = "二",
+                            Level = 3,
+                            MeaningVi = "hai",
+                            OrderIndex = 2,
+                            Pinyin = "èr"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002013"),
+                            Chinese = "三",
+                            Level = 3,
+                            MeaningVi = "ba",
+                            OrderIndex = 3,
+                            Pinyin = "sān"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002014"),
+                            Chinese = "四",
+                            Level = 3,
+                            MeaningVi = "bốn",
+                            OrderIndex = 4,
+                            Pinyin = "sì"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002015"),
+                            Chinese = "五",
+                            Level = 3,
+                            MeaningVi = "năm",
+                            OrderIndex = 5,
+                            Pinyin = "wǔ"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002016"),
+                            Chinese = "今天",
+                            Level = 4,
+                            MeaningVi = "hôm nay",
+                            OrderIndex = 1,
+                            Pinyin = "jīntiān"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002017"),
+                            Chinese = "明天",
+                            Level = 4,
+                            MeaningVi = "ngày mai",
+                            OrderIndex = 2,
+                            Pinyin = "míngtiān"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002018"),
+                            Chinese = "昨天",
+                            Level = 4,
+                            MeaningVi = "hôm qua",
+                            OrderIndex = 3,
+                            Pinyin = "zuótiān"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002019"),
+                            Chinese = "现在",
+                            Level = 4,
+                            MeaningVi = "bây giờ",
+                            OrderIndex = 4,
+                            Pinyin = "xiànzài"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002020"),
+                            Chinese = "时候",
+                            Level = 4,
+                            MeaningVi = "thời gian / lúc",
+                            OrderIndex = 5,
+                            Pinyin = "shíhou"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002021"),
+                            Chinese = "爸爸",
+                            Level = 5,
+                            MeaningVi = "bố",
+                            OrderIndex = 1,
+                            Pinyin = "bàba"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002022"),
+                            Chinese = "妈妈",
+                            Level = 5,
+                            MeaningVi = "mẹ",
+                            OrderIndex = 2,
+                            Pinyin = "māma"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002023"),
+                            Chinese = "哥哥",
+                            Level = 5,
+                            MeaningVi = "anh trai",
+                            OrderIndex = 3,
+                            Pinyin = "gēge"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002024"),
+                            Chinese = "姐姐",
+                            Level = 5,
+                            MeaningVi = "chị gái",
+                            OrderIndex = 4,
+                            Pinyin = "jiějie"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002025"),
+                            Chinese = "朋友",
+                            Level = 5,
+                            MeaningVi = "bạn bè",
+                            OrderIndex = 5,
+                            Pinyin = "péngyou"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002026"),
+                            Chinese = "学校",
+                            Level = 6,
+                            MeaningVi = "trường học",
+                            OrderIndex = 1,
+                            Pinyin = "xuéxiào"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002027"),
+                            Chinese = "老师",
+                            Level = 6,
+                            MeaningVi = "giáo viên",
+                            OrderIndex = 2,
+                            Pinyin = "lǎoshī"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002028"),
+                            Chinese = "学生",
+                            Level = 6,
+                            MeaningVi = "học sinh",
+                            OrderIndex = 3,
+                            Pinyin = "xuésheng"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002029"),
+                            Chinese = "汉语",
+                            Level = 6,
+                            MeaningVi = "tiếng Trung",
+                            OrderIndex = 4,
+                            Pinyin = "hànyǔ"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002030"),
+                            Chinese = "学习",
+                            Level = 6,
+                            MeaningVi = "học tập",
+                            OrderIndex = 5,
+                            Pinyin = "xuéxí"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002031"),
+                            Chinese = "苹果",
+                            Level = 7,
+                            MeaningVi = "táo",
+                            OrderIndex = 1,
+                            Pinyin = "píngguǒ"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002032"),
+                            Chinese = "米饭",
+                            Level = 7,
+                            MeaningVi = "cơm",
+                            OrderIndex = 2,
+                            Pinyin = "mǐfàn"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002033"),
+                            Chinese = "喝水",
+                            Level = 7,
+                            MeaningVi = "uống nước",
+                            OrderIndex = 3,
+                            Pinyin = "hē shuǐ"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002034"),
+                            Chinese = "喜欢",
+                            Level = 7,
+                            MeaningVi = "yêu thích",
+                            OrderIndex = 4,
+                            Pinyin = "xǐhuan"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002035"),
+                            Chinese = "饭店",
+                            Level = 7,
+                            MeaningVi = "nhà hàng",
+                            OrderIndex = 5,
+                            Pinyin = "fàndiàn"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002036"),
+                            Chinese = "医院",
+                            Level = 8,
+                            MeaningVi = "bệnh viện",
+                            OrderIndex = 1,
+                            Pinyin = "yīyuàn"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002037"),
+                            Chinese = "商店",
+                            Level = 8,
+                            MeaningVi = "cửa hàng",
+                            OrderIndex = 2,
+                            Pinyin = "shāngdiàn"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002038"),
+                            Chinese = "火车站",
+                            Level = 8,
+                            MeaningVi = "ga tàu",
+                            OrderIndex = 3,
+                            Pinyin = "huǒchēzhàn"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002039"),
+                            Chinese = "出租车",
+                            Level = 8,
+                            MeaningVi = "taxi",
+                            OrderIndex = 4,
+                            Pinyin = "chūzūchē"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002040"),
+                            Chinese = "飞机",
+                            Level = 8,
+                            MeaningVi = "máy bay",
+                            OrderIndex = 5,
+                            Pinyin = "fēijī"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002041"),
+                            Chinese = "因为",
+                            Level = 9,
+                            MeaningVi = "bởi vì",
+                            OrderIndex = 1,
+                            Pinyin = "yīnwèi"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002042"),
+                            Chinese = "所以",
+                            Level = 9,
+                            MeaningVi = "cho nên",
+                            OrderIndex = 2,
+                            Pinyin = "suǒyǐ"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002043"),
+                            Chinese = "但是",
+                            Level = 9,
+                            MeaningVi = "nhưng",
+                            OrderIndex = 3,
+                            Pinyin = "dànshì"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002044"),
+                            Chinese = "已经",
+                            Level = 9,
+                            MeaningVi = "đã rồi",
+                            OrderIndex = 4,
+                            Pinyin = "yǐjīng"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002045"),
+                            Chinese = "正在",
+                            Level = 9,
+                            MeaningVi = "đang",
+                            OrderIndex = 5,
+                            Pinyin = "zhèngzài"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002046"),
+                            Chinese = "环境",
+                            Level = 10,
+                            MeaningVi = "môi trường",
+                            OrderIndex = 1,
+                            Pinyin = "huánjìng"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002047"),
+                            Chinese = "文化",
+                            Level = 10,
+                            MeaningVi = "văn hóa",
+                            OrderIndex = 2,
+                            Pinyin = "wénhuà"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002048"),
+                            Chinese = "经验",
+                            Level = 10,
+                            MeaningVi = "kinh nghiệm",
+                            OrderIndex = 3,
+                            Pinyin = "jīngyàn"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002049"),
+                            Chinese = "机会",
+                            Level = 10,
+                            MeaningVi = "cơ hội",
+                            OrderIndex = 4,
+                            Pinyin = "jīhuì"
+                        },
+                        new
+                        {
+                            Id = new Guid("b1000000-0000-0000-0000-000000002050"),
+                            Chinese = "解决",
+                            Level = 10,
+                            MeaningVi = "giải quyết",
+                            OrderIndex = 5,
+                            Pinyin = "jiějué"
+                        });
+                });
+
             modelBuilder.Entity("Campfire.Modules.Learning.Domain.Progress.UserActivityProgress", b =>
                 {
                     b.Property<Guid>("UserId")

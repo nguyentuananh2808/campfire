@@ -28,7 +28,46 @@
       <span aria-hidden="true">声</span
       ><span><strong>Luyện nghe</strong><small>Văn bản thành giọng đọc</small></span>
     </button>
+    <a routerLink="/learning/game" class="game-tab">
+      <span aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3v18M5.6 6.7 12 10l6.4-3.3M5.6 17.3 12 14l6.4 3.3" />
+        </svg>
+      </span>
+      <span><strong>Luyện gõ</strong><small>10 cấp độ từ vựng</small></span>
+    </a>
   </nav>
+
+  @if (lockScreenReview.supported) {
+    <section class="lock-screen-review" aria-labelledby="lock-screen-review-title">
+      <span class="lock-screen-icon" aria-hidden="true">锁</span>
+      <div>
+        <h2 id="lock-screen-review-title">Ôn từ trên màn hình khóa</h2>
+        <p>
+          Hiện luân phiên {{ lockScreenReview.wordCount() }} từ đã gặp, không phát âm thanh hay
+          rung.
+        </p>
+        @if (lockScreenReview.permissionDenied()) {
+          <small role="alert">Hãy cho phép thông báo Campfire trong Cài đặt Android.</small>
+        } @else {
+          <small
+            >Android có thể dừng việc đổi từ khi app bị đóng; thông báo hiện tại vẫn được
+            giữ.</small
+          >
+        }
+      </div>
+      <button
+        type="button"
+        class="review-toggle"
+        [class.active]="lockScreenReview.enabled()"
+        [disabled]="!lockScreenReview.wordCount()"
+        [attr.aria-pressed]="lockScreenReview.enabled()"
+        (click)="toggleLockScreenReview()"
+      >
+        {{ lockScreenReview.enabled() ? 'Đang bật' : 'Bật ôn từ' }}
+      </button>
+    </section>
+  }
 
   @if (loading()) {
     <div class="state-card" role="status">

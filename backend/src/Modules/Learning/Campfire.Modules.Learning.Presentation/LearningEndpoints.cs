@@ -6,12 +6,14 @@ using Campfire.Modules.Learning.Application.GetDay;
 using Campfire.Modules.Learning.Application.GetMindMap;
 using Campfire.Modules.Learning.Application.GetPath;
 using Campfire.Modules.Learning.Application.GetToday;
+using Campfire.Modules.Learning.Application.GetVocabularyGame;
 using Campfire.Modules.Learning.Application.GetReadingDocument;
 using Campfire.Modules.Learning.Application.ListReadingDocuments;
 using Campfire.Modules.Learning.Application.DeleteReadingDocument;
 using Campfire.Modules.Learning.Application.Models;
 using Campfire.Modules.Learning.Application.PrepareReadingText;
 using Campfire.Modules.Learning.Application.SubmitExercise;
+using Campfire.Modules.Learning.Application.SubmitVocabularyGame;
 using Campfire.Modules.Learning.Application.SaveReadingDocument;
 using Campfire.Modules.Learning.Presentation.Endpoints;
 using Campfire.Modules.Learning.Presentation.Models;
@@ -39,6 +41,8 @@ public static class LearningEndpoints
         group.MapGet("/reading/documents/{documentId:guid}", GetReadingDocumentAsync).WithName("GetLearningReadingDocument");
         group.MapPost("/reading/documents", SaveReadingDocumentAsync).AddEndpointFilter<AntiforgeryEndpointFilter>().WithName("SaveLearningReadingDocument");
         group.MapDelete("/reading/documents/{documentId:guid}", DeleteReadingDocumentAsync).AddEndpointFilter<AntiforgeryEndpointFilter>().WithName("DeleteLearningReadingDocument");
+        group.MapGet("/vocabulary-game", VocabularyGameAsync).WithName("GetVocabularyGame");
+        group.MapPost("/vocabulary-game/results", SubmitVocabularyGameAsync).AddEndpointFilter<AntiforgeryEndpointFilter>().WithName("SubmitVocabularyGameResult");
         return endpoints;
     }
 
@@ -64,6 +68,10 @@ public static class LearningEndpoints
         var result = await sender.Send(new DeleteReadingDocumentCommand(UserId(principal), documentId), token);
         return result.IsSuccess ? Results.NoContent() : Result(result, context);
     }
+    private static async Task<IResult> VocabularyGameAsync(ClaimsPrincipal principal, ISender sender, HttpContext context, CancellationToken token) =>
+        Result(await sender.Send(new GetVocabularyGameQuery(UserId(principal)), token), context);
+    private static async Task<IResult> SubmitVocabularyGameAsync(SubmitVocabularyGameRequest request, ClaimsPrincipal principal, ISender sender, HttpContext context, CancellationToken token) =>
+        Result(await sender.Send(new SubmitVocabularyGameCommand(UserId(principal), request.Level, request.Score, request.Correct, request.Total, request.RemainingLives), token), context);
 
     private static Guid UserId(ClaimsPrincipal principal) => Guid.TryParse(principal.FindFirstValue(ClaimTypes.NameIdentifier), out var value) ? value : throw new UnauthorizedAccessException("Invalid identity session.");
     private static IResult Result<T>(LearningResult<T> result, HttpContext context)

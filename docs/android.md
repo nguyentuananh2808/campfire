@@ -78,3 +78,14 @@ The committed manifest describes version 1 and has no download URL, so developme
 Reliable killed-app delivery requires a later FCM increment: a Firebase project and `google-services.json`, a server-side device-token registry with per-user authorization/revocation, and post-commit push delivery. Those credentials and backend contracts are not present, so the app does not claim full push support.
 
 Offline mode is not part of this first APK. Existing in-app sound, unread badges and page-title counters continue alongside native notifications while the WebView is active.
+
+## Lock-screen vocabulary review
+
+- `Học quanh lửa` exposes an Android-only opt-in control after a lesson has supplied vocabulary.
+- The app keeps at most 100 public course words in origin-scoped local storage. It does not store credentials, learner answers or private content for this feature.
+- Enabling the feature creates a silent, low-priority, public Android notification channel and an ongoing notification containing one Chinese word, pinyin and Vietnamese meaning. Tapping it opens `/learning`.
+- `DeviceUnlockPlugin` listens for `ACTION_USER_PRESENT` with a runtime receiver and rotates the word when Android reports an unlock while the Campfire process is alive. App resume also rotates the word.
+- Android does not deliver this runtime receiver after the process has been killed and may defer broadcasts for cached apps. The current notification remains visible, but rotation on every unlock is not guaranteed. Campfire intentionally does not add a battery-consuming foreground service or alter the user's wallpaper.
+- Users can disable the feature in Learning and can independently hide lock-screen notification content in Android system settings.
+
+This change includes native Android code and therefore requires APK version `1.1` (`versionCode 2`) to be rebuilt and installed; updating only the hosted web frontend is not sufficient.

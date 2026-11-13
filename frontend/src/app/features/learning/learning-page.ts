@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { getApiErrorMessage } from '../../core/auth/api-error';
 import {
@@ -15,11 +16,12 @@ import {
 import { LearningService } from '../../core/learning/learning.service';
 import { SpeechService } from '../../core/learning/speech.service';
 import { ReadingVoiceService } from '../../core/learning/reading-voice.service';
+import { LockScreenVocabularyService } from '../../core/learning/lock-screen-vocabulary.service';
 import { ReadingLibrary } from './reading-library';
 
 @Component({
   selector: 'app-learning-page',
-  imports: [FormsModule, ReadingLibrary],
+  imports: [FormsModule, RouterLink, ReadingLibrary],
   templateUrl: './learning-page.html',
   styleUrl: './learning-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +30,7 @@ export class LearningPage implements OnInit {
   private readonly api = inject(LearningService);
   readonly speech = inject(SpeechService);
   readonly reader = inject(ReadingVoiceService);
+  readonly lockScreenReview = inject(LockScreenVocabularyService);
   readonly mode = signal<'path' | 'mindmap' | 'reader'>('path');
   readonly loading = signal(true);
   readonly pending = signal<string | null>(null);
@@ -53,7 +56,17 @@ export class LearningPage implements OnInit {
   readonly readingLibraryLoading = signal(false);
 
   ngOnInit(): void {
+    void this.lockScreenReview.initialize();
     this.load();
+  }
+  async toggleLockScreenReview(): Promise<void> {
+    if (this.lockScreenReview.enabled()) {
+      await this.lockScreenReview.disable();
+      this.notice.set('Đã tắt ôn từ trên màn hình khóa.');
+      return;
+    }
+    const enabled = await this.lockScreenReview.enable();
+    if (enabled) this.notice.set('Đã bật ôn từ trên màn hình khóa.');
   }
   setMode(mode: 'path' | 'mindmap' | 'reader'): void {
     this.mode.set(mode);
@@ -197,6 +210,7 @@ export class LearningPage implements OnInit {
       .subscribe({
         next: (day) => {
           this.day.set(day);
+          this.lockScreenReview.rememberDay(day);
           this.answers.set({});
         },
         error: (e) => this.error.set(getApiErrorMessage(e)),
@@ -284,6 +298,7 @@ export class LearningPage implements OnInit {
         next: ({ path, today, capabilities }) => {
           this.path.set(path);
           this.day.set(today.currentDay);
+          this.lockScreenReview.rememberDay(today.currentDay);
           this.capabilities.set(capabilities);
         },
         error: (e) => this.loadError.set(getApiErrorMessage(e)),
@@ -301,6 +316,7 @@ export class LearningPage implements OnInit {
   }
   private applyCompletion(day: LearningDayDetail, xp: number): void {
     this.day.set(day);
+    this.lockScreenReview.rememberDay(day);
     this.notice.set(
       xp > 0 ? `Hoàn thành ngày học! +${xp} XP và đã mở bài tiếp theo.` : 'Tiến độ đã được lưu.',
     );

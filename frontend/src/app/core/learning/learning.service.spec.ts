@@ -72,4 +72,25 @@ describe('LearningService', () => {
     expect(remove.request.method).toBe('DELETE');
     remove.flush(null);
   });
+
+  it('loads and submits vocabulary game progress through antiforgery', () => {
+    service.vocabularyGame().subscribe();
+    const overview = http.expectOne('/api/v1/learning/vocabulary-game');
+    expect(overview.request.method).toBe('GET');
+    overview.flush({ levels: [] });
+
+    service.submitVocabularyGameResult(3, 920, 9, 11, 2).subscribe();
+    http.expectOne('/api/v1/auth/antiforgery').flush(null);
+    const result = http.expectOne('/api/v1/learning/vocabulary-game/results');
+    expect(result.request.method).toBe('POST');
+    expect(result.request.headers.get('X-XSRF-TOKEN')).toBe('learning-test-token');
+    expect(result.request.body).toEqual({
+      level: 3,
+      score: 920,
+      correct: 9,
+      total: 11,
+      remainingLives: 2,
+    });
+    result.flush({});
+  });
 });

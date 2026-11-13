@@ -1,4 +1,5 @@
 using Campfire.Modules.Learning.Domain.Courses;
+using Campfire.Modules.Learning.Domain.Games;
 using Campfire.Modules.Learning.Domain.Vocabulary;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,7 @@ internal static class LearningSeed
         m.Entity<LessonActivity>().HasData(Activities());
         m.Entity<Vocabulary>().HasData(VocabularyItems());
         m.Entity<VocabularyRelation>().HasData(Relations());
+        m.Entity<VocabularyGameWord>().HasData(GameWords());
     }
 
     private static LessonActivity[] Activities() =>
@@ -48,5 +50,40 @@ internal static class LearningSeed
     {
         var root = Guid.Parse("b1000000-0000-0000-0000-000000001001");
         return [new(root, Guid.Parse("b1000000-0000-0000-0000-000000001002"), "Compound"), new(root, Guid.Parse("b1000000-0000-0000-0000-000000001003"), "Compound"), new(root, Guid.Parse("b1000000-0000-0000-0000-000000001004"), "Compound"), new(root, Guid.Parse("b1000000-0000-0000-0000-000000001005"), "Semantic"), new(root, Guid.Parse("b1000000-0000-0000-0000-000000001006"), "Semantic")];
+    }
+
+    private static VocabularyGameWord[] GameWords()
+    {
+        var rows = new (string Chinese, string Pinyin, string Meaning)[][]
+        {
+            [("你好", "nǐ hǎo", "xin chào"), ("谢谢", "xièxie", "cảm ơn"), ("再见", "zàijiàn", "tạm biệt"), ("是", "shì", "là"), ("不", "bù", "không")],
+            [("我", "wǒ", "tôi"), ("你", "nǐ", "bạn"), ("他", "tā", "anh ấy"), ("她", "tā", "cô ấy"), ("我们", "wǒmen", "chúng tôi")],
+            [("一", "yī", "một"), ("二", "èr", "hai"), ("三", "sān", "ba"), ("四", "sì", "bốn"), ("五", "wǔ", "năm")],
+            [("今天", "jīntiān", "hôm nay"), ("明天", "míngtiān", "ngày mai"), ("昨天", "zuótiān", "hôm qua"), ("现在", "xiànzài", "bây giờ"), ("时候", "shíhou", "thời gian / lúc")],
+            [("爸爸", "bàba", "bố"), ("妈妈", "māma", "mẹ"), ("哥哥", "gēge", "anh trai"), ("姐姐", "jiějie", "chị gái"), ("朋友", "péngyou", "bạn bè")],
+            [("学校", "xuéxiào", "trường học"), ("老师", "lǎoshī", "giáo viên"), ("学生", "xuésheng", "học sinh"), ("汉语", "hànyǔ", "tiếng Trung"), ("学习", "xuéxí", "học tập")],
+            [("苹果", "píngguǒ", "táo"), ("米饭", "mǐfàn", "cơm"), ("喝水", "hē shuǐ", "uống nước"), ("喜欢", "xǐhuan", "yêu thích"), ("饭店", "fàndiàn", "nhà hàng")],
+            [("医院", "yīyuàn", "bệnh viện"), ("商店", "shāngdiàn", "cửa hàng"), ("火车站", "huǒchēzhàn", "ga tàu"), ("出租车", "chūzūchē", "taxi"), ("飞机", "fēijī", "máy bay")],
+            [("因为", "yīnwèi", "bởi vì"), ("所以", "suǒyǐ", "cho nên"), ("但是", "dànshì", "nhưng"), ("已经", "yǐjīng", "đã rồi"), ("正在", "zhèngzài", "đang")],
+            [("环境", "huánjìng", "môi trường"), ("文化", "wénhuà", "văn hóa"), ("经验", "jīngyàn", "kinh nghiệm"), ("机会", "jīhuì", "cơ hội"), ("解决", "jiějué", "giải quyết")]
+        };
+
+        var words = new List<VocabularyGameWord>();
+        var suffix = 2001;
+        for (var level = 1; level <= rows.Length; level++)
+        {
+            for (var order = 1; order <= rows[level - 1].Length; order++)
+            {
+                var item = rows[level - 1][order - 1];
+                words.Add(new VocabularyGameWord(
+                    Guid.Parse($"b1000000-0000-0000-0000-00000000{suffix++}"),
+                    level,
+                    order,
+                    item.Chinese,
+                    item.Pinyin,
+                    item.Meaning));
+            }
+        }
+        return words.ToArray();
     }
 }

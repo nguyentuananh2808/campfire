@@ -11,6 +11,8 @@ import {
   VocabularyMindMap,
   ReadingDocument,
   ReadingDocumentSummary,
+  VocabularyGameOverview,
+  VocabularyGameResult,
 } from './learning.models';
 
 @Injectable({ providedIn: 'root' })
@@ -63,6 +65,26 @@ export class LearningService {
   }
   deleteReadingDocument(id: string): Observable<void> {
     return this.mutation(() => this.http.delete<void>(`/api/v1/learning/reading/documents/${id}`));
+  }
+  vocabularyGame(): Observable<VocabularyGameOverview> {
+    return this.http.get<VocabularyGameOverview>('/api/v1/learning/vocabulary-game');
+  }
+  submitVocabularyGameResult(
+    level: number,
+    score: number,
+    correct: number,
+    total: number,
+    remainingLives: number,
+  ): Observable<VocabularyGameResult> {
+    return this.mutation(() =>
+      this.http.post<VocabularyGameResult>('/api/v1/learning/vocabulary-game/results', {
+        level,
+        score,
+        correct,
+        total,
+        remainingLives,
+      }),
+    );
   }
   private mutation<T>(request: () => Observable<T>): Observable<T> {
     return this.http.get<void>('/api/v1/auth/antiforgery').pipe(switchMap(request));

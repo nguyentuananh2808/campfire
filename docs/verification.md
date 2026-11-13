@@ -345,3 +345,26 @@ The integration suite additionally requires a working Docker engine because it i
 - Blocked: Docker Desktop's Linux engine pipe is unavailable, so the migration was not applied to a real local PostgreSQL instance and Games integration tests were not run.
 - Not run: physical browser/device visual and pan/keyboard acceptance at 360/390/430px plus desktop. Production deployment must run the module migrator before serving the new frontend.
 
+# Android lock-screen vocabulary review — 2026-11-11
+
+- Passed: frontend Prettier lint.
+- Passed: Vitest 35/35 across 15 files.
+- Passed: Angular production build without component-style budget warnings; Learning remains lazy-loaded.
+- Passed: `npm run android:sync`; Capacitor synchronized App, Browser and Local Notifications.
+- Passed: `gradlew.bat :app:assembleDebug` (129 tasks, build successful). Final debug APK generated at `frontend/android/app/build/outputs/apk/debug/app-debug.apk` (13,551,458 bytes).
+- Passed source/privacy review: opt-in only, bounded public course vocabulary only, no auth/private learner data, silent low-priority public channel, allow-listed `/learning` deep link, removable notification, no manifest receiver/foreground service/wallpaper mutation.
+- Not run: physical-device acceptance for Android notification permission denial, OEM lock-screen visibility settings, unlock/resume rotation and battery process eviction. Android officially permits runtime `ACTION_USER_PRESENT` delivery only while the registering process remains alive, so killed-app every-unlock rotation is not claimed.
+
+# Luyện gõ từ vựng 10 cấp độ — 2026-11-12
+
+- Passed: full Debug solution build, 0 warnings and 0 errors.
+- Passed outside the restricted loopback sandbox: UnitTests 44/44 and ArchitectureTests 4/4.
+- Passed: focused C# whitespace verification after correcting the modified Learning DI file.
+- Passed: Learning EF `has-pending-model-changes`; generated/reviewed SQL creates only `learning.vocabulary_game_words` and `learning.user_vocabulary_game_progress`, their check constraints/indexes and 50 curated seed rows.
+- Passed: frontend Prettier lint, Vitest 36/36 across 15 files and Angular production build. The vocabulary game is a 26.68 kB lazy chunk and the build has no component-style budget warning.
+- Passed: Capacitor Android sync and `gradlew.bat :app:assembleDebug`; the final debug APK is `frontend/android/app/build/outputs/apk/debug/app-debug.apk` (13,721,038 bytes).
+- Passed source security review: both endpoints require Identity cookie authentication; POST requires antiforgery; user ID comes only from claims; locked level words are omitted; progression is checked in Infrastructure; no game input/body is logged and progress has no cross-schema FK.
+- Blocked on final rerun: locked-mode `dotnet restore` exits before emitting restore diagnostics because the sandboxed .NET SDK cannot open Windows Service Control Manager. The earlier full solution build remains the dependency/build evidence for this change.
+- Blocked: the focused `LearningVocabularyGameApiTests` integration test compiled but could not run because Docker Desktop's Linux engine pipe is absent. No real PostgreSQL runtime pass is claimed.
+- Not run: physical browser/Android visual, soft-keyboard, long-session performance and reduced-motion acceptance at 360/390/430px and landscape. The UI implements responsive breakpoints, pause-on-blur, 48px controls and semantic tokens, but these remain device acceptance items.
+
